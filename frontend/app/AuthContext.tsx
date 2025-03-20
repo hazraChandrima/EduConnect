@@ -19,7 +19,7 @@ export const AuthContext = createContext<AuthContextProps | null>(null);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);  // Define 'isLoading'
+  const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
     console.log("Checking for stored user...");
@@ -41,6 +41,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadUser();
   }, []);
 
+
+
   const login = async (email: string, password: string) => {
     console.log("Sending login request to backend...");
     try {
@@ -49,7 +51,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   
       const userData: User = { email, role: response.data.role, token: response.data.token };
   
-      // Set state first before storing it in AsyncStorage
       setUser(userData);
   
       // Store the user data in AsyncStorage
@@ -64,6 +65,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
   
+
 
   const logout = async () => {
     console.log("Logging out...");
@@ -81,6 +83,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false);  
     }
   };
+
+
 
   return (
     <AuthContext.Provider value={{ user, isLoading, login, logout }}>

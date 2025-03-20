@@ -34,6 +34,7 @@ export default function RegisterScreen() {
   const [role, setRole] = useState("student");
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  
   const isAllFilled = !!(
     name.trim() &&
     email.trim() &&
