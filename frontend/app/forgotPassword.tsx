@@ -1,38 +1,136 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+  SafeAreaView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style"
 
 export default function ForgotPasswordScreen() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleForgotPassword = async () => {
+    // Validate email
+    if (!email.trim()) {
+      setTimeout(() => {
+        Alert.alert("Invalid Input", "Please enter your email address.");
+      }, 100);
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        "http://localhost:3000/api/auth/forgot-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to send reset link.');
+        throw new Error(data.message || "Failed to send reset link.");
       }
 
-      Alert.alert('Success', 'Reset link sent to your email.');
+      setTimeout(() => {
+        Alert.alert(
+          "Success",
+          "Password reset instructions have been sent to your email.",
+          [{ text: "OK", onPress: () => router.back() }]
+        );
+      }, 100);
     } catch (error) {
-      Alert.alert('Error','Something went wrong.');
+      setTimeout(() => {
+        Alert.alert("Error", "Something went wrong. Please try again later.");
+      }, 100);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <View>
-      <Text>Enter your email to reset your password:</Text>
-      <TextInput value={email} onChangeText={setEmail} placeholder="Email" autoCapitalize="none" />
-      <Button title="Send Reset Link" onPress={handleForgotPassword} disabled={isLoading} />
-    </View>
+    <SafeAreaView style={forgotResetPassStyle.container}>
+      <TouchableOpacity
+        style={forgotResetPassStyle.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={20} color="#4b5563" />
+        <Text style={forgotResetPassStyle.backButtonText}>Back</Text>
+      </TouchableOpacity>
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={forgotResetPassStyle.keyboardAvoidView}
+      >
+        <ScrollView contentContainerStyle={forgotResetPassStyle.scrollContent}>
+          <View style={forgotResetPassStyle.formContainer}>
+            <Text style={forgotResetPassStyle.headerText}>Forgot Password</Text>
+            <Text style={forgotResetPassStyle.subHeaderText}>
+              Enter your email and we'll send you instructions to reset your
+              password
+            </Text>
+
+            {/* Email Input */}
+            <View style={forgotResetPassStyle.inputContainer}>
+              <Text style={forgotResetPassStyle.inputLabel}>Email</Text>
+              <View style={forgotResetPassStyle.inputWrapper}>
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color="#666"
+                  style={forgotResetPassStyle.inputIcon}
+                />
+                <TextInput
+                  style={forgotResetPassStyle.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+            </View>
+
+            {/* Send Reset Link Button */}
+            <TouchableOpacity
+              style={forgotResetPassStyle.primaryButton}
+              onPress={handleForgotPassword}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={forgotResetPassStyle.primaryButtonText}>
+                  Send Reset Link
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Login Link */}
+            <View style={forgotResetPassStyle.linkContainer}>
+              <Text style={forgotResetPassStyle.linkText}>Remembered your password?</Text>
+              <TouchableOpacity onPress={() => router.push("/login")}>
+                <Text style={forgotResetPassStyle.link}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

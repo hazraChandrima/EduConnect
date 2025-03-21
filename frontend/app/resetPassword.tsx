@@ -1,42 +1,253 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Button, Alert } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  ActivityIndicator,
+  SafeAreaView,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
-  const { token } = useLocalSearchParams();
-  const [newPassword, setNewPassword] = useState('');
+  const { token } = useLocalSearchParams() as { token: string };
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordVisible(!confirmPasswordVisible);
+  };
+
+
+ const validatePassword = (value: string): void => {
+   const length: boolean = value.length >= 8;
+   const hasDigit: boolean = /\d/.test(value);
+   const hasLowerCase: boolean = /[a-z]/.test(value);
+
+   if (!length) {
+     setPasswordError("Password must be at least 8 characters!");
+   } else if (!hasDigit) {
+     setPasswordError("Password must include at least one digit!");
+   } else if (!hasLowerCase) {
+     setPasswordError("Password must include at least one lowercase letter!");
+   } else {
+     setPasswordError("");
+   }
+ };
+
 
   const handleResetPassword = async () => {
+    // Validation
+    if (!newPassword.trim()) {
+      setTimeout(() => {
+        Alert.alert("Invalid Input", "Please enter a new password.");
+      }, 100);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setTimeout(() => {
+        Alert.alert(
+          "Password Mismatch",
+          "Your passwords do not match. Please try again."
+        );
+      }, 100);
+      return;
+    }
+
+    if (passwordError) {
+      setTimeout(() => {
+        console.log("Password must be at least 8 characters long.");
+        Alert.alert(
+          "Weak Password",
+          "Password must be at least 8 characters long."
+        );
+      }, 100);
+      return;
+    }
+
     setIsLoading(true);
+
     try {
-      const response = await fetch('http://localhost:3000/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword }),
-      });
+      console.log(token, newPassword);
+      const response = await fetch(
+        "http://localhost:3000/api/auth/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, newPassword }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to reset password.');
+        throw new Error(data.message || "Failed to reset password.");
       }
 
-      Alert.alert('Success', 'Password reset successfully. Please log in.');
-      router.replace('/login');
+      setTimeout(() => {
+        console.log("password reset successfully.");
+        Alert.alert(
+          "Success",
+          "Your password has been reset successfully. Please log in with your new password.",
+          [{ text: "OK", onPress: () => router.replace("/login") }]
+        );
+      }, 100);
     } catch (error) {
-      Alert.alert('Error', 'Something went wrong.');
+      setTimeout(() => {
+        console.log(
+          "Something went wrong. The link may have expired. Please try again"
+        );
+        Alert.alert(
+          "Error",
+          "Something went wrong. The link may have expired. Please try again."
+        );
+      }, 100);
     } finally {
       setIsLoading(false);
     }
   };
 
+
+
   return (
-    <View>
-      <Text>Enter your new password:</Text>
-      <TextInput value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="New Password" />
-      <Button title="Reset Password" onPress={handleResetPassword} disabled={isLoading} />
-    </View>
+    <SafeAreaView style={forgotResetPassStyle.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={forgotResetPassStyle.keyboardAvoidView}
+      >
+        <ScrollView contentContainerStyle={forgotResetPassStyle.scrollContent}>
+          <View style={forgotResetPassStyle.formContainer}>
+            <Text style={forgotResetPassStyle.headerText}>Reset Password</Text>
+            <Text style={forgotResetPassStyle.subHeaderText}>
+              Create a new password for your account
+            </Text>
+
+            {/* New Password Input */}
+            <View style={forgotResetPassStyle.inputContainer}>
+              <Text style={forgotResetPassStyle.inputLabel}>New Password</Text>
+              <View style={forgotResetPassStyle.inputWrapper}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#666"
+                  style={forgotResetPassStyle.inputIcon}
+                />
+                <TextInput
+                  style={forgotResetPassStyle.input}
+                  value={newPassword}
+                  onChangeText={(text) => {
+                    setNewPassword(text);
+                    validatePassword(text);
+                  }}
+                  secureTextEntry={!passwordVisible}
+                  placeholder="Enter new password"
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={togglePasswordVisibility}
+                  style={forgotResetPassStyle.eyeIcon}
+                >
+                  <Ionicons
+                    name={passwordVisible ? "eye-off-outline" : "eye-outline"}
+                    size={20}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <View style={forgotResetPassStyle.container}>
+              {passwordError && (
+                <Text style={forgotResetPassStyle.errorText}>
+                  {passwordError}
+                </Text>
+              )}
+              <Text style={forgotResetPassStyle.instructionText}>
+                Password should be at least 8 characters including a number and
+                a lowercase letter.
+              </Text>
+            </View>
+
+            {/* Confirm Password Input */}
+            <View style={forgotResetPassStyle.inputContainer}>
+              <Text style={forgotResetPassStyle.inputLabel}>
+                Confirm Password
+              </Text>
+              <View style={forgotResetPassStyle.inputWrapper}>
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color="#666"
+                  style={forgotResetPassStyle.inputIcon}
+                />
+                <TextInput
+                  style={forgotResetPassStyle.input}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry={!confirmPasswordVisible}
+                  placeholder="Confirm your password"
+                  placeholderTextColor="#999"
+                  autoCapitalize="none"
+                />
+                <TouchableOpacity
+                  onPress={toggleConfirmPasswordVisibility}
+                  style={forgotResetPassStyle.eyeIcon}
+                >
+                  <Ionicons
+                    name={
+                      confirmPasswordVisible ? "eye-off-outline" : "eye-outline"
+                    }
+                    size={20}
+                    color="#666"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Reset Password Button */}
+            <TouchableOpacity
+              style={forgotResetPassStyle.primaryButton}
+              onPress={handleResetPassword}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={forgotResetPassStyle.primaryButtonText}>
+                  Reset Password
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Login Link */}
+            <View style={forgotResetPassStyle.linkContainer}>
+              <Text style={forgotResetPassStyle.linkText}>
+                Remembered your password?
+              </Text>
+              <TouchableOpacity onPress={() => router.replace("/login")}>
+                <Text style={forgotResetPassStyle.link}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

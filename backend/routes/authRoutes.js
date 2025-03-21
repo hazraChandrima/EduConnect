@@ -27,7 +27,8 @@ router.post('/forgot-password', async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-        const resetLink = `http://localhost:3000/reset-password/${token}`;
+        const resetLink = `http://localhost:8081/resetPassword?token=${token}`;
+
 
         // Set up email transporter (configure with your email credentials)
         const transporter = nodemailer.createTransport({
@@ -53,6 +54,7 @@ router.post('/forgot-password', async (req, res) => {
         res.status(500).json({ message: 'Error sending reset email.' });
     }
 });
+
 
 // Reset Password
 router.post('/reset-password', async (req, res) => {
