@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from './AuthContext';
+import { AuthContext } from "./context/AuthContext";
 import { useRouter } from 'expo-router';
 import { View, Text, ActivityIndicator } from 'react-native';
 
@@ -31,7 +31,7 @@ export default function Index() {
     if (isAppMounted && !isLoading) {
       if (user) {
         console.log(`✅ User detected (${user.role}), redirecting...`);
-        router.replace('/(tabs)/studentDashboard');  // ✅ Ensure this path exists
+        router.replace('/studentDashboard');
       } else {
         console.log("🔴 No user, redirecting to login...");
         router.replace('/login');

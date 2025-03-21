@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/StudentDashboard.styles";
-
+import { useRouter } from "expo-router";
 
 
 export default function StudentDashboard() {
-  
+  const router = useRouter();
+
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar backgroundColor="#4252e5" barStyle="light-content" />
@@ -50,7 +52,7 @@ export default function StudentDashboard() {
               <Text style={styles.statValue}>85%</Text>
               <Text style={styles.statLabel}>Attendance</Text>
             </View>
-             <View style={styles.statCard}>
+            <View style={styles.statCard}>
               <Text style={styles.statValue}>85%</Text>
               <Text style={styles.statLabel}>Attendance</Text>
             </View>
@@ -173,6 +175,29 @@ export default function StudentDashboard() {
         </View>
       </ScrollView>
 
+      {/* Chatbot Floating Button */}
+      <TouchableOpacity
+        style={{
+          position: "absolute",
+          right: 20,
+          bottom: 80, // Positioned above the navigation bar
+          backgroundColor: "#5c51f3",
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          justifyContent: "center",
+          alignItems: "center",
+          elevation: 5,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+        }}
+        onPress={() => router.push("/chatbotScreen")}
+      >
+        <Ionicons name="chatbubble-ellipses" size={28} color="white" />
+      </TouchableOpacity>
+
       {/* Navigation Bar */}
       <View style={styles.navigationBar}>
         <TouchableOpacity style={styles.navItem}>
@@ -199,4 +224,3 @@ export default function StudentDashboard() {
     </SafeAreaView>
   );
 }
-

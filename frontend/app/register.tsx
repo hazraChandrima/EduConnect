@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 import {
   View,
@@ -49,7 +49,7 @@ export default function RegisterScreen() {
     if (user && !isRedirecting) {
       setIsRedirecting(true);
       console.log(`User registered (${user.role}), navigating to dashboard...`);
-      router.replace(`/(tabs)/${user.role}Dashboard`);
+      router.replace(`/${user.role}Dashboard`);
     }
   }, [user]);
 

@@ -10,11 +10,11 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         backgroundColor: "#4169E1",
-        paddingVertical: 16,
+        paddingVertical: 14,
         paddingHorizontal: 20,
     },
     headerTitle: {
-        fontSize: 24,
+        fontSize: 22,
         fontWeight: "bold",
         color: "white",
     },

@@ -12,12 +12,12 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         backgroundColor: "#4252e5",
         paddingHorizontal: 15,
-        paddingVertical: 15,
+        paddingVertical: 10,
         elevation: 4,
     },
     logo: {
         color: "white",
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: "bold",
     },
     profileContainer: {

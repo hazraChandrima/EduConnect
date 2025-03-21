@@ -8,7 +8,7 @@ import {
   StatusBar,
 } from "react-native";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import styles from "./styles/ProfessorDahsboard.styles";
+import styles from "./styles/ProfessorDashboard.styles";
 
 
 
