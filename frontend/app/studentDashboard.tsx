@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   View,
   Text,
@@ -6,18 +6,94 @@ import {
   TouchableOpacity,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import styles from "./styles/StudentDashboard.styles";
+import styles from "./styles/StudentDashboard.style";
 import { useRouter } from "expo-router";
 import AcademicAnalytics from "./components/AcademicAnalytics";
 import { useWindowDimensions } from "react-native";
+import { AuthContext } from "./context/AuthContext"; // Adjust the import path as needed
+
+// Define TypeScript interface for user data
+interface UserData {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  __v: number;
+}
 
 const { width } = useWindowDimensions();
 const isSmallDevice = width < 500;
 
-export default function StudentDashboard() {
+export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
+  const auth = useContext(AuthContext);
+  const [userData, setUserData] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Default name for fallback
+  const displayName = userData?.name || "Student";
+  const firstName = displayName.split(" ")[0];
+
+  useEffect(() => {
+    const checkAuthAndFetchData = async (): Promise<void> => {
+      try {
+        setIsLoading(true);
+
+        // Check if user is logged in
+        if (!auth?.user) {
+          console.log("No authenticated user, redirecting to login");
+          router.replace("/login");
+          return;
+        }
+
+        // Check if user role is student
+        if (auth.user.role !== "student") {
+          console.log(`User role is ${auth.user.role}, not authorized for student dashboard`);
+          router.replace("/_not-found"); // Redirect to an unauthorized page
+          return;
+        }
+
+        // Fetch user data
+        const response = await fetch(`http://192.168.224.247:3000/api/user/${auth.user.userId}`);
+
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json() as UserData;
+        if (data && data.name) {
+          setUserData(data);
+        }
+      } catch (error) {
+        console.error("Error in StudentDashboard:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuthAndFetchData();
+  }, [auth, router]);
+
+  // Show loading indicator while checking auth
+  if (auth?.isLoading || isLoading) {
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#5c51f3" />
+        <Text style={{ marginTop: 10 }}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  // Redirect if user is not authorized
+  if (!auth?.user || auth.user.role !== "student" || !userData) {
+    router.replace("/login");
+    return <></>;
+  }
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -30,14 +106,14 @@ export default function StudentDashboard() {
           <View style={styles.profilePic}>
             <Ionicons name="person" size={24} color="white" />
           </View>
-          <Text style={styles.profileName}>John Doe</Text>
+          <Text style={styles.profileName}>{displayName}</Text>
         </View>
       </View>
 
       <ScrollView style={styles.scrollView}>
         {/* Welcome Banner */}
         <View style={styles.welcomeBanner}>
-          <Text style={styles.welcomeTitle}>Hello, John!</Text>
+          <Text style={styles.welcomeTitle}>Hello, {firstName}!</Text>
           <Text style={styles.welcomeSubtitle}>
             Welcome back to your student dashboard
           </Text>
@@ -224,8 +300,7 @@ export default function StudentDashboard() {
         <Ionicons name="chatbubble-ellipses" size={28} color="white" />
       </TouchableOpacity>
 
-
-      {/* Navigation Bar */}
+      {/* Navigation Bar with Logout Button */}
       <View style={styles.navigationBar}>
         <TouchableOpacity style={styles.navItem}>
           <Ionicons name="home" size={24} color="#5c51f3" />
@@ -243,9 +318,14 @@ export default function StudentDashboard() {
           <MaterialIcons name="date-range" size={24} color="#777" />
           <Text style={styles.navText}>Attendance</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person" size={24} color="#777" />
-          <Text style={styles.navText}>Profile</Text>
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => {
+            auth?.logout().then(() => router.replace("/login"));
+          }}
+        >
+          <Ionicons name="log-out" size={24} color="#777" />
+          <Text style={styles.navText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>

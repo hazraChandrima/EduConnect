@@ -43,7 +43,7 @@ export default function RegisterScreen() {
   );
 
   // Role options
-  const roleOptions = ["student", "teacher", "admin"];
+  const roleOptions = ["student", "professor", "admin"];
 
   useEffect(() => {
     if (user && !isRedirecting) {

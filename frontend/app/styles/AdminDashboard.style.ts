@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from "react-native"
 
 const styles = StyleSheet.create({
     container: {
@@ -17,6 +17,13 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: "bold",
         color: "white",
+    },
+    headerActions: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    logoutButton: {
+        marginRight: 15,
     },
     adminBadge: {
         flexDirection: "row",
@@ -58,6 +65,7 @@ const styles = StyleSheet.create({
         padding: 16,
         alignItems: "center",
         width: "30%",
+        elevation: 2,
     },
     statNumber: {
         fontSize: 24,
@@ -165,6 +173,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "48%",
         marginBottom: 16,
+        elevation: 1,
     },
     actionText: {
         marginTop: 12,
@@ -191,6 +200,552 @@ const styles = StyleSheet.create({
         color: "#4169E1",
         fontWeight: "500",
     },
-});
+    // Tab styles
+    tabHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+    },
+    tabTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    addButton: {
+        backgroundColor: "#4169E1",
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    // Search
+    searchContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        borderRadius: 8,
+        margin: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        elevation: 2,
+    },
+    searchIcon: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: "#333",
+        padding: 8,
+    },
+    // Tabs
+    tabsContainer: {
+        flexDirection: "row",
+        paddingHorizontal: 16,
+        marginBottom: 16,
+    },
+    tabButton: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        marginRight: 8,
+        backgroundColor: "#f0f0f0",
+    },
+    tabButtonText: {
+        color: "#777",
+    },
+    activeTabButton: {
+        backgroundColor: "#4169E1",
+    },
+    activeTabButtonText: {
+        color: "white",
+        fontWeight: "500",
+    },
+    // User items
+    userItem: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        elevation: 2,
+        alignItems: "center",
+    },
+    userAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: "#4169E1",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+    },
+    userInfo: {
+        flex: 1,
+    },
+    userName: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 4,
+    },
+    userEmail: {
+        color: "#777",
+        marginBottom: 4,
+    },
+    userDepartment: {
+        color: "#777",
+        fontSize: 14,
+    },
+    userActions: {
+        flexDirection: "row",
+    },
+    userActionButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: 8,
+    },
+    // User detail
+    userDetailContainer: {
+        padding: 16,
+    },
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    backButtonText: {
+        color: "#4169E1",
+        marginLeft: 8,
+        fontWeight: "500",
+    },
+    userProfile: {
+        alignItems: "center",
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 24,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    userProfileAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: "#4169E1",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+    userProfileName: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 8,
+    },
+    userProfileId: {
+        color: "#777",
+        marginBottom: 8,
+    },
+    userProfileEmail: {
+        color: "#777",
+        marginBottom: 8,
+    },
+    userInfoSection: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    userInfoItem: {
+        flexDirection: "row",
+        marginBottom: 12,
+    },
+    userInfoLabel: {
+        width: 100,
+        color: "#777",
+        fontSize: 16,
+    },
+    userInfoValue: {
+        flex: 1,
+        color: "#333",
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    courseTagsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+    },
+    courseTag: {
+        backgroundColor: "#E3F2FD",
+        borderRadius: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        marginRight: 8,
+        marginBottom: 8,
+    },
+    courseTagText: {
+        color: "#4169E1",
+    },
+    editButton: {
+        backgroundColor: "#4169E1",
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 12,
+    },
+    editButtonText: {
+        color: "white",
+        fontWeight: "bold",
+        marginLeft: 8,
+    },
+    deleteButton: {
+        backgroundColor: "#FF4081",
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    deleteButtonText: {
+        color: "white",
+        fontWeight: "bold",
+        marginLeft: 8,
+    },
+    // Empty list
+    emptyListContainer: {
+        padding: 24,
+        alignItems: "center",
+    },
+    emptyListText: {
+        color: "#777",
+        fontSize: 16,
+    },
+    // Course items
+    courseItem: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginHorizontal: 16,
+        marginBottom: 12,
+        elevation: 2,
+        alignItems: "center",
+    },
+    courseItemIcon: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: "#40BFFF",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+    },
+    courseItemInfo: {
+        flex: 1,
+    },
+    courseItemTitle: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 4,
+    },
+    courseItemCode: {
+        color: "#777",
+        marginBottom: 4,
+    },
+    courseItemDepartment: {
+        color: "#777",
+        fontSize: 14,
+    },
+    courseItemActions: {
+        flexDirection: "row",
+    },
+    courseItemActionButton: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        marginLeft: 8,
+    },
+    // Course detail
+    courseDetailContainer: {
+        padding: 16,
+    },
+    courseHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
+        padding: 16,
+        borderRadius: 8,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    courseHeaderInfo: {
+        marginLeft: 16,
+    },
+    courseHeaderTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 4,
+    },
+    courseHeaderCode: {
+        color: "#777",
+    },
+    courseInfoSection: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    courseInfoItem: {
+        flexDirection: "row",
+        marginBottom: 12,
+    },
+    courseInfoLabel: {
+        width: 150,
+        color: "#777",
+        fontSize: 16,
+    },
+    courseInfoValue: {
+        flex: 1,
+        color: "#333",
+        fontSize: 16,
+        fontWeight: "500",
+    },
+    courseActions: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+    },
+    // Settings
+    settingsSection: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        margin: 16,
+        marginTop: 0,
+        elevation: 2,
+    },
+    settingsSectionTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        marginBottom: 16,
+        color: "#333",
+    },
+    settingsItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
+    },
+    settingsItemLeft: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    settingsItemText: {
+        fontSize: 16,
+        color: "#333",
+        marginLeft: 12,
+    },
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContainer: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        width: "90%",
+        maxHeight: "80%",
+        elevation: 5,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    modalContent: {
+        padding: 16,
+    },
+    inputLabel: {
+        fontSize: 16,
+        color: "#333",
+        marginBottom: 8,
+        marginTop: 12,
+    },
+    textInput: {
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: "#eee",
+    },
+    roleOptions: {
+        flexDirection: "row",
+        marginBottom: 16,
+    },
+    roleOption: {
+        flex: 1,
+        padding: 12,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#eee",
+        marginRight: 8,
+    },
+    roleOptionText: {
+        color: "#333",
+    },
+    selectedRoleOption: {
+        backgroundColor: "#4169E1",
+        borderColor: "#4169E1",
+    },
+    selectedRoleOptionText: {
+        color: "white",
+    },
+    pickerContainer: {
+        marginBottom: 16,
+    },
+    professorOption: {
+        backgroundColor: "#f9f9f9",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 8,
+        borderWidth: 1,
+        borderColor: "#eee",
+    },
+    professorOptionText: {
+        color: "#333",
+    },
+    selectedProfessorOption: {
+        backgroundColor: "#4169E1",
+        borderColor: "#4169E1",
+    },
+    selectedProfessorOptionText: {
+        color: "white",
+    },
+    submitButton: {
+        backgroundColor: "#4169E1",
+        borderRadius: 8,
+        padding: 16,
+        alignItems: "center",
+        marginTop: 16,
+    },
+    submitButtonText: {
+        color: "white",
+        fontWeight: "bold",
+    },
+    // Confirm delete modal
+    confirmModalOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    confirmModalContainer: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        width: "80%",
+        elevation: 5,
+    },
+    confirmModalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+    },
+    confirmModalTitle: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    confirmModalContent: {
+        padding: 16,
+    },
+    confirmModalText: {
+        fontSize: 16,
+        color: "#333",
+        marginBottom: 8,
+    },
+    confirmModalSubtext: {
+        fontSize: 14,
+        color: "#777",
+    },
+    confirmModalActions: {
+        flexDirection: "row",
+        justifyContent: "flex-end",
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#eee",
+    },
+    cancelButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        marginRight: 8,
+    },
+    cancelButtonText: {
+        color: "#777",
+        fontWeight: "500",
+    },
+    deleteConfirmButton: {
+        backgroundColor: "#FF4081",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 4,
+    },
+    deleteConfirmButtonText: {
+        color: "white",
+        fontWeight: "500",
+    },
+    // Chart styles
+    chartCard: {
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        elevation: 2,
+    },
+    chartTitle: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 12,
+    },
+    chart: {
+        borderRadius: 8,
+        marginVertical: 8,
+    },
+})
 
-export default styles;
+export default styles
+
