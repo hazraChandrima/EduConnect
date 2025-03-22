@@ -11,6 +11,10 @@ import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/StudentDashboard.styles";
 import { useRouter } from "expo-router";
 import AcademicAnalytics from "./components/AcademicAnalytics";
+import { useWindowDimensions } from "react-native";
+
+const { width } = useWindowDimensions();
+const isSmallDevice = width < 500;
 
 export default function StudentDashboard() {
   const router = useRouter();
@@ -38,7 +42,12 @@ export default function StudentDashboard() {
             Welcome back to your student dashboard
           </Text>
 
-          <View style={styles.statsContainer}>
+          <View
+            style={[
+              styles.statsContainer,
+              isSmallDevice && { flexDirection: "column", alignItems: "center" },
+            ]}
+          >
             <View style={styles.statCard}>
               <Text style={styles.statValue}>85%</Text>
               <Text style={styles.statLabel}>Attendance</Text>
@@ -48,8 +57,8 @@ export default function StudentDashboard() {
               <Text style={styles.statLabel}>GPA</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>85%</Text>
-              <Text style={styles.statLabel}>Completed</Text>
+              <Text style={styles.statValue}>75%</Text>
+              <Text style={styles.statLabel}>Semester Completed</Text>
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>4</Text>

@@ -82,10 +82,10 @@ const AcademicAnalytics: React.FC = () => {
 
     // Subject performance data
     const subjectPerformanceData = {
-        labels: ["CS 101", "MATH 202", "PHYS 101", "ENG 110", "HIST 105", "BIO 201"],
+        labels: ["CS 101", "MATH 202", "PHYS 101", "ENG 110", "HIST 105"],
         datasets: [
             {
-                data: [85, 78, 82, 91, 76, 56],
+                data: [85, 78, 82, 91, 76],
             },
         ],
     };
@@ -196,7 +196,7 @@ const AcademicAnalytics: React.FC = () => {
                         <ScrollView horizontal showsHorizontalScrollIndicator={true}>
                             <ProgressChart
                                 data={attendanceData}
-                                width={Math.max(getChartWidth(), 300)}
+                                width={Math.max(getChartWidth(), 500)}
                                 height={300}
                                 strokeWidth={16}
                                 radius={24}
@@ -274,7 +274,7 @@ const AcademicAnalytics: React.FC = () => {
                                 yAxisSuffix="%"
                                 chartConfig={{
                                     ...chartConfig,
-                                    barPercentage: 2.0,
+                                    barPercentage: 1.0,
                                 }}
                                 style={styles.chart}
                             />
@@ -415,7 +415,7 @@ const AcademicAnalytics: React.FC = () => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.tabContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <ScrollView horizontal showsHorizontalScrollIndicator={true}>
                     {tabs.map((tab) => (
                         <TouchableOpacity
                             key={tab.id}

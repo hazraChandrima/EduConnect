@@ -47,7 +47,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     console.log("Sending login request to backend...");
     try {
       const response = await axios.post(
-        "http://localhost:3000/api/auth/login",
+        "http://192.168.224.247:3000/api/auth/login",
         { email, password }
       );
       console.log("Server response:", response.data);
