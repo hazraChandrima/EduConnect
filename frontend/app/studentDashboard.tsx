@@ -10,11 +10,10 @@ import {
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/StudentDashboard.styles";
 import { useRouter } from "expo-router";
-
+import AcademicAnalytics from "./components/AcademicAnalytics";
 
 export default function StudentDashboard() {
   const router = useRouter();
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -50,13 +49,25 @@ export default function StudentDashboard() {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>85%</Text>
-              <Text style={styles.statLabel}>Attendance</Text>
+              <Text style={styles.statLabel}>Completed</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statValue}>85%</Text>
-              <Text style={styles.statLabel}>Attendance</Text>
+              <Text style={styles.statValue}>4</Text>
+              <Text style={styles.statLabel}>Courses</Text>
             </View>
           </View>
+        </View>
+
+        {/* Academic Analytics Section */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Academic Analytics</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+
+          <AcademicAnalytics />
         </View>
 
         {/* Courses Section */}
@@ -146,7 +157,10 @@ export default function StudentDashboard() {
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>Pending</Text>
               </View>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push("/assignmentSubmission")}
+              >
                 <Text style={styles.actionButtonText}>Submit Now</Text>
               </TouchableOpacity>
             </View>
@@ -167,7 +181,10 @@ export default function StudentDashboard() {
               <View style={styles.statusBadge}>
                 <Text style={styles.statusText}>Pending</Text>
               </View>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => router.push("/assignmentSubmission")}
+              >
                 <Text style={styles.actionButtonText}>Start Now</Text>
               </TouchableOpacity>
             </View>
@@ -197,6 +214,7 @@ export default function StudentDashboard() {
       >
         <Ionicons name="chatbubble-ellipses" size={28} color="white" />
       </TouchableOpacity>
+
 
       {/* Navigation Bar */}
       <View style={styles.navigationBar}>
