@@ -6,13 +6,13 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const { registerUser, loginUser } = require('../controllers/authController');
+const { registerUser, loginUser, verifyEmail, updatePassword } = require('../controllers/authController');
 
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
-
-
+router.post('/verifyEmail', verifyEmail);
+router.post('/updatePassword', updatePassword);
 
 // Send password reset link
 router.post('/forgot-password', async (req, res) => {

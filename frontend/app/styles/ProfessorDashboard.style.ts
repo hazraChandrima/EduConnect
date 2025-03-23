@@ -25,7 +25,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         position: 'relative',
         zIndex: 2000, // Ensure it's above other components
-
     },
     profilePic: {
         width: 40,
@@ -100,6 +99,7 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#333",
         marginBottom: 10,
+        marginLeft: 15,
     },
     viewAllText: {
         color: "#4252e5",
@@ -787,6 +787,8 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: "center",
         marginTop: 10,
+        marginLeft: 15,
+        marginRight: 15,
     },
     submitButtonText: {
         color: "white",

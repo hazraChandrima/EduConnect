@@ -122,6 +122,92 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         marginLeft: 4,
     },
+    progressContainer: {
+        height: 6,
+        backgroundColor: "#e0e0e0",
+        borderRadius: 3,
+        marginBottom: 30,
+        overflow: "hidden",
+    },
+    progressBar: {
+        height: "100%",
+        backgroundColor: "#5c51f3",
+        borderRadius: 3,
+    },
+    stepIndicatorContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        marginBottom: 20,
+    },
+    stepDot: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: "#e0e0e0",
+        marginHorizontal: 8,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    stepDotActive: {
+        backgroundColor: "#5c51f3",
+    },
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 15,
+    },
+    backButtonText: {
+        color: "#5c51f3",
+        marginLeft: 5,
+        fontSize: 16,
+    },
+    resendContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 15,
+    },
+    resendText: {
+        color: "#666",
+        marginRight: 5,
+    },
+    resendLink: {
+        color: "#5c51f3",
+        fontWeight: "bold",
+    },
+    countdownText: {
+        color: "#999",
+    },
+    passwordHint: {
+        color: "#666",
+        fontSize: 12,
+        marginTop: 5,
+        marginLeft: 5,
+    },
+    completionContainer: {
+        alignItems: "center",
+        padding: 20,
+    },
+    successIconContainer: {
+        marginBottom: 20,
+    },
+    completionHeader: {
+        fontSize: 24,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 10,
+        textAlign: "center",
+    },
+    completionText: {
+        fontSize: 16,
+        color: "#666",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    redirectLoader: {
+        marginTop: 20,
+    },
 });
 
 
