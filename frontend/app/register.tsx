@@ -299,7 +299,7 @@ export default function RegisterScreen() {
       setCurrentStep(RegistrationStep.COMPLETE);
       
       // Log in the user
-      await login(registrationData.email, registrationData.password);
+      await login(registrationData.email, registrationData.password, true);
       
       Alert.alert(
         "Registration Complete",

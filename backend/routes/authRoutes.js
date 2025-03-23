@@ -6,13 +6,23 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const { registerUser, loginUser, verifyEmail, updatePassword } = require('../controllers/authController');
+const { 
+    registerUser, 
+    loginUser, 
+    verifyEmail, 
+    updatePassword, 
+    requestLoginOTP, 
+    verifyLoginOTP 
+} = require('../controllers/authController');
 
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/verifyEmail', verifyEmail);
 router.post('/updatePassword', updatePassword);
+router.post("/requestLoginOTP", requestLoginOTP)
+router.post("/verifyLoginOTP", verifyLoginOTP)
+
 
 // Send password reset link
 router.post('/forgot-password', async (req, res) => {
@@ -30,7 +40,6 @@ router.post('/forgot-password', async (req, res) => {
         const resetLink = `http://localhost:8081/resetPassword?token=${token}`;
 
 
-        // Set up email transporter (configure with your email credentials)
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {

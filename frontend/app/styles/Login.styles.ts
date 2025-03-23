@@ -4,7 +4,7 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f9fafb",
+        backgroundColor: "#fff",
     },
     keyboardAvoidView: {
         flex: 1,
@@ -12,109 +12,155 @@ const styles = StyleSheet.create({
     scrollContent: {
         flexGrow: 1,
         justifyContent: "center",
+        padding: 20,
     },
     formContainer: {
-        paddingHorizontal: 24,
-        paddingVertical: 32,
+        width: "100%",
+        maxWidth: 400,
+        alignSelf: "center",
     },
     headerText: {
         fontSize: 28,
-        fontWeight: "700",
-        color: "#1f2937",
+        fontWeight: "bold",
         marginBottom: 8,
+        color: "#333",
+        textAlign: "center",
     },
     subHeaderText: {
         fontSize: 16,
-        color: "#6b7280",
-        marginBottom: 32,
+        color: "#666",
+        marginBottom: 24,
+        textAlign: "center",
     },
     inputContainer: {
-        marginBottom: 20,
+        marginBottom: 16,
     },
     inputLabel: {
         fontSize: 14,
         fontWeight: "500",
-        color: "#4b5563",
         marginBottom: 8,
+        color: "#333",
     },
     inputWrapper: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "white",
         borderWidth: 1,
-        borderColor: "#e5e7eb",
-        borderRadius: 12,
-        height: 50,
+        borderColor: "#ddd",
+        borderRadius: 8,
         paddingHorizontal: 12,
+        backgroundColor: "#f9f9f9",
+    },
+    inputIcon: {
+        marginRight: 10,
     },
     input: {
         flex: 1,
-        height: "100%",
-        paddingLeft: 8,
+        height: 50,
         fontSize: 16,
-        color: "#1f2937",
-    },
-    inputIcon: {
-        marginRight: 8,
+        color: "#333",
+        padding: 10,
     },
     eyeIcon: {
-        padding: 8,
+        padding: 10,
     },
     forgotPasswordContainer: {
         alignItems: "flex-end",
         marginBottom: 24,
     },
     forgotPasswordText: {
-        color: "#3b82f6",
+        color: "#5c51f3",
         fontSize: 14,
-        fontWeight: "500",
     },
     loginButton: {
-        backgroundColor: "#3b82f6",
-        borderRadius: 12,
+        backgroundColor: "#5c51f3",
+        borderRadius: 8,
         height: 50,
         justifyContent: "center",
         alignItems: "center",
-        shadowColor: "#3b82f6",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 4,
+        marginBottom: 16,
+    },
+    disabledButton: {
+        backgroundColor: "#a8a5e6",
     },
     loginButtonText: {
-        color: "white",
+        color: "#fff",
         fontSize: 16,
         fontWeight: "600",
     },
     registerContainer: {
         flexDirection: "row",
         justifyContent: "center",
-        marginTop: 24,
+        marginTop: 16,
     },
     registerText: {
-        color: "#6b7280",
+        color: "#666",
         fontSize: 14,
-    },
-    disabledButton: {
-        backgroundColor: "#7fadf8",
-        shadowColor: "#a1a1aa",
     },
     registerLink: {
-        color: "#3b82f6",
-        fontSize: 14,
+        color: "#5c51f3",
         fontWeight: "600",
         marginLeft: 4,
+        fontSize: 14,
     },
     testButton: {
         marginTop: 20,
-        backgroundColor: "#f87171",
         padding: 10,
+        backgroundColor: "#f0f0f0",
         borderRadius: 8,
         alignItems: "center",
     },
     testButtonText: {
-        color: "white",
+        color: "#333",
+    },
+
+    // Progress bar styles
+    progressContainer: {
+        width: "100%",
+        height: 4,
+        backgroundColor: "#e0e0e0",
+        borderRadius: 2,
+        marginBottom: 20,
+    },
+    progressBar: {
+        height: "100%",
+        backgroundColor: "#5c51f3",
+        borderRadius: 2,
+    },
+
+    // Back button styles
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginTop: 16,
+    },
+    backButtonText: {
+        color: "#666",
+        marginLeft: 4,
+        fontSize: 14,
+    },
+
+    // Resend code styles
+    resendContainer: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 16,
+    },
+    resendText: {
+        color: "#666",
+        fontSize: 14,
+    },
+    resendLink: {
+        color: "#5c51f3",
         fontWeight: "600",
+        marginLeft: 4,
+        fontSize: 14,
+    },
+    countdownText: {
+        color: "#999",
+        marginLeft: 4,
+        fontSize: 14,
     },
 });
 
