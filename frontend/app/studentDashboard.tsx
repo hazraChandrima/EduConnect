@@ -53,7 +53,7 @@ export default function StudentDashboard(): React.ReactElement {
         // Check if user role is student
         if (auth.user.role !== "student") {
           console.log(`User role is ${auth.user.role}, not authorized for student dashboard`);
-          router.replace("/_not-found"); // Redirect to an unauthorized page
+          router.replace(`/${auth.user.role}Dashboard`);// Redirect to an unauthorized page
           return;
         }
 

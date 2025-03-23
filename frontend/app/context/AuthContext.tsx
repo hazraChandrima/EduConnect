@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
+import { router } from "expo-router";
 
 interface User {
 	userId: string; // Added userId field
@@ -44,6 +45,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 		loadUser();
 	}, []);
 
+
+
 	const login = async (email: string, password: string) => {
 		console.log("Sending login request to backend...");
 		try {
@@ -73,11 +76,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 				"Authorization"
 			] = `Bearer ${response.data.token}`;
 			console.log("User logged in and stored:", userData);
+			router.replace(`/${userData.role}Dashboard`);
 		} catch (error: unknown) {
 			const err = error as Error;
 			console.error("Login request failed:", err.message);
 		}
 	};
+
+
 
 	const logout = async () => {
 		console.log("Logging out...");

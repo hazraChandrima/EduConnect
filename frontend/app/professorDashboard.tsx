@@ -251,7 +251,7 @@ export default function ProfessorDashboard() {
 				// Check if user role is admin
 				if (authContext.user.role !== "professor") {
 					console.log(`User role is ${authContext.user.role}, not authorized for professor dashboard`);
-					router.replace("/_not-found"); // Redirect to an unauthorized page
+					router.replace(`/${authContext.user.role}Dashboard`) // Redirect to an unauthorized page
 					return;
 				}
 

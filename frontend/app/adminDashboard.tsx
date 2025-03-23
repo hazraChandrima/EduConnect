@@ -266,7 +266,7 @@ export default function AdminDashboard() {
         // Check if user role is admin
         if (authContext.user.role !== "admin") {
           console.log(`User role is ${authContext.user.role}, not authorized for admin dashboard`);
-          router.replace("/_not-found"); // Redirect to an unauthorized page
+          router.replace(`/${authContext.user.role}Dashboard`) // Redirect to an unauthorized page
           return;
         }
 
