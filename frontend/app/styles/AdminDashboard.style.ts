@@ -12,6 +12,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#4169E1",
         paddingVertical: 14,
         paddingHorizontal: 20,
+        zIndex: 2000,
     },
     headerTitle: {
         fontSize: 22,
@@ -36,12 +37,15 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
+        zIndex: 1
     },
     dashboardHeader: {
         backgroundColor: "#40BFFF",
         padding: 20,
         borderRadius: 8,
         margin: 16,
+        position: 'relative',
+        zIndex: 1
     },
     dashboardTitle: {
         fontSize: 24,
@@ -744,6 +748,41 @@ const styles = StyleSheet.create({
     chart: {
         borderRadius: 8,
         marginVertical: 8,
+    },
+    profileContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        position: 'relative',
+        zIndex: 1000,
+    },
+    profileButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    profileDropdown: {
+        position: 'absolute',
+        top: 45,
+        right: 0,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        zIndex: 3000,
+    },
+    profileMenuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+    profileMenuItemText: {
+        marginLeft: 8,
+        fontSize: 16,
+        color: '#333',
     },
 })
 

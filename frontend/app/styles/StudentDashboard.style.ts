@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 10,
     elevation: 4,
+    zIndex: 2000, // Increase z-index for the entire header
   },
   logo: {
     color: "white",
@@ -22,6 +23,8 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
+    position: 'relative',
+    zIndex: 2000, // Increased z-index to ensure it's above other elements
   },
   profilePic: {
     width: 40,
@@ -38,12 +41,14 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    zIndex: 1, // Lower z-index for the scrollView
   },
   welcomeBanner: {
     backgroundColor: "#52c4eb",
     padding: 20,
     borderBottomLeftRadius: 15,
     borderBottomRightRadius: 15,
+    zIndex: 1, // Ensure this is lower than the profile dropdown
   },
   welcomeTitle: {
     color: "white",
@@ -223,6 +228,35 @@ const styles = StyleSheet.create({
   },
   navActive: {
     color: "#5c51f3",
+  },
+  profileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  profileDropdown: {
+    position: 'absolute',
+    top: 45, // Slightly increased to ensure it's below the profile pic
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 3000, // Increased z-index to be higher than any other element
+  },
+  profileMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  profileMenuItemText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#333',
   },
 });
 

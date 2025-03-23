@@ -228,6 +228,8 @@ export default function AdminDashboard() {
   const [itemToDelete, setItemToDelete] = useState<Professor | Student | Course | null>(null)
   const [deleteType, setDeleteType] = useState<"professor" | "student" | "course" | "">("")
   const [searchQuery, setSearchQuery] = useState("")
+  const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
+
   const [newUser, setNewUser] = useState<NewUser>({
     name: "",
     email: "",
@@ -1284,13 +1286,38 @@ export default function AdminDashboard() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>EduConnect</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={24} color="white" />
-          </TouchableOpacity>
-          <View style={styles.adminBadge}>
-            <FontAwesome5 name="user-circle" size={24} color="white" />
-            <Text style={styles.adminText}>{firstName}</Text>
+
+          <View style={styles.profileContainer}>
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => setIsProfileMenuVisible(!isProfileMenuVisible)}
+            >
+              <View style={styles.adminBadge}>
+                <FontAwesome5 name="user-circle" size={24} color="white" />
+              </View>
+              <Text style={styles.adminText}>{firstName}</Text>
+              <Ionicons
+                name={isProfileMenuVisible ? "chevron-up" : "chevron-down"}
+                size={16}
+                color="white"
+                style={{ marginLeft: 4 }}
+              />
+            </TouchableOpacity>
+
+            {isProfileMenuVisible && (
+              <View style={styles.profileDropdown}>
+                <TouchableOpacity
+                  style={styles.profileMenuItem}
+                  onPress={handleLogout}
+                >
+                  <Ionicons name="log-out-outline" size={20} color="#333" />
+                  <Text style={styles.profileMenuItemText}>Logout</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
+
+
         </View>
       </View>
 

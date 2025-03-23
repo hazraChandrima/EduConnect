@@ -217,6 +217,7 @@ export default function ProfessorDashboard() {
 	const [isGradingModalVisible, setIsGradingModalVisible] = useState(false)
 	const [isAttendanceModalVisible, setIsAttendanceModalVisible] = useState(false)
 	const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
+	const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
 	const [newAssignment, setNewAssignment] = useState({
 		title: "",
 		description: "",
@@ -291,7 +292,6 @@ export default function ProfessorDashboard() {
 		router.replace("/login");
 		return <></>;
 	}
-
 
 
 	const handleLogout = async () => {
@@ -1199,13 +1199,33 @@ export default function ProfessorDashboard() {
 			<View style={styles.header}>
 				<Text style={styles.logo}>EduConnect</Text>
 				<View style={styles.profileContainer}>
-					<TouchableOpacity onPress={handleLogout}>
-						<Ionicons name="log-out-outline" size={24} color="white" />
+					<TouchableOpacity
+						style={styles.profileButton}
+						onPress={() => setIsProfileMenuVisible(!isProfileMenuVisible)}
+					>
+						<View style={styles.profilePic}>
+							<Ionicons name="person" size={24} color="white" />
+						</View>
+						<Text style={styles.profileName}>Dr. {firstName}</Text>
+						<Ionicons
+							name={isProfileMenuVisible ? "chevron-up" : "chevron-down"}
+							size={16}
+							color="white"
+							style={{ marginLeft: 4 }}
+						/>
 					</TouchableOpacity>
-					<View style={styles.profilePic}>
-						<Ionicons name="person" size={24} color="white" />
-					</View>
-					<Text style={styles.profileName}>Dr. {firstName}</Text>
+
+					{isProfileMenuVisible && (
+						<View style={styles.profileDropdown}>
+							<TouchableOpacity
+								style={styles.profileMenuItem}
+								onPress={handleLogout}
+							>
+								<Ionicons name="log-out-outline" size={20} color="#333" />
+								<Text style={styles.profileMenuItemText}>Logout</Text>
+							</TouchableOpacity>
+						</View>
+					)}
 				</View>
 			</View>
 

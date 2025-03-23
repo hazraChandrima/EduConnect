@@ -13,6 +13,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         paddingVertical: 10,
         elevation: 4,
+        zIndex: 2000,
     },
     logo: {
         color: "white",
@@ -22,6 +23,9 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "row",
         alignItems: "center",
+        position: 'relative',
+        zIndex: 2000, // Ensure it's above other components
+
     },
     profilePic: {
         width: 40,
@@ -44,6 +48,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
+        zIndex: 1,
     },
     welcomeTitle: {
         color: "white",
@@ -845,6 +850,35 @@ const styles = StyleSheet.create({
     absentOption: {
         backgroundColor: "#F44336",
         borderColor: "#F44336",
+    },
+    profileButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    profileDropdown: {
+        position: 'absolute',
+        top: 45,
+        right: 0,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        zIndex: 3000,
+    },
+    profileMenuItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+    profileMenuItemText: {
+        marginLeft: 8,
+        fontSize: 16,
+        color: '#333',
     },
 });
 

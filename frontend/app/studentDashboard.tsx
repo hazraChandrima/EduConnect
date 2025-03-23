@@ -25,19 +25,25 @@ interface UserData {
   __v: number;
 }
 
-const { width } = useWindowDimensions();
-const isSmallDevice = width < 500;
+// Move this outside the component
+const useIsSmallDevice = () => {
+  const { width } = useWindowDimensions();
+  return width < 500;
+};
 
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
   const auth = useContext(AuthContext);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const isSmallDevice = useIsSmallDevice();
+  const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
 
   // Default name for fallback
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
+  // This useEffect handles both authentication check and redirection
   useEffect(() => {
     const checkAuthAndFetchData = async (): Promise<void> => {
       try {
@@ -53,7 +59,7 @@ export default function StudentDashboard(): React.ReactElement {
         // Check if user role is student
         if (auth.user.role !== "student") {
           console.log(`User role is ${auth.user.role}, not authorized for student dashboard`);
-          router.replace(`/${auth.user.role}Dashboard`);// Redirect to an unauthorized page
+          router.replace(`/${auth.user.role}Dashboard`);
           return;
         }
 
@@ -78,6 +84,12 @@ export default function StudentDashboard(): React.ReactElement {
     checkAuthAndFetchData();
   }, [auth, router]);
 
+  const handleLogout = () => {
+    if (auth?.logout) {
+      auth.logout().then(() => router.replace("/login"));
+    }
+  };
+
   // Show loading indicator while checking auth
   if (auth?.isLoading || isLoading) {
     return (
@@ -88,12 +100,16 @@ export default function StudentDashboard(): React.ReactElement {
     );
   }
 
-  // Redirect if user is not authorized
+  // If user is not authorized, show a loading screen
+  // But don't use hooks conditionally
   if (!auth?.user || auth.user.role !== "student" || !userData) {
-    router.replace("/login");
-    return <></>;
+    return (
+      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#5c51f3" />
+        <Text style={{ marginTop: 10 }}>Redirecting...</Text>
+      </SafeAreaView>
+    );
   }
-
 
   return (
     <SafeAreaView style={styles.container}>
@@ -103,10 +119,33 @@ export default function StudentDashboard(): React.ReactElement {
       <View style={styles.header}>
         <Text style={styles.logo}>EduConnect</Text>
         <View style={styles.profileContainer}>
-          <View style={styles.profilePic}>
-            <Ionicons name="person" size={24} color="white" />
-          </View>
-          <Text style={styles.profileName}>{displayName}</Text>
+          <TouchableOpacity
+            style={styles.profileButton}
+            onPress={() => setIsProfileMenuVisible(!isProfileMenuVisible)}
+          >
+            <View style={styles.profilePic}>
+              <Ionicons name="person" size={24} color="white" />
+            </View>
+            <Text style={styles.profileName}>{displayName}</Text>
+            <Ionicons
+              name={isProfileMenuVisible ? "chevron-up" : "chevron-down"}
+              size={16}
+              color="white"
+              style={{ marginLeft: 4 }}
+            />
+          </TouchableOpacity>
+
+          {isProfileMenuVisible && (
+            <View style={styles.profileDropdown}>
+              <TouchableOpacity
+                style={styles.profileMenuItem}
+                onPress={handleLogout}
+              >
+                <Ionicons name="log-out-outline" size={20} color="#333" />
+                <Text style={styles.profileMenuItemText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
       </View>
 
@@ -294,13 +333,14 @@ export default function StudentDashboard(): React.ReactElement {
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
+          zIndex: 2500,
         }}
         onPress={() => router.push("/chatbotScreen")}
       >
         <Ionicons name="chatbubble-ellipses" size={28} color="white" />
       </TouchableOpacity>
 
-      {/* Navigation Bar with Logout Button */}
+      {/* Navigation Bar */}
       <View style={styles.navigationBar}>
         <TouchableOpacity style={styles.navItem}>
           <Ionicons name="home" size={24} color="#5c51f3" />
@@ -317,15 +357,6 @@ export default function StudentDashboard(): React.ReactElement {
         <TouchableOpacity style={styles.navItem}>
           <MaterialIcons name="date-range" size={24} color="#777" />
           <Text style={styles.navText}>Attendance</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => {
-            auth?.logout().then(() => router.replace("/login"));
-          }}
-        >
-          <Ionicons name="log-out" size={24} color="#777" />
-          <Text style={styles.navText}>Logout</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
