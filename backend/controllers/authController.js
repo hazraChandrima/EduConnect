@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendVerificationCode, sendWelcomeEmail } = require('../middleware/email');
+const { sendVerificationCode, sendWelcomeEmail, sendAlertOnLogin } = require('../middleware/email');
 
 
 const generateToken = (id, role) => {
@@ -206,6 +206,7 @@ exports.verifyLoginOTP = async (req, res) => {
       success: true,
       message: "OTP verified successfully",
     })
+
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
@@ -241,6 +242,9 @@ exports.loginUser = async (req, res) => {
       token,
       role: user.role,
     })
+
+    sendAlertOnLogin(user.email, user.name);
+
   } catch (error) {
     res.status(500).json({ error: error.message })
   }

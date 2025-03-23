@@ -47,7 +47,7 @@ export default function RegisterScreen() {
   }
 
   const { login, user } = authContext;
-  
+
   // State for registration data
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     name: "",
@@ -56,7 +56,7 @@ export default function RegisterScreen() {
     role: "student",
     verificationCode: "",
   });
-  
+
   // State for UI control
   const [currentStep, setCurrentStep] = useState<RegistrationStep>(RegistrationStep.INITIAL_INFO);
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -64,10 +64,10 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  
+
   // Animation value for progress bar
   const [progressAnim] = useState(new Animated.Value(0));
-  
+
   // Role options
   const roleOptions = ["student", "professor", "admin"];
 
@@ -154,7 +154,6 @@ export default function RegisterScreen() {
             email: registrationData.email.trim(),
             password: "temporary_" + Math.random().toString(36).substring(2),
             role: registrationData.role.trim(),
-            // Send a temporary password that will be updated later
           }),
         }
       );
@@ -165,13 +164,12 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to initiate registration");
       }
 
-      // Move to verification step
       setCurrentStep(RegistrationStep.VERIFY_EMAIL);
-      
+
       // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
-      
+
       Alert.alert(
         "Verification Code Sent",
         "Please check your email for the verification code."
@@ -254,7 +252,7 @@ export default function RegisterScreen() {
       // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
-      
+
       Alert.alert(
         "Verification Code Sent",
         "A new verification code has been sent to your email."
@@ -297,10 +295,10 @@ export default function RegisterScreen() {
 
       // Move to complete step
       setCurrentStep(RegistrationStep.COMPLETE);
-      
+
       // Log in the user
       await login(registrationData.email, registrationData.password, true);
-      
+
       Alert.alert(
         "Registration Complete",
         "Your account has been created successfully!"
