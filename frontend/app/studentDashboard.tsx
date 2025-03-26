@@ -376,7 +376,7 @@ export default function StudentDashboard(): React.ReactElement {
         }
 
         // Fetch user data
-        const response = await fetch(`http://192.168.224.247:3000/api/user/${auth.user.userId}`);
+        const response = await fetch(`http://localhost:3000/api/user/${auth.user.userId}`);
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
@@ -450,16 +450,55 @@ export default function StudentDashboard(): React.ReactElement {
   };
 
   // Function to submit assignment
-  const submitAssignment = () => {
+  const submitAssignment = async () => {
     if (!selectedAssignment) return;
-    
-    // In a real app, you would upload files and text to your backend here
-    console.log("Submitting assignment:", {
-      assignmentId: selectedAssignment.id,
-      text: submissionText,
-      files: submissionFiles,
+
+    const formData = new FormData();
+    formData.append("assignmentId", selectedAssignment.id);
+    formData.append("text", submissionText);
+
+    // Convert files to Blobs and append to formData
+    const filePromises = submissionFiles.map(async (file) => {
+        try {
+            const response = await fetch(file.uri);
+            const blob = await response.blob();
+            const fileObject = new File([blob], file.name, { type: file.type });
+
+            formData.append("file", fileObject); //Ensure key matches backend
+        } catch (error) {
+            console.error(" Error converting file to Blob:", error);
+        }
     });
-    
+
+    await Promise.all(filePromises); // Ensure all files are processed before sending request
+
+    //Include Token in Request Headers
+    const token = localStorage.getItem("token");
+    if (!token) {
+        console.error("No authentication token found!");
+        return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:3000/api/assignment/submit", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`, //Send token for authentication
+        },
+      });
+
+      console.log("Raw response from backend:", response);
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Assignment submitted successfully:", data);
+      } else {
+        console.error("Failed to submit assignment:", data.error);
+      }
+    } catch (error) {
+      console.error("Error submitting assignment:", error);
+    }
     // Update the assignment status
     const updatedAssignments = assignments.map(assignment => 
       assignment.id === selectedAssignment.id 
@@ -472,7 +511,7 @@ export default function StudentDashboard(): React.ReactElement {
     
     // Show success message (in a real app, you might use a toast or alert)
     alert("Assignment submitted successfully!");
-  };
+};
 
   // Calculate attendance percentage for a course
   const calculateAttendancePercentage = (courseId: string): number => {
