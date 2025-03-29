@@ -20,9 +20,7 @@ import AcademicAnalytics from "./components/AcademicAnalytics";
 import { useWindowDimensions } from "react-native";
 import { AuthContext } from "./context/AuthContext"; // Adjust the import path as needed
 import * as DocumentPicker from 'expo-document-picker';
-import { IP_ADDRESS, PORT } from "@env";
 
-// Define TypeScript interfaces for data structures
 interface UserData {
   _id: string;
   name: string;
@@ -326,18 +324,14 @@ export default function StudentDashboard(): React.ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const isSmallDevice = useIsSmallDevice();
   const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
-  
   const [activeTab, setActiveTab] = useState<"home" | "courses" | "assignments" | "attendance">("home");
-  
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isCourseModalVisible, setIsCourseModalVisible] = useState(false);
   const [activeCourseTab, setActiveCourseTab] = useState<"curriculum" | "attendance" | "marks" | "remarks">("curriculum");
-  
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [isSubmissionModalVisible, setIsSubmissionModalVisible] = useState(false);
   const [submissionText, setSubmissionText] = useState("");
   const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>([]);
-  
   const [courses, setCourses] = useState<Course[]>(sampleCourses);
   const [assignments, setAssignments] = useState<Assignment[]>(sampleAssignments);
   const [curriculum, setCurriculum] = useState<Curriculum[]>(sampleCurriculum);
@@ -348,27 +342,25 @@ export default function StudentDashboard(): React.ReactElement {
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
+
   useEffect(() => {
     const checkAuthAndFetchData = async (): Promise<void> => {
       try {
         setIsLoading(true);
 
-        // Check if user is logged in
         if (!auth?.user) {
           console.log("No authenticated user, redirecting to login");
           router.replace("/login");
           return;
         }
 
-        // Check if user role is student
         if (auth.user.role !== "student") {
           console.log(`User role is ${auth.user.role}, not authorized for student dashboard`);
           router.replace(`/${auth.user.role}Dashboard`);
           return;
         }
 
-        // Fetch user data
-        const response = await fetch(`http://${IP_ADDRESS}:${PORT}/api/user/${auth.user.userId}`);
+        const response = await fetch(`http://192.168.142.247:3000/api/user/${auth.user.userId}`);
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
@@ -394,14 +386,12 @@ export default function StudentDashboard(): React.ReactElement {
     }
   };
 
-  // Function to handle course selection
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
     setActiveCourseTab("curriculum");
     setIsCourseModalVisible(true);
   };
 
-  // Function to handle assignment selection for submission
   const handleAssignmentSelect = (assignment: Assignment) => {
     setSelectedAssignment(assignment);
     setSubmissionText("");
@@ -409,7 +399,6 @@ export default function StudentDashboard(): React.ReactElement {
     setIsSubmissionModalVisible(true);
   };
 
-  // Function to pick document for assignment submission
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -434,25 +423,21 @@ export default function StudentDashboard(): React.ReactElement {
     }
   };
 
-  // Function to remove a file from submission
   const removeFile = (index: number) => {
     const updatedFiles = [...submissionFiles];
     updatedFiles.splice(index, 1);
     setSubmissionFiles(updatedFiles);
   };
 
-  // Function to submit assignment
   const submitAssignment = () => {
     if (!selectedAssignment) return;
     
-    // In a real app, you would upload files and text to your backend here
     console.log("Submitting assignment:", {
       assignmentId: selectedAssignment.id,
       text: submissionText,
       files: submissionFiles,
     });
     
-    // Update the assignment status
     const updatedAssignments = assignments.map(assignment => 
       assignment.id === selectedAssignment.id 
         ? { ...assignment, status: "submitted" as const } 
@@ -462,11 +447,9 @@ export default function StudentDashboard(): React.ReactElement {
     setAssignments(updatedAssignments);
     setIsSubmissionModalVisible(false);
     
-    // Show success message (in a real app, you might use a toast or alert)
     alert("Assignment submitted successfully!");
   };
 
-  // Calculate attendance percentage for a course
   const calculateAttendancePercentage = (courseId: string): number => {
     const courseAttendance = attendance.filter(a => a.courseId === courseId);
     if (courseAttendance.length === 0) return 0;
@@ -475,7 +458,6 @@ export default function StudentDashboard(): React.ReactElement {
     return Math.round((presentCount / courseAttendance.length) * 100);
   };
 
-  // Calculate average score for a course
   const calculateAverageScore = (courseId: string): number => {
     const courseMarks = marks.filter(m => m.courseId === courseId);
     if (courseMarks.length === 0) return 0;
@@ -494,8 +476,6 @@ export default function StudentDashboard(): React.ReactElement {
     );
   }
 
-  // If user is not authorized, show a loading screen
-  // But don't use hooks conditionally
   if (!auth?.user || auth.user.role !== "student" || !userData) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>

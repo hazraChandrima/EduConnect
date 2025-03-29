@@ -5,8 +5,6 @@ import { createContext, useState, useEffect, type ReactNode } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import axios from "axios"
 import { router } from "expo-router"
-import { IP_ADDRESS, PORT } from "@env"
-
 
 interface User {
 	userId: string
@@ -24,7 +22,6 @@ interface AuthContextProps {
 	verifyLoginOTP: (email: string, code: string) => Promise<boolean>
 	login: (email: string, password: string, otpVerified?: boolean) => Promise<void>
 	logout: () => Promise<void>
-	// Reset function to go back in the auth flow
 	resetAuthFlow: () => void
 }
 
@@ -36,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 	const [currentEmail, setCurrentEmail] = useState<string | null>(null)
 	const [isOtpVerified, setIsOtpVerified] = useState(false)
 
-	const API_URL = `http://${IP_ADDRESS}:${PORT}/api/auth`
+	const API_URL = "http://192.168.142.247:3000/api/auth"
 
 	useEffect(() => {
 		console.log("Checking for stored user...")
@@ -65,13 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		setIsLoading(true)
 		try {
 			console.log("Requesting login OTP for:", email)
-			console.log("API URL:", API_URL);
-			console.log("IP_ADDRESS:", IP_ADDRESS);
-			console.log("PORT:", PORT);
-
-			
 			const response = await axios.post(`${API_URL}/requestLoginOTP`, { email })
-			
 
 			if (response.data.success) {
 				setCurrentEmail(email)
@@ -144,6 +135,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 			}
 
 			setUser(userData)
+
 			await AsyncStorage.setItem("token", response.data.token)
 			await AsyncStorage.setItem("user", JSON.stringify(userData))
 			await AsyncStorage.setItem("userId", response.data.userId)
@@ -153,8 +145,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 			axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`
 
 			resetAuthFlow()
-			router.replace(`/${userData.role}Dashboard`)
 
+			router.replace(`/${userData.role}Dashboard`)
 		} catch (error: unknown) {
 			const err = error as Error
 			console.error("Login request failed:", err.message)

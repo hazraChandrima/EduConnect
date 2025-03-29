@@ -16,9 +16,6 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
-import { IP_ADDRESS, PORT } from "@env";
-
-
 
 enum RegistrationStep {
   INITIAL_INFO = 0,
@@ -60,9 +57,27 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
   const [progressAnim] = useState(new Animated.Value(0));
 
   const roleOptions = ["student", "professor", "admin"];
+
+  const validatePassword = (value: string): void => {
+    const length: boolean = value.length >= 8;
+    const hasDigit: boolean = /\d/.test(value);
+    const hasLowerCase: boolean = /[a-z]/.test(value);
+
+    if (!length) {
+      setPasswordError("Password must be at least 8 characters!");
+    } else if (!hasDigit) {
+      setPasswordError("Password must include at least one digit!");
+    } else if (!hasLowerCase) {
+      setPasswordError("Password must include at least one lowercase letter!");
+    } else {
+      setPasswordError("");
+    }
+  };
 
 
   useEffect(() => {
@@ -76,6 +91,23 @@ export default function RegisterScreen() {
 
 
   useEffect(() => {
+    if (registrationData.email.trim() === "") {
+      setEmailError("")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(registrationData.email)) {
+      setEmailError("Please enter a valid email address")
+    } else {
+      setEmailError("")
+    }
+  }, [registrationData.email])
+
+
+
+
+  useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
       timer = setTimeout(() => setCountdown(countdown - 1), 1000);
@@ -84,7 +116,6 @@ export default function RegisterScreen() {
     }
     return () => clearTimeout(timer);
   }, [countdown]);
-
 
 
   useEffect(() => {
@@ -102,17 +133,11 @@ export default function RegisterScreen() {
     registrationData.role.trim()
   );
 
-
   const isVerificationCodeFilled = !!(
     registrationData.verificationCode.trim().length === 6
   );
 
-
-  const isPasswordFilled = !!(
-    registrationData.password.trim().length >= 6
-  );
-
-
+  // Handle input changes
   const handleInputChange = (field: keyof RegistrationData, value: string) => {
     setRegistrationData(prev => ({
       ...prev,
@@ -125,18 +150,17 @@ export default function RegisterScreen() {
     setPasswordVisible(!passwordVisible);
   };
 
-
   const handleInitialSubmit = async () => {
     setIsLoading(true);
     try {
-      
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(registrationData.email)) {
         throw new Error("Please enter a valid email address");
       }
 
       const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/api/auth/register`,
+        "http://192.168.142.247:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -160,6 +184,7 @@ export default function RegisterScreen() {
 
       setCurrentStep(RegistrationStep.VERIFY_EMAIL);
 
+      // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
 
@@ -177,14 +202,12 @@ export default function RegisterScreen() {
     }
   };
 
-
-
-
+  // Handle verification code submission
   const handleVerifyCode = async () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/api/auth/verifyEmail`,
+        "http://192.168.142.247:3000/api/auth/verifyEmail",
         {
           method: "POST",
           headers: {
@@ -202,8 +225,9 @@ export default function RegisterScreen() {
       if (!response.ok) {
         throw new Error(data.message || "Invalid verification code");
       }
-      setCurrentStep(RegistrationStep.CREATE_PASSWORD);
 
+      // Move to password creation step
+      setCurrentStep(RegistrationStep.CREATE_PASSWORD);
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -214,14 +238,13 @@ export default function RegisterScreen() {
     }
   };
 
-
-
-
+  // Handle resend verification code
   const handleResendCode = async () => {
     setIsLoading(true);
     try {
+      // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/api/auth/register`,
+        "http://192.168.142.247:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -233,6 +256,7 @@ export default function RegisterScreen() {
             email: registrationData.email.trim(),
             role: registrationData.role.trim(),
             password: "temporary_" + Math.random().toString(36).substring(2),
+            // Send a temporary password that will be updated later
           }),
         }
       );
@@ -243,6 +267,7 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to resend verification code");
       }
 
+      // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
 
@@ -260,14 +285,13 @@ export default function RegisterScreen() {
     }
   };
 
-
-
-
+  // Handle password submission and complete registration
   const handleCompleteRegistration = async () => {
     setIsLoading(true);
     try {
+      // Update the user's password
       const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/api/auth/updatePassword`,
+        "http://192.168.142.247:3000/api/auth/updatePassword",
         {
           method: "POST",
           headers: {
@@ -287,7 +311,10 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to update password");
       }
 
+      // Move to complete step
       setCurrentStep(RegistrationStep.COMPLETE);
+
+      // Log in the user
       await login(registrationData.email, registrationData.password, true);
 
       Alert.alert(
@@ -304,8 +331,7 @@ export default function RegisterScreen() {
     }
   };
 
-
-
+  // Render progress bar
   const renderProgressBar = () => {
     const progressWidth = progressAnim.interpolate({
       inputRange: [0, 100],
@@ -347,7 +373,7 @@ export default function RegisterScreen() {
   //   );
   // };
 
-
+  // Render initial form (name, email, role)
   const renderInitialForm = () => {
     return (
       <>
@@ -379,13 +405,8 @@ export default function RegisterScreen() {
         {/* Email Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
-          <View style={styles.inputWrapper}>
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color="#666"
-              style={styles.inputIcon}
-            />
+          <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
+            <Ionicons name="mail-outline" size={20} color={emailError ? "#ff3b30" : "#666"} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               value={registrationData.email}
@@ -396,6 +417,7 @@ export default function RegisterScreen() {
               autoCapitalize="none"
             />
           </View>
+          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         </View>
 
         {/* Role Selection */}
@@ -428,10 +450,10 @@ export default function RegisterScreen() {
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (!isInitialFormFilled || isLoading) && styles.disabledButton,
+            (!isInitialFormFilled || isLoading || !!emailError) && styles.disabledButton,
           ]}
           onPress={handleInitialSubmit}
-          disabled={!isInitialFormFilled || isLoading}
+          disabled={!isInitialFormFilled || isLoading || !!emailError}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -537,7 +559,10 @@ export default function RegisterScreen() {
             <TextInput
               style={styles.input}
               value={registrationData.password}
-              onChangeText={(value) => handleInputChange("password", value)}
+              onChangeText={(value) => {
+                handleInputChange("password", value);
+                validatePassword(value);
+              }}
               secureTextEntry={!passwordVisible}
               placeholder="Create a password"
               placeholderTextColor="#999"
@@ -555,18 +580,28 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.passwordHint}>
-            Password must be at least 6 characters
+            Password should be at least 8 characters including a number and
+            a lowercase letter.
           </Text>
         </View>
+
+        <View style={styles.container}>
+          {passwordError && (
+            <Text style={styles.errorText}>
+              {passwordError}
+            </Text>
+          )}
+        </View>
+
 
         {/* Complete Registration Button */}
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (!isPasswordFilled || isLoading) && styles.disabledButton,
+            (isLoading || !!passwordError) && styles.disabledButton,
           ]}
           onPress={handleCompleteRegistration}
-          disabled={!isPasswordFilled || isLoading}
+          disabled={isLoading || !!passwordError}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -616,7 +651,6 @@ export default function RegisterScreen() {
             {currentStep < RegistrationStep.COMPLETE && (
               <>
                 {renderProgressBar()}
-                {/* {renderStepIndicator()} */}
               </>
             )}
 

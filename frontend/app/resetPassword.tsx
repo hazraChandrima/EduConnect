@@ -14,8 +14,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
-import { IP_ADDRESS, PORT } from "@env";
-
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -55,6 +53,7 @@ export default function ResetPasswordScreen() {
 
 
   const handleResetPassword = async () => {
+    // Validation
     if (!newPassword.trim()) {
       setTimeout(() => {
         Alert.alert("Invalid Input", "Please enter a new password.");
@@ -88,7 +87,7 @@ export default function ResetPasswordScreen() {
     try {
       console.log(token, newPassword);
       const response = await fetch(
-        `http://${IP_ADDRESS}:${PORT}/api/auth/reset-password`,
+        "http://192.168.142.247:3000/api/auth/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -225,9 +224,11 @@ export default function ResetPasswordScreen() {
 
             {/* Reset Password Button */}
             <TouchableOpacity
-              style={forgotResetPassStyle.primaryButton}
+              style={[
+                forgotResetPassStyle.primaryButton,
+                (!newPassword || isLoading || !!passwordError) && forgotResetPassStyle.disabledButton]}
               onPress={handleResetPassword}
-              disabled={isLoading}
+              disabled={!newPassword || isLoading || !!passwordError}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />

@@ -45,9 +45,10 @@ export default function LoginScreen() {
   const [currentStep, setCurrentStep] = useState<LoginStep>(LoginStep.EMAIL)
   const [resendDisabled, setResendDisabled] = useState(false)
   const [countdown, setCountdown] = useState(0)
-
-  // Animation value for progress bar
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("");
   const [progressAnim] = useState(new Animated.Value(0))
+
 
   useEffect(() => {
     Animated.timing(progressAnim, {
@@ -57,7 +58,8 @@ export default function LoginScreen() {
     }).start()
   }, [currentStep])
 
-  // Handle countdown for resend code
+
+
   useEffect(() => {
     let timer: NodeJS.Timeout
     if (countdown > 0) {
@@ -68,7 +70,8 @@ export default function LoginScreen() {
     return () => clearTimeout(timer)
   }, [countdown])
 
-  // Redirect if user is authenticated
+
+
   useEffect(() => {
     if (user && !isRedirecting) {
       setIsRedirecting(true)
@@ -77,14 +80,31 @@ export default function LoginScreen() {
     }
   }, [user])
 
-  // Reset auth flow when component unmounts
+
+
   useEffect(() => {
     return () => {
       resetAuthFlow()
     }
   }, [])
 
-  const isEmailFilled = !!email.trim()
+
+
+  useEffect(() => {
+    if (email.trim() === "") {
+      setEmailError("")
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      setEmailError("Please enter a valid email address")
+    } else {
+      setEmailError("")
+    }
+  }, [email])
+
+
+  const isEmailFilled = !!email.trim() && !emailError
   const isOtpFilled = !!otpCode.trim() && otpCode.length === 6
   const isPasswordFilled = !!password.trim()
 
@@ -93,10 +113,11 @@ export default function LoginScreen() {
     setPasswordVisible(!passwordVisible)
   }
 
+
   const handleEmailSubmit = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address")
+      setEmailError("Please enter a valid email address")
       return
     }
 
@@ -105,15 +126,13 @@ export default function LoginScreen() {
       const success = await requestLoginOTP(email.trim())
 
       if (success) {
-        // Move to OTP verification step
         setCurrentStep(LoginStep.VERIFY_OTP)
-
-        // Start countdown for resend
         setResendDisabled(true)
         setCountdown(60)
 
         Alert.alert("Verification Code Sent", "Please check your email for the verification code.")
       } else {
+        setEmailError("The email you've entered either does not exist or is not registered.")
         Alert.alert("Error", "Failed to send verification code. Please try again.")
       }
     } catch (error) {
@@ -125,7 +144,10 @@ export default function LoginScreen() {
     }
   }
 
-  // Handle OTP verification
+  const handleEmailChange = (text: string) => {
+    setEmail(text)
+  }
+
   const handleVerifyOtp = async () => {
     setIsLoading(true)
     try {
@@ -167,7 +189,6 @@ export default function LoginScreen() {
     }
   }
 
-
   const handleCompleteLogin = async () => {
     setIsLoading(true)
     console.log("Attempting to log in...")
@@ -177,6 +198,7 @@ export default function LoginScreen() {
       console.log("Login successful, waiting for user state update...")
     } catch (error) {
       console.error("Login failed:")
+      setPasswordError("Login Failed, invalid credentials");
       setTimeout(() => {
         Alert.alert("Login Failed", "Invalid credentials")
       }, 100)
@@ -185,7 +207,6 @@ export default function LoginScreen() {
     }
   }
 
-  // Render progress bar
   const renderProgressBar = () => {
     const progressWidth = progressAnim.interpolate({
       inputRange: [0, 100],
@@ -206,7 +227,6 @@ export default function LoginScreen() {
     )
   }
 
-  // Render email step
   const renderEmailStep = () => {
     return (
       <>
@@ -216,18 +236,19 @@ export default function LoginScreen() {
         {/* Email Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
-          <View style={styles.inputWrapper}>
-            <Ionicons name="mail-outline" size={20} color="#666" style={styles.inputIcon} />
+          <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
+            <Ionicons name="mail-outline" size={20} color={emailError ? "#ff3b30" : "#666"} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={handleEmailChange}
               placeholder="Enter your email"
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
             />
           </View>
+          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         </View>
 
         {/* Continue Button */}
@@ -346,6 +367,7 @@ export default function LoginScreen() {
               <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="#666" />
             </TouchableOpacity>
           </View>
+          {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
         </View>
 
         {/* Forgot Password Link */}
@@ -397,4 +419,3 @@ export default function LoginScreen() {
     </SafeAreaView>
   )
 }
-

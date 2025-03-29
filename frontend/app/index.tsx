@@ -22,6 +22,7 @@ export default function Index() {
   useEffect(() => {
     console.log("🟡 Checking navigation...");
 
+    // Ensure the app has mounted before trying to navigate
     const timeout = setTimeout(() => setIsAppMounted(true), 500);
     return () => clearTimeout(timeout);
   }, []);
@@ -30,7 +31,7 @@ export default function Index() {
     if (isAppMounted && !isLoading) {
       if (user) {
         console.log(`✅ User detected (${user.role}), redirecting...`);
-        router.replace(`/${user.role}Dashboard`);
+        router.replace('/studentDashboard');
       } else {
         console.log("🔴 No user, redirecting to login...");
         router.replace('/login');

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useContext } from "react"
 import {
     View,
     Text,
@@ -14,12 +14,13 @@ import {
     Platform,
     ScrollView,
     Animated,
-    Alert
+    Alert,
+    ActivityIndicator
 } from "react-native"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import styles from "./styles/Chabot.style"
-import { IP_ADDRESS, CHATBOT_PORT } from "@env"
+import { AuthContext } from "./context/AuthContext"
 
 
 interface ScrollableChipsProps {
@@ -59,6 +60,29 @@ const ChatbotScreen = () => {
     const [isTyping, setIsTyping] = useState(false)
     const flatListRef = useRef<FlatList>(null)
     const fadeAnim = useRef(new Animated.Value(0)).current
+    const auth = useContext(AuthContext);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
+
+
+    useEffect(() => {
+        const isLoggedIn = async (): Promise<void> => {
+            setIsLoading(true);
+            try {
+                if (!auth?.user) {
+                    console.log("No authenticated user, redirecting to login");
+                    router.replace("/login");
+                    return;
+                }
+            } catch {
+                console.log("Some unknown error occurred");
+            } finally {
+                setIsLoading(false);
+            }
+        }
+        isLoggedIn();
+    }, [auth])
+
+
 
     useEffect(() => {
         
@@ -66,6 +90,8 @@ const ChatbotScreen = () => {
             flatListRef.current.scrollToEnd({ animated: true })
         }
     }, [messages])
+
+
 
     useEffect(() => {
 
@@ -90,10 +116,21 @@ const ChatbotScreen = () => {
     }, [isTyping, fadeAnim])
 
 
+    
+    if (auth?.isLoading || isLoading) {
+        return (
+            <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+                <ActivityIndicator size="large" color="#5c51f3" />
+                <Text style={{ marginTop: 10 }}>Loading...</Text>
+            </SafeAreaView>
+        );
+    }
 
+
+    
     const fetchBotResponse = async (query: string): Promise<string> => {
         try {
-            const response = await fetch(`http://${IP_ADDRESS}:${CHATBOT_PORT}/ask`, {
+            const response = await fetch('http://192.168.142.247:5000/ask', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -141,7 +178,10 @@ const ChatbotScreen = () => {
         }, 300)
 
         try {
+            // Fetch bot response
             const botResponseText = await fetchBotResponse(inputText)
+
+            // Remove typing indicator and add actual response
             setTimeout(() => {
                 setIsTyping(false)
                 setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
@@ -156,6 +196,7 @@ const ChatbotScreen = () => {
                 setMessages((prevMessages) => [...prevMessages, botResponse])
             }, 1500)
         } catch (error) {
+            // Handle any errors in fetching response
             setIsTyping(false)
             setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
         }

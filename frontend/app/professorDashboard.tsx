@@ -19,8 +19,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { AuthContext } from "./context/AuthContext"
 import styles from "./styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
-import { IP_ADDRESS, PORT } from "@env"
-
 
 interface Assignment {
 	id: string
@@ -97,7 +95,6 @@ const dummyStudent: Student = {
 	],
 }
 
-// Dummy courses data
 const professorCourses: Course[] = [
 	{
 		id: "CS101",
@@ -246,11 +243,11 @@ export default function ProfessorDashboard() {
 
 				if (authContext.user.role !== "professor") {
 					console.log(`User role is ${authContext.user.role}, not authorized for professor dashboard`);
-					router.replace(`/${authContext.user.role}Dashboard`)
+					router.replace(`/${authContext.user.role}Dashboard`) // Redirect to an unauthorized page
 					return;
 				}
 
-				const response = await fetch(`http://${IP_ADDRESS}:${PORT}/api/user/${authContext.user.userId}`);
+				const response = await fetch(`http://192.168.142.247:3000/api/user/${authContext.user.userId}`);
 
 				if (!response.ok) {
 					throw new Error(`API request failed with status ${response.status}`);
@@ -280,6 +277,7 @@ export default function ProfessorDashboard() {
 		);
 	}
 
+	// Redirect if user is not authorized
 	if (!authContext?.user || authContext.user.role !== "professor" || !userData) {
 		router.replace("/login");
 		return <></>;
@@ -299,6 +297,7 @@ export default function ProfessorDashboard() {
 		if (!newAssignment.title || !newAssignment.description || !newAssignment.dueDate || !newAssignment.course) {
 			return
 		}
+
 		setIsLoading(true)
 		setIsLoading(false)
 		setIsAssignmentModalVisible(false)
@@ -314,6 +313,7 @@ export default function ProfessorDashboard() {
 		if (!gradeInput) {
 			return
 		}
+
 		setIsLoading(true)
 		setIsLoading(false)
 		setIsGradingModalVisible(false)
@@ -328,8 +328,6 @@ export default function ProfessorDashboard() {
 		setAttendanceStatus({})
 	}
 
-
-	
 	const renderHomeTab = () => (
 		<>
 			{/* Welcome Banner */}
