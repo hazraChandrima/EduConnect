@@ -1,6 +1,3 @@
-// This is a Node.js script to show the enhanced registration screen code
-// You should copy this into your React Native project
-
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useRouter } from "expo-router";

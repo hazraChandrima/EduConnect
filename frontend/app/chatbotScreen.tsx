@@ -14,11 +14,11 @@ import {
     Platform,
     ScrollView,
     Animated,
+    Alert
 } from "react-native"
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import styles from "./styles/Chabot.style"
-import { getBotResponse } from "./utils/chatbot-response"
 
 interface ScrollableChipsProps {
     suggestions: string[]
@@ -42,11 +42,13 @@ const initialMessages: Message[] = [
     },
     {
         id: "2",
-        text: "I can help with course information, assignments, academic concepts, or answer questions about computer science, math, and more.",
+        text: "I can help with course information, assignments, academic concepts, or answer questions about computer science, programming, and more.",
         sender: "bot",
         timestamp: new Date(Date.now() - 1000 * 60 * 4),
     },
 ]
+
+
 
 const ChatbotScreen = () => {
     const router = useRouter()
@@ -57,14 +59,14 @@ const ChatbotScreen = () => {
     const fadeAnim = useRef(new Animated.Value(0)).current
 
     useEffect(() => {
-        // Scroll to bottom when messages change
+        
         if (flatListRef.current && messages.length > 0) {
             flatListRef.current.scrollToEnd({ animated: true })
         }
     }, [messages])
 
     useEffect(() => {
-        // Animation for typing indicator
+
         if (isTyping) {
             Animated.loop(
                 Animated.sequence([
@@ -85,7 +87,32 @@ const ChatbotScreen = () => {
         }
     }, [isTyping, fadeAnim])
 
-    const sendMessage = () => {
+
+
+    const fetchBotResponse = async (query: string): Promise<string> => {
+        try {
+            const response = await fetch('http://192.168.224.247:5000/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ query }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            return data.answer;
+        } catch (error) {
+            console.error('Error fetching bot response:', error);
+            return "I'm sorry, I couldn't process your request.";
+        }
+    };
+
+
+    const sendMessage = async () => {
         if (inputText.trim() === "") return
 
         const userMessage: Message = {
@@ -99,7 +126,6 @@ const ChatbotScreen = () => {
         setInputText("")
         setIsTyping(true)
 
-        // Add typing indicator
         const typingIndicator: Message = {
             id: `typing-${Date.now()}`,
             text: "",
@@ -112,20 +138,29 @@ const ChatbotScreen = () => {
             setMessages((prevMessages) => [...prevMessages, typingIndicator])
         }, 300)
 
-        // Remove typing indicator and add actual response
-        setTimeout(() => {
+        try {
+            // Fetch bot response
+            const botResponseText = await fetchBotResponse(inputText)
+
+            // Remove typing indicator and add actual response
+            setTimeout(() => {
+                setIsTyping(false)
+                setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
+
+                const botResponse: Message = {
+                    id: (Date.now() + 1).toString(),
+                    text: botResponseText,
+                    sender: "bot",
+                    timestamp: new Date(),
+                }
+
+                setMessages((prevMessages) => [...prevMessages, botResponse])
+            }, 1500)
+        } catch (error) {
+            // Handle any errors in fetching response
             setIsTyping(false)
             setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
-
-            const botResponse: Message = {
-                id: (Date.now() + 1).toString(),
-                text: getBotResponse(inputText),
-                sender: "bot",
-                timestamp: new Date(),
-            }
-
-            setMessages((prevMessages) => [...prevMessages, botResponse])
-        }, 1500)
+        }
     }
 
     const formatTime = (date: Date): string => {
@@ -279,4 +314,3 @@ const ScrollableChips: React.FC<ScrollableChipsProps> = ({ suggestions, onPress 
 }
 
 export default ChatbotScreen
-

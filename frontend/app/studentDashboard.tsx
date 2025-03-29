@@ -1,6 +1,3 @@
-// This is a Node.js script to show the enhanced student dashboard code
-// You should copy this into your React Native project
-
 import React, { useState, useEffect, useContext } from "react";
 import {
   View,
@@ -841,10 +838,6 @@ export default function StudentDashboard(): React.ReactElement {
           <View style={styles.statCard}>
             <Text style={styles.statValue}>3.8</Text>
             <Text style={styles.statLabel}>GPA</Text>
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statValue}>75%</Text>
-            <Text style={styles.statLabel}>Semester Completed</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{courses.length}</Text>
