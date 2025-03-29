@@ -14,6 +14,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
+import { IP_ADDRESS, PORT } from "@env";
+
 
 export default function ResetPasswordScreen() {
   const router = useRouter();
@@ -24,6 +26,7 @@ export default function ResetPasswordScreen() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -52,7 +55,6 @@ export default function ResetPasswordScreen() {
 
 
   const handleResetPassword = async () => {
-    // Validation
     if (!newPassword.trim()) {
       setTimeout(() => {
         Alert.alert("Invalid Input", "Please enter a new password.");
@@ -86,7 +88,7 @@ export default function ResetPasswordScreen() {
     try {
       console.log(token, newPassword);
       const response = await fetch(
-        "http://localhost:3000/api/auth/reset-password",
+        `http://${IP_ADDRESS}:${PORT}/api/auth/reset-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

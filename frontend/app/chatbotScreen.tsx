@@ -19,6 +19,8 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import styles from "./styles/Chabot.style"
+import { IP_ADDRESS, CHATBOT_PORT } from "@env"
+
 
 interface ScrollableChipsProps {
     suggestions: string[]
@@ -91,7 +93,7 @@ const ChatbotScreen = () => {
 
     const fetchBotResponse = async (query: string): Promise<string> => {
         try {
-            const response = await fetch('http://192.168.224.247:5000/ask', {
+            const response = await fetch(`http://${IP_ADDRESS}:${CHATBOT_PORT}/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,10 +141,7 @@ const ChatbotScreen = () => {
         }, 300)
 
         try {
-            // Fetch bot response
             const botResponseText = await fetchBotResponse(inputText)
-
-            // Remove typing indicator and add actual response
             setTimeout(() => {
                 setIsTyping(false)
                 setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
@@ -157,7 +156,6 @@ const ChatbotScreen = () => {
                 setMessages((prevMessages) => [...prevMessages, botResponse])
             }, 1500)
         } catch (error) {
-            // Handle any errors in fetching response
             setIsTyping(false)
             setMessages((prevMessages) => prevMessages.filter((msg) => !msg.isTyping))
         }

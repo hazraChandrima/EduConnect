@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 
-// ✅ Fix: Rename `authMiddleware` to `verifyToken`
 const verifyToken = (req, res, next) => {
   const token = req.header("Authorization");
   if (!token) return res.status(401).json({ message: "Access Denied" });
@@ -14,7 +13,6 @@ const verifyToken = (req, res, next) => {
   }
 };
 
-// ✅ Fix: Use `req.user` after `verifyToken` is called
 const authorizeRoles = (roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
@@ -24,5 +22,4 @@ const authorizeRoles = (roles) => {
   };
 };
 
-// ✅ Export correctly
 module.exports = { verifyToken, authorizeRoles };

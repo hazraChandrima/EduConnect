@@ -20,6 +20,7 @@ import AcademicAnalytics from "./components/AcademicAnalytics";
 import { useWindowDimensions } from "react-native";
 import { AuthContext } from "./context/AuthContext"; // Adjust the import path as needed
 import * as DocumentPicker from 'expo-document-picker';
+import { IP_ADDRESS, PORT } from "@env";
 
 // Define TypeScript interfaces for data structures
 interface UserData {
@@ -326,21 +327,17 @@ export default function StudentDashboard(): React.ReactElement {
   const isSmallDevice = useIsSmallDevice();
   const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
   
-  // State for active tab in navigation
   const [activeTab, setActiveTab] = useState<"home" | "courses" | "assignments" | "attendance">("home");
   
-  // State for course details modal
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isCourseModalVisible, setIsCourseModalVisible] = useState(false);
   const [activeCourseTab, setActiveCourseTab] = useState<"curriculum" | "attendance" | "marks" | "remarks">("curriculum");
   
-  // State for assignment submission modal
   const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
   const [isSubmissionModalVisible, setIsSubmissionModalVisible] = useState(false);
   const [submissionText, setSubmissionText] = useState("");
   const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>([]);
   
-  // State for courses and assignments
   const [courses, setCourses] = useState<Course[]>(sampleCourses);
   const [assignments, setAssignments] = useState<Assignment[]>(sampleAssignments);
   const [curriculum, setCurriculum] = useState<Curriculum[]>(sampleCurriculum);
@@ -348,11 +345,9 @@ export default function StudentDashboard(): React.ReactElement {
   const [marks, setMarks] = useState<Mark[]>(sampleMarks);
   const [remarks, setRemarks] = useState<ProfessorRemark[]>(sampleRemarks);
 
-  // Default name for fallback
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
-  // This useEffect handles both authentication check and redirection
   useEffect(() => {
     const checkAuthAndFetchData = async (): Promise<void> => {
       try {
@@ -373,7 +368,7 @@ export default function StudentDashboard(): React.ReactElement {
         }
 
         // Fetch user data
-        const response = await fetch(`http://192.168.224.247:3000/api/user/${auth.user.userId}`);
+        const response = await fetch(`http://${IP_ADDRESS}:${PORT}/api/user/${auth.user.userId}`);
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);

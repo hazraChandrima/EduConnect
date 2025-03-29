@@ -117,12 +117,10 @@ exports.updatePassword = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    // Check if user is verified
     if (!user.isVerified) {
       return res.status(403).json({ success: false, message: "Email not verified. Please verify your email first." });
     }
 
-    // Update password
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     await user.save();
@@ -150,20 +148,17 @@ exports.requestLoginOTP = async (req, res) => {
       return res.status(404).json({ success: false, message: "User not found" })
     }
 
-    // Check if user is verified
     if (!user.isVerified) {
       return res.status(403).json({ success: false, message: "Email not verified. Please verify your email first." })
     }
 
-    // Generate a new verification code
     const loginOTP = Math.floor(100000 + Math.random() * 900000).toString()
 
-    // Save the OTP to the user document with an expiry time (15 minutes)
+    // Save the OTP to the user document with an expiry time (10 minutes)
     user.loginOTP = loginOTP
-    user.loginOTPExpires = new Date(Date.now() + 15 * 60 * 1000) // 15 minutes
+    user.loginOTPExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
     await user.save()
 
-    // Send the OTP via email
     sendVerificationCode(user.email, loginOTP)
 
     res.status(200).json({

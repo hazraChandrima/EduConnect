@@ -19,7 +19,7 @@ import {
 import { Ionicons } from "@expo/vector-icons"
 import styles from "./styles/Login.styles"
 
-// Define the login steps
+
 enum LoginStep {
   EMAIL = 0,
   VERIFY_OTP = 1,
@@ -36,16 +36,12 @@ export default function LoginScreen() {
   }
 
   const { user, isLoading: contextLoading, requestLoginOTP, verifyLoginOTP, login, resetAuthFlow } = authContext
-
-  // State for login data
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [otpCode, setOtpCode] = useState("")
   const [passwordVisible, setPasswordVisible] = useState(false)
   const [isRedirecting, setIsRedirecting] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-
-  // State for login flow
   const [currentStep, setCurrentStep] = useState<LoginStep>(LoginStep.EMAIL)
   const [resendDisabled, setResendDisabled] = useState(false)
   const [countdown, setCountdown] = useState(0)
@@ -53,7 +49,6 @@ export default function LoginScreen() {
   // Animation value for progress bar
   const [progressAnim] = useState(new Animated.Value(0))
 
-  // Update progress bar when step changes
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: (currentStep / 2) * 100,
@@ -89,23 +84,16 @@ export default function LoginScreen() {
     }
   }, [])
 
-  // Check if email is filled
   const isEmailFilled = !!email.trim()
-
-  // Check if OTP is filled
   const isOtpFilled = !!otpCode.trim() && otpCode.length === 6
-
-  // Check if password is filled
   const isPasswordFilled = !!password.trim()
 
-  // Toggle password visibility
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible)
   }
 
-  // Handle email submission and request OTP
   const handleEmailSubmit = async () => {
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       Alert.alert("Invalid Email", "Please enter a valid email address")
@@ -144,7 +132,6 @@ export default function LoginScreen() {
       const success = await verifyLoginOTP(email.trim(), otpCode.trim())
 
       if (success) {
-        // Move to password step
         setCurrentStep(LoginStep.PASSWORD)
       } else {
         Alert.alert("Error", "Invalid verification code. Please try again.")
@@ -158,14 +145,12 @@ export default function LoginScreen() {
     }
   }
 
-  // Handle resend OTP
   const handleResendOtp = async () => {
     setIsLoading(true)
     try {
       const success = await requestLoginOTP(email.trim())
 
       if (success) {
-        // Start countdown for resend
         setResendDisabled(true)
         setCountdown(60)
 
@@ -182,13 +167,12 @@ export default function LoginScreen() {
     }
   }
 
-  // Handle final login with password
+
   const handleCompleteLogin = async () => {
     setIsLoading(true)
     console.log("Attempting to log in...")
 
     try {
-      // The login function will use the currentEmail from context
       await login(email, password, true)
       console.log("Login successful, waiting for user state update...")
     } catch (error) {

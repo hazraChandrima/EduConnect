@@ -19,8 +19,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { AuthContext } from "./context/AuthContext"
 import styles from "./styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
+import { IP_ADDRESS, PORT } from "@env"
 
-// Define proper interfaces
+
 interface Assignment {
 	id: string
 	title: string
@@ -56,19 +57,16 @@ interface Student {
 	courses: Course[]
 }
 
-// Define a type for the AuthContext
 interface AuthContextType {
 	logout?: () => Promise<void>
 }
 
-// Define a type for attendance status
 interface AttendanceStatus {
 	[key: string]: "present" | "absent"
 }
 
 const screenWidth = Dimensions.get("window").width
 
-// Dummy student data
 const dummyStudent: Student = {
 	id: "S12345",
 	name: "Chandrima Hazra",
@@ -147,7 +145,6 @@ const professorCourses: Course[] = [
 	},
 ]
 
-// Dummy assignments data
 const pendingAssignments: Assignment[] = [
 	{
 		id: "A1",
@@ -171,7 +168,6 @@ const pendingAssignments: Assignment[] = [
 	},
 ]
 
-// Chart data
 const attendanceData = {
 	labels: ["CS101", "PROG201", "DB301", "AI301"],
 	datasets: [
@@ -242,22 +238,19 @@ export default function ProfessorDashboard() {
 			try {
 				setIsLoading(true);
 
-				// Check if user is logged in
 				if (!authContext?.user) {
 					console.log("No authenticated user, redirecting to login");
 					router.replace("/login");
 					return;
 				}
 
-				// Check if user role is admin
 				if (authContext.user.role !== "professor") {
 					console.log(`User role is ${authContext.user.role}, not authorized for professor dashboard`);
-					router.replace(`/${authContext.user.role}Dashboard`) // Redirect to an unauthorized page
+					router.replace(`/${authContext.user.role}Dashboard`)
 					return;
 				}
 
-				// Fetch user data
-				const response = await fetch(`http://192.168.224.247:3000/api/user/${authContext.user.userId}`);
+				const response = await fetch(`http://${IP_ADDRESS}:${PORT}/api/user/${authContext.user.userId}`);
 
 				if (!response.ok) {
 					throw new Error(`API request failed with status ${response.status}`);
@@ -287,7 +280,6 @@ export default function ProfessorDashboard() {
 		);
 	}
 
-	// Redirect if user is not authorized
 	if (!authContext?.user || authContext.user.role !== "professor" || !userData) {
 		router.replace("/login");
 		return <></>;
@@ -304,60 +296,40 @@ export default function ProfessorDashboard() {
 	}
 
 	const handleCreateAssignment = () => {
-		// Validate inputs
 		if (!newAssignment.title || !newAssignment.description || !newAssignment.dueDate || !newAssignment.course) {
 			return
 		}
-
-		// In a real app, you would send this to your backend
 		setIsLoading(true)
-
-		// Simulate API call
-		setTimeout(() => {
-			setIsLoading(false)
-			setIsAssignmentModalVisible(false)
-
-			// Reset form
-			setNewAssignment({
-				title: "",
-				description: "",
-				dueDate: "",
-				course: "",
-			})
-		}, 1500)
+		setIsLoading(false)
+		setIsAssignmentModalVisible(false)
+		setNewAssignment({
+			title: "",
+			description: "",
+			dueDate: "",
+			course: "",
+		})
 	}
 
 	const handleGradeSubmission = () => {
 		if (!gradeInput) {
 			return
 		}
-
 		setIsLoading(true)
-
-		// Simulate API call
-		setTimeout(() => {
-			setIsLoading(false)
-			setIsGradingModalVisible(false)
-
-			// Reset form
-			setGradeInput("")
-			setFeedbackInput("")
-		}, 1500)
+		setIsLoading(false)
+		setIsGradingModalVisible(false)
+		setGradeInput("")
+		setFeedbackInput("")
 	}
 
 	const handleSaveAttendance = () => {
 		setIsLoading(true)
-
-		// Simulate API call
-		setTimeout(() => {
-			setIsLoading(false)
-			setIsAttendanceModalVisible(false)
-
-			// Reset form
-			setAttendanceStatus({})
-		}, 1500)
+		setIsLoading(false)
+		setIsAttendanceModalVisible(false)
+		setAttendanceStatus({})
 	}
 
+
+	
 	const renderHomeTab = () => (
 		<>
 			{/* Welcome Banner */}

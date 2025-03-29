@@ -16,8 +16,10 @@ import {
 } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
+import { IP_ADDRESS, PORT } from "@env";
 
-// Define the registration steps
+
+
 enum RegistrationStep {
   INITIAL_INFO = 0,
   VERIFY_EMAIL = 1,
@@ -25,7 +27,6 @@ enum RegistrationStep {
   COMPLETE = 3,
 }
 
-// Define the interface for registration data
 interface RegistrationData {
   name: string;
   email: string;
@@ -45,7 +46,6 @@ export default function RegisterScreen() {
 
   const { login, user } = authContext;
 
-  // State for registration data
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     name: "",
     email: "",
@@ -54,21 +54,17 @@ export default function RegisterScreen() {
     verificationCode: "",
   });
 
-  // State for UI control
   const [currentStep, setCurrentStep] = useState<RegistrationStep>(RegistrationStep.INITIAL_INFO);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
-
-  // Animation value for progress bar
   const [progressAnim] = useState(new Animated.Value(0));
 
-  // Role options
   const roleOptions = ["student", "professor", "admin"];
 
-  // Update progress bar when step changes
+
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: (currentStep / 3) * 100,
@@ -77,7 +73,8 @@ export default function RegisterScreen() {
     }).start();
   }, [currentStep]);
 
-  // Handle countdown for resend code
+
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -88,7 +85,8 @@ export default function RegisterScreen() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Redirect if user is authenticated
+
+
   useEffect(() => {
     if (user && !isRedirecting && currentStep === RegistrationStep.COMPLETE) {
       setIsRedirecting(true);
@@ -97,24 +95,24 @@ export default function RegisterScreen() {
     }
   }, [user, currentStep]);
 
-  // Check if initial form is filled
+
   const isInitialFormFilled = !!(
     registrationData.name.trim() &&
     registrationData.email.trim() &&
     registrationData.role.trim()
   );
 
-  // Check if verification code is filled
+
   const isVerificationCodeFilled = !!(
     registrationData.verificationCode.trim().length === 6
   );
 
-  // Check if password is filled
+
   const isPasswordFilled = !!(
     registrationData.password.trim().length >= 6
   );
 
-  // Handle input changes
+
   const handleInputChange = (field: keyof RegistrationData, value: string) => {
     setRegistrationData(prev => ({
       ...prev,
@@ -122,24 +120,23 @@ export default function RegisterScreen() {
     }));
   };
 
-  // Toggle password visibility
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  // Handle initial form submission (name, email, role)
+
   const handleInitialSubmit = async () => {
     setIsLoading(true);
     try {
-      // Validate email format
+      
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(registrationData.email)) {
         throw new Error("Please enter a valid email address");
       }
 
-      // Send request to initiate registration and send verification code
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/register",
+        `http://${IP_ADDRESS}:${PORT}/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -163,7 +160,6 @@ export default function RegisterScreen() {
 
       setCurrentStep(RegistrationStep.VERIFY_EMAIL);
 
-      // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
 
@@ -181,12 +177,14 @@ export default function RegisterScreen() {
     }
   };
 
-  // Handle verification code submission
+
+
+
   const handleVerifyCode = async () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/verifyEmail",
+        `http://${IP_ADDRESS}:${PORT}/api/auth/verifyEmail`,
         {
           method: "POST",
           headers: {
@@ -204,9 +202,8 @@ export default function RegisterScreen() {
       if (!response.ok) {
         throw new Error(data.message || "Invalid verification code");
       }
-
-      // Move to password creation step
       setCurrentStep(RegistrationStep.CREATE_PASSWORD);
+
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
@@ -217,13 +214,14 @@ export default function RegisterScreen() {
     }
   };
 
-  // Handle resend verification code
+
+
+
   const handleResendCode = async () => {
     setIsLoading(true);
     try {
-      // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/register",
+        `http://${IP_ADDRESS}:${PORT}/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -235,7 +233,6 @@ export default function RegisterScreen() {
             email: registrationData.email.trim(),
             role: registrationData.role.trim(),
             password: "temporary_" + Math.random().toString(36).substring(2),
-            // Send a temporary password that will be updated later
           }),
         }
       );
@@ -246,7 +243,6 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to resend verification code");
       }
 
-      // Start countdown for resend
       setResendDisabled(true);
       setCountdown(60);
 
@@ -264,13 +260,14 @@ export default function RegisterScreen() {
     }
   };
 
-  // Handle password submission and complete registration
+
+
+
   const handleCompleteRegistration = async () => {
     setIsLoading(true);
     try {
-      // Update the user's password
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/updatePassword",
+        `http://${IP_ADDRESS}:${PORT}/api/auth/updatePassword`,
         {
           method: "POST",
           headers: {
@@ -290,10 +287,7 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to update password");
       }
 
-      // Move to complete step
       setCurrentStep(RegistrationStep.COMPLETE);
-
-      // Log in the user
       await login(registrationData.email, registrationData.password, true);
 
       Alert.alert(
@@ -310,7 +304,8 @@ export default function RegisterScreen() {
     }
   };
 
-  // Render progress bar
+
+
   const renderProgressBar = () => {
     const progressWidth = progressAnim.interpolate({
       inputRange: [0, 100],
@@ -352,7 +347,7 @@ export default function RegisterScreen() {
   //   );
   // };
 
-  // Render initial form (name, email, role)
+
   const renderInitialForm = () => {
     return (
       <>
