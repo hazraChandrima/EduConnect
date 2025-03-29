@@ -25,6 +25,7 @@ export default function ResetPasswordScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -86,7 +87,7 @@ export default function ResetPasswordScreen() {
     try {
       console.log(token, newPassword);
       const response = await fetch(
-        "http://localhost:3000/api/auth/reset-password",
+        "http://192.168.142.247:3000/api/auth/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -223,9 +224,11 @@ export default function ResetPasswordScreen() {
 
             {/* Reset Password Button */}
             <TouchableOpacity
-              style={forgotResetPassStyle.primaryButton}
+              style={[
+                forgotResetPassStyle.primaryButton,
+                (!newPassword || isLoading || !!passwordError) && forgotResetPassStyle.disabledButton]}
               onPress={handleResetPassword}
-              disabled={isLoading}
+              disabled={!newPassword || isLoading || !!passwordError}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />

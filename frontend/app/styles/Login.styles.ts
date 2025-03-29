@@ -162,6 +162,15 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         fontSize: 14,
     },
+    inputError: {
+        borderColor: '#ff3b30',
+    },
+    errorText: {
+        color: '#ff3b30',
+        fontSize: 14,
+        marginTop: 4,
+        marginLeft: 4,
+    }
 });
 
 

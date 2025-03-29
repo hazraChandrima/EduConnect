@@ -13,8 +13,10 @@ export const forgotResetPassStyle = StyleSheet.create({
         justifyContent: "center",
     },
     formContainer: {
-        paddingHorizontal: 24,
+        paddingHorizontal:24,
         paddingVertical: 32,
+        maxWidth: 400,
+        alignSelf: "center",
     },
     headerText: {
         fontSize: 28,
@@ -112,6 +114,10 @@ export const forgotResetPassStyle = StyleSheet.create({
         color: 'gray',
         fontSize: 14,
         marginBottom: 40,
-    }
+    },
+    disabledButton: {
+        backgroundColor: "#7fadf8",
+        shadowColor: "#a1a1aa",
+    },
 });
 

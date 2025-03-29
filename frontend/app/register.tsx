@@ -1,6 +1,3 @@
-// This is a Node.js script to show the enhanced registration screen code
-// You should copy this into your React Native project
-
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useRouter } from "expo-router";
@@ -20,7 +17,6 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
 
-// Define the registration steps
 enum RegistrationStep {
   INITIAL_INFO = 0,
   VERIFY_EMAIL = 1,
@@ -28,7 +24,6 @@ enum RegistrationStep {
   COMPLETE = 3,
 }
 
-// Define the interface for registration data
 interface RegistrationData {
   name: string;
   email: string;
@@ -48,7 +43,6 @@ export default function RegisterScreen() {
 
   const { login, user } = authContext;
 
-  // State for registration data
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     name: "",
     email: "",
@@ -57,21 +51,35 @@ export default function RegisterScreen() {
     verificationCode: "",
   });
 
-  // State for UI control
   const [currentStep, setCurrentStep] = useState<RegistrationStep>(RegistrationStep.INITIAL_INFO);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
-
-  // Animation value for progress bar
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
   const [progressAnim] = useState(new Animated.Value(0));
 
-  // Role options
   const roleOptions = ["student", "professor", "admin"];
 
-  // Update progress bar when step changes
+  const validatePassword = (value: string): void => {
+    const length: boolean = value.length >= 8;
+    const hasDigit: boolean = /\d/.test(value);
+    const hasLowerCase: boolean = /[a-z]/.test(value);
+
+    if (!length) {
+      setPasswordError("Password must be at least 8 characters!");
+    } else if (!hasDigit) {
+      setPasswordError("Password must include at least one digit!");
+    } else if (!hasLowerCase) {
+      setPasswordError("Password must include at least one lowercase letter!");
+    } else {
+      setPasswordError("");
+    }
+  };
+
+
   useEffect(() => {
     Animated.timing(progressAnim, {
       toValue: (currentStep / 3) * 100,
@@ -80,7 +88,25 @@ export default function RegisterScreen() {
     }).start();
   }, [currentStep]);
 
-  // Handle countdown for resend code
+
+
+  useEffect(() => {
+    if (registrationData.email.trim() === "") {
+      setEmailError("")
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(registrationData.email)) {
+      setEmailError("Please enter a valid email address")
+    } else {
+      setEmailError("")
+    }
+  }, [registrationData.email])
+
+
+
+
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -91,7 +117,7 @@ export default function RegisterScreen() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Redirect if user is authenticated
+
   useEffect(() => {
     if (user && !isRedirecting && currentStep === RegistrationStep.COMPLETE) {
       setIsRedirecting(true);
@@ -100,21 +126,15 @@ export default function RegisterScreen() {
     }
   }, [user, currentStep]);
 
-  // Check if initial form is filled
+
   const isInitialFormFilled = !!(
     registrationData.name.trim() &&
     registrationData.email.trim() &&
     registrationData.role.trim()
   );
 
-  // Check if verification code is filled
   const isVerificationCodeFilled = !!(
     registrationData.verificationCode.trim().length === 6
-  );
-
-  // Check if password is filled
-  const isPasswordFilled = !!(
-    registrationData.password.trim().length >= 6
   );
 
   // Handle input changes
@@ -125,24 +145,22 @@ export default function RegisterScreen() {
     }));
   };
 
-  // Toggle password visibility
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
-  // Handle initial form submission (name, email, role)
   const handleInitialSubmit = async () => {
     setIsLoading(true);
     try {
-      // Validate email format
+
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(registrationData.email)) {
         throw new Error("Please enter a valid email address");
       }
 
-      // Send request to initiate registration and send verification code
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/register",
+        "http://192.168.142.247:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -189,7 +207,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/verifyEmail",
+        "http://192.168.142.247:3000/api/auth/verifyEmail",
         {
           method: "POST",
           headers: {
@@ -226,7 +244,7 @@ export default function RegisterScreen() {
     try {
       // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/register",
+        "http://192.168.142.247:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -273,7 +291,7 @@ export default function RegisterScreen() {
     try {
       // Update the user's password
       const response = await fetch(
-        "http://192.168.224.247:3000/api/auth/updatePassword",
+        "http://192.168.142.247:3000/api/auth/updatePassword",
         {
           method: "POST",
           headers: {
@@ -387,13 +405,8 @@ export default function RegisterScreen() {
         {/* Email Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Email</Text>
-          <View style={styles.inputWrapper}>
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color="#666"
-              style={styles.inputIcon}
-            />
+          <View style={[styles.inputWrapper, emailError ? styles.inputError : null]}>
+            <Ionicons name="mail-outline" size={20} color={emailError ? "#ff3b30" : "#666"} style={styles.inputIcon} />
             <TextInput
               style={styles.input}
               value={registrationData.email}
@@ -404,6 +417,7 @@ export default function RegisterScreen() {
               autoCapitalize="none"
             />
           </View>
+          {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         </View>
 
         {/* Role Selection */}
@@ -436,10 +450,10 @@ export default function RegisterScreen() {
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (!isInitialFormFilled || isLoading) && styles.disabledButton,
+            (!isInitialFormFilled || isLoading || !!emailError) && styles.disabledButton,
           ]}
           onPress={handleInitialSubmit}
-          disabled={!isInitialFormFilled || isLoading}
+          disabled={!isInitialFormFilled || isLoading || !!emailError}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -545,7 +559,10 @@ export default function RegisterScreen() {
             <TextInput
               style={styles.input}
               value={registrationData.password}
-              onChangeText={(value) => handleInputChange("password", value)}
+              onChangeText={(value) => {
+                handleInputChange("password", value);
+                validatePassword(value);
+              }}
               secureTextEntry={!passwordVisible}
               placeholder="Create a password"
               placeholderTextColor="#999"
@@ -563,18 +580,28 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
           <Text style={styles.passwordHint}>
-            Password must be at least 6 characters
+            Password should be at least 8 characters including a number and
+            a lowercase letter.
           </Text>
         </View>
+
+        <View style={styles.container}>
+          {passwordError && (
+            <Text style={styles.errorText}>
+              {passwordError}
+            </Text>
+          )}
+        </View>
+
 
         {/* Complete Registration Button */}
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (!isPasswordFilled || isLoading) && styles.disabledButton,
+            (isLoading || !!passwordError) && styles.disabledButton,
           ]}
           onPress={handleCompleteRegistration}
-          disabled={!isPasswordFilled || isLoading}
+          disabled={isLoading || !!passwordError}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -624,7 +651,6 @@ export default function RegisterScreen() {
             {currentStep < RegistrationStep.COMPLETE && (
               <>
                 {renderProgressBar()}
-                {/* {renderStepIndicator()} */}
               </>
             )}
 

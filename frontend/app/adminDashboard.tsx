@@ -1,6 +1,3 @@
-// This is a Node.js script to show the fixed code
-// You should copy this into your React Native project
-
 "use client"
 
 import { useState, useEffect, useContext } from "react"
@@ -84,16 +81,16 @@ const screenWidth = Dimensions.get("window").width
 const professors: Professor[] = [
   {
     id: "P1001",
-    name: "Dr. John Smith",
-    email: "john.smith@university.edu",
+    name: "Dr. Sunil Kumar",
+    email: "sunilkr.cse@university.edu",
     department: "Computer Science",
     courses: ["CS101", "PROG201"],
     joinDate: "2018-08-15",
   },
   {
     id: "P1002",
-    name: "Dr. Sarah Johnson",
-    email: "sarah.johnson@university.edu",
+    name: "Dr. Ritu Jaiswal",
+    email: "ritujaiswal.math@university.edu",
     department: "Mathematics",
     courses: ["MATH101", "MATH202"],
     joinDate: "2019-01-10",

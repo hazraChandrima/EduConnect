@@ -208,6 +208,15 @@ const styles = StyleSheet.create({
     redirectLoader: {
         marginTop: 20,
     },
+    inputError: {
+        borderColor: '#ff3b30',
+    },
+    errorText: {
+        color: '#ff3b30',
+        fontSize: 14,
+        marginTop: 4,
+        marginLeft: 4,
+    }
 });
 
 

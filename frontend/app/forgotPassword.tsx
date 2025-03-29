@@ -18,6 +18,7 @@ import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style"
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const router = useRouter();
 
   const handleForgotPassword = async () => {
@@ -54,6 +55,8 @@ export default function ForgotPasswordScreen() {
         );
       }, 100);
     } catch (error) {
+      setEmailError("The email you've entered is either invalid or does not exist.")
+      console.log("Something went wrong")
       setTimeout(() => {
         Alert.alert("Error", "Something went wrong. Please try again later.");
       }, 100);
@@ -104,6 +107,8 @@ export default function ForgotPasswordScreen() {
                   autoCapitalize="none"
                 />
               </View>
+              {emailError ? <Text style={forgotResetPassStyle.errorText}>{emailError}</Text> : null}
+
             </View>
 
             {/* Send Reset Link Button */}

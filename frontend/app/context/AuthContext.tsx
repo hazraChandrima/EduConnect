@@ -18,13 +18,10 @@ interface AuthContextProps {
 	isLoading: boolean
 	currentEmail: string | null
 	isOtpVerified: boolean
-	// New functions for 2FA flow
 	requestLoginOTP: (email: string) => Promise<boolean>
 	verifyLoginOTP: (email: string, code: string) => Promise<boolean>
-	// Modified login function with optional otpVerified parameter
 	login: (email: string, password: string, otpVerified?: boolean) => Promise<void>
 	logout: () => Promise<void>
-	// Reset function to go back in the auth flow
 	resetAuthFlow: () => void
 }
 
@@ -33,11 +30,10 @@ export const AuthContext = createContext<AuthContextProps | null>(null)
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 	const [user, setUser] = useState<User | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
-	// New state for tracking the 2FA flow
 	const [currentEmail, setCurrentEmail] = useState<string | null>(null)
 	const [isOtpVerified, setIsOtpVerified] = useState(false)
 
-	const API_URL = "http://192.168.224.247:3000/api/auth"
+	const API_URL = "http://192.168.142.247:3000/api/auth"
 
 	useEffect(() => {
 		console.log("Checking for stored user...")
@@ -69,7 +65,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 			const response = await axios.post(`${API_URL}/requestLoginOTP`, { email })
 
 			if (response.data.success) {
-				// Store the email for the next steps
 				setCurrentEmail(email)
 				console.log("OTP requested successfully")
 				return true
@@ -97,7 +92,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 			})
 
 			if (response.data.success) {
-				// Mark OTP as verified for the final login step
 				setIsOtpVerified(true)
 				console.log("OTP verified successfully")
 				return true
@@ -119,10 +113,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		console.log("Sending login request to backend...")
 		setIsLoading(true)
 		try {
-			// Use either the passed otpVerified parameter or the state
 			const isVerified = otpVerified || isOtpVerified
 
-			// If OTP verification is required but not completed, throw an error
 			if (!isVerified) {
 				throw new Error("Email verification required")
 			}
@@ -144,7 +136,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 			setUser(userData)
 
-			// Store the user data in AsyncStorage
 			await AsyncStorage.setItem("token", response.data.token)
 			await AsyncStorage.setItem("user", JSON.stringify(userData))
 			await AsyncStorage.setItem("userId", response.data.userId)
@@ -153,10 +144,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 			axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`
 
-			// Reset the 2FA flow state
 			resetAuthFlow()
 
-			// Navigate to dashboard
 			router.replace(`/${userData.role}Dashboard`)
 		} catch (error: unknown) {
 			const err = error as Error
