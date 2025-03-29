@@ -11,6 +11,7 @@ import {
   TextInput,
   FlatList,
   Image,
+  Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, FontAwesome, MaterialIcons, AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,304 +19,32 @@ import styles from "./styles/StudentDashboard.style";
 import { useRouter } from "expo-router";
 import AcademicAnalytics from "./components/AcademicAnalytics";
 import { useWindowDimensions } from "react-native";
-import { AuthContext } from "./context/AuthContext"; // Adjust the import path as needed
+import { AuthContext } from "./context/AuthContext"; 
 import * as DocumentPicker from 'expo-document-picker';
+import {
+  UserData,
+  Course,
+  Assignment,
+  Curriculum,
+  CurriculumUnit,
+  Attendance,
+  Mark,
+  ProfessorRemark,
+  SubmissionFile,
+  sampleCourses,
+  sampleAssignments,
+  sampleCurriculum,
+  sampleAttendance,
+  sampleMarks,
+  sampleRemarks
+} from "./utils/dummy_data/sample_student";
 
-interface UserData {
-  _id: string;
-  name: string;
-  email: string;
-  role: string;
-  __v: number;
-}
 
-interface Course {
-  id: string;
-  code: string;
-  title: string;
-  professor: string;
-  progress: number;
-  color: string;
-  icon: string;
-}
-
-interface Assignment {
-  id: string;
-  courseId: string;
-  courseCode: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  status: "pending" | "submitted" | "graded" | "late";
-  color: string;
-}
-
-interface Curriculum {
-  id: string;
-  courseId: string;
-  title: string;
-  description: string;
-  units: CurriculumUnit[];
-}
-
-interface CurriculumUnit {
-  id: string;
-  title: string;
-  topics: string[];
-  resources: string[];
-}
-
-interface Attendance {
-  id: string;
-  courseId: string;
-  date: string;
-  status: "present" | "absent" | "excused";
-}
-
-interface Mark {
-  id: string;
-  courseId: string;
-  title: string;
-  score: number;
-  maxScore: number;
-  type: "assignment" | "quiz" | "exam" | "project";
-  feedback?: string;
-}
-
-interface ProfessorRemark {
-  id: string;
-  courseId: string;
-  date: string;
-  remark: string;
-  type: "positive" | "negative" | "neutral";
-}
-
-interface SubmissionFile {
-  name: string;
-  uri: string;
-  type: string;
-  size: number;
-}
-
-// Move this outside the component
 const useIsSmallDevice = () => {
   const { width } = useWindowDimensions();
   return width < 500;
 };
 
-// Sample data for courses
-const sampleCourses: Course[] = [
-  {
-    id: "1",
-    code: "CS 101",
-    title: "Computer Science 101",
-    professor: "Prof. Smith",
-    progress: 75,
-    color: "#52c4eb",
-    icon: "laptop",
-  },
-  {
-    id: "2",
-    code: "MATH 202",
-    title: "Mathematics 202",
-    professor: "Prof. Johnson",
-    progress: 60,
-    color: "#ff5694",
-    icon: "calculator",
-  },
-  {
-    id: "3",
-    code: "PHYS 101",
-    title: "Physics 101",
-    professor: "Prof. Williams",
-    progress: 45,
-    color: "#5c51f3",
-    icon: "settings",
-  },
-  {
-    id: "4",
-    code: "ENG 105",
-    title: "English Composition",
-    professor: "Prof. Davis",
-    progress: 80,
-    color: "#ffa726",
-    icon: "book",
-  },
-];
-
-// Sample data for assignments
-const sampleAssignments: Assignment[] = [
-  {
-    id: "1",
-    courseId: "1",
-    courseCode: "CS 101",
-    title: "Algorithm Analysis Report",
-    description: "Submit a report analyzing the time and space complexity of the algorithms discussed in class.",
-    dueDate: "Tomorrow",
-    status: "pending",
-    color: "#52c4eb",
-  },
-  {
-    id: "2",
-    courseId: "2",
-    courseCode: "MATH 202",
-    title: "Calculus Problem Set",
-    description: "Complete problems 1-15 from Chapter 4 of the textbook.",
-    dueDate: "3 days",
-    status: "pending",
-    color: "#ff5694",
-  },
-  {
-    id: "3",
-    courseId: "3",
-    courseCode: "PHYS 101",
-    title: "Lab Report: Forces and Motion",
-    description: "Write a detailed report on the lab experiment conducted on forces and motion.",
-    dueDate: "5 days",
-    status: "pending",
-    color: "#5c51f3",
-  },
-  {
-    id: "4",
-    courseId: "4",
-    courseCode: "ENG 105",
-    title: "Literary Analysis Essay",
-    description: "Write a 1000-word essay analyzing the themes in the assigned novel.",
-    dueDate: "1 week",
-    status: "pending",
-    color: "#ffa726",
-  },
-];
-
-// Sample data for curriculum
-const sampleCurriculum: Curriculum[] = [
-  {
-    id: "1",
-    courseId: "1",
-    title: "Introduction to Computer Science",
-    description: "Fundamentals of computer science and programming",
-    units: [
-      {
-        id: "1-1",
-        title: "Algorithms and Data Structures",
-        topics: ["Introduction to Algorithms", "Time Complexity", "Space Complexity", "Basic Data Structures"],
-        resources: ["Textbook Ch. 1-3", "Online Lecture Notes", "Practice Problems"],
-      },
-      {
-        id: "1-2",
-        title: "Programming Fundamentals",
-        topics: ["Variables and Data Types", "Control Structures", "Functions and Methods", "Object-Oriented Programming"],
-        resources: ["Textbook Ch. 4-6", "Coding Exercises", "Programming Lab"],
-      },
-    ],
-  },
-  {
-    id: "2",
-    courseId: "2",
-    title: "Advanced Mathematics",
-    description: "Calculus and linear algebra concepts",
-    units: [
-      {
-        id: "2-1",
-        title: "Differential Calculus",
-        topics: ["Limits and Continuity", "Derivatives", "Applications of Derivatives"],
-        resources: ["Textbook Ch. 1-2", "Problem Set 1", "Online Calculator Tools"],
-      },
-      {
-        id: "2-2",
-        title: "Integral Calculus",
-        topics: ["Indefinite Integrals", "Definite Integrals", "Applications of Integration"],
-        resources: ["Textbook Ch. 3-4", "Problem Set 2", "Video Tutorials"],
-      },
-    ],
-  },
-  {
-    id: "3",
-    courseId: "3",
-    title: "Fundamentals of Physics",
-    description: "Basic principles of physics and mechanics",
-    units: [
-      {
-        id: "3-1",
-        title: "Mechanics",
-        topics: ["Newton's Laws", "Work and Energy", "Momentum", "Rotational Motion"],
-        resources: ["Textbook Ch. 1-4", "Lab Manual", "Physics Simulations"],
-      },
-      {
-        id: "3-2",
-        title: "Waves and Oscillations",
-        topics: ["Simple Harmonic Motion", "Wave Properties", "Sound Waves", "Standing Waves"],
-        resources: ["Textbook Ch. 5-7", "Lab Experiments", "Wave Demonstrations"],
-      },
-    ],
-  },
-  {
-    id: "4",
-    courseId: "4",
-    title: "English Composition",
-    description: "Principles of effective writing and communication",
-    units: [
-      {
-        id: "4-1",
-        title: "Essay Writing",
-        topics: ["Thesis Development", "Paragraph Structure", "Argumentative Writing", "Research Methods"],
-        resources: ["Writing Handbook Ch. 1-3", "Sample Essays", "Writing Workshops"],
-      },
-      {
-        id: "4-2",
-        title: "Literary Analysis",
-        topics: ["Critical Reading", "Analyzing Themes", "Character Analysis", "Symbolism and Imagery"],
-        resources: ["Literary Analysis Guide", "Assigned Novels", "Critical Essays"],
-      },
-    ],
-  },
-];
-
-// Sample data for attendance
-const sampleAttendance: Attendance[] = [
-  { id: "1", courseId: "1", date: "2023-09-05", status: "present" },
-  { id: "2", courseId: "1", date: "2023-09-07", status: "present" },
-  { id: "3", courseId: "1", date: "2023-09-12", status: "absent" },
-  { id: "4", courseId: "1", date: "2023-09-14", status: "present" },
-  { id: "5", courseId: "2", date: "2023-09-06", status: "present" },
-  { id: "6", courseId: "2", date: "2023-09-08", status: "excused" },
-  { id: "7", courseId: "2", date: "2023-09-13", status: "present" },
-  { id: "8", courseId: "2", date: "2023-09-15", status: "present" },
-  { id: "9", courseId: "3", date: "2023-09-05", status: "present" },
-  { id: "10", courseId: "3", date: "2023-09-07", status: "present" },
-  { id: "11", courseId: "3", date: "2023-09-12", status: "present" },
-  { id: "12", courseId: "3", date: "2023-09-14", status: "absent" },
-  { id: "13", courseId: "4", date: "2023-09-06", status: "present" },
-  { id: "14", courseId: "4", date: "2023-09-08", status: "present" },
-  { id: "15", courseId: "4", date: "2023-09-13", status: "present" },
-  { id: "16", courseId: "4", date: "2023-09-15", status: "present" },
-];
-
-// Sample data for marks
-const sampleMarks: Mark[] = [
-  { id: "1", courseId: "1", title: "Quiz 1", score: 18, maxScore: 20, type: "quiz" },
-  { id: "2", courseId: "1", title: "Midterm Exam", score: 85, maxScore: 100, type: "exam" },
-  { id: "3", courseId: "1", title: "Programming Assignment 1", score: 92, maxScore: 100, type: "assignment", feedback: "Excellent work on algorithm optimization!" },
-  { id: "4", courseId: "2", title: "Problem Set 1", score: 45, maxScore: 50, type: "assignment" },
-  { id: "5", courseId: "2", title: "Quiz 1", score: 17, maxScore: 20, type: "quiz" },
-  { id: "6", courseId: "2", title: "Midterm Exam", score: 78, maxScore: 100, type: "exam", feedback: "Good understanding of concepts, but work on application problems." },
-  { id: "7", courseId: "3", title: "Lab Report 1", score: 28, maxScore: 30, type: "assignment" },
-  { id: "8", courseId: "3", title: "Quiz 1", score: 15, maxScore: 20, type: "quiz" },
-  { id: "9", courseId: "3", title: "Midterm Exam", score: 82, maxScore: 100, type: "exam" },
-  { id: "10", courseId: "4", title: "Essay 1", score: 88, maxScore: 100, type: "assignment", feedback: "Strong thesis and well-structured arguments." },
-  { id: "11", courseId: "4", title: "Reading Quiz", score: 9, maxScore: 10, type: "quiz" },
-  { id: "12", courseId: "4", title: "Midterm Paper", score: 92, maxScore: 100, type: "exam" },
-];
-
-// Sample data for professor remarks
-const sampleRemarks: ProfessorRemark[] = [
-  { id: "1", courseId: "1", date: "2023-09-10", remark: "Excellent participation in class discussions.", type: "positive" },
-  { id: "2", courseId: "1", date: "2023-09-17", remark: "Please review the material on time complexity before the next quiz.", type: "neutral" },
-  { id: "3", courseId: "2", date: "2023-09-12", remark: "Your problem-solving approach shows creativity.", type: "positive" },
-  { id: "4", courseId: "2", date: "2023-09-18", remark: "Missing homework assignments. Please submit them as soon as possible.", type: "negative" },
-  { id: "5", courseId: "3", date: "2023-09-14", remark: "Great lab work and attention to detail.", type: "positive" },
-  { id: "6", courseId: "4", date: "2023-09-16", remark: "Your writing has improved significantly since the beginning of the semester.", type: "positive" },
-];
 
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
@@ -339,6 +68,7 @@ export default function StudentDashboard(): React.ReactElement {
   const [marks, setMarks] = useState<Mark[]>(sampleMarks);
   const [remarks, setRemarks] = useState<ProfessorRemark[]>(sampleRemarks);
 
+  // Default name for fallback
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
@@ -386,11 +116,13 @@ export default function StudentDashboard(): React.ReactElement {
     }
   };
 
+
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
     setActiveCourseTab("curriculum");
     setIsCourseModalVisible(true);
   };
+
 
   const handleAssignmentSelect = (assignment: Assignment) => {
     setSelectedAssignment(assignment);
@@ -398,6 +130,7 @@ export default function StudentDashboard(): React.ReactElement {
     setSubmissionFiles([]);
     setIsSubmissionModalVisible(true);
   };
+
 
   const pickDocument = async () => {
     try {
@@ -423,50 +156,96 @@ export default function StudentDashboard(): React.ReactElement {
     }
   };
 
+
   const removeFile = (index: number) => {
     const updatedFiles = [...submissionFiles];
     updatedFiles.splice(index, 1);
     setSubmissionFiles(updatedFiles);
   };
 
-  const submitAssignment = () => {
+
+  const submitAssignment = async () => {
     if (!selectedAssignment) return;
-    
-    console.log("Submitting assignment:", {
-      assignmentId: selectedAssignment.id,
-      text: submissionText,
-      files: submissionFiles,
+
+    const formData = new FormData();
+    formData.append("assignmentId", selectedAssignment.id);
+    formData.append("text", submissionText);
+
+
+    const filePromises = submissionFiles.map(async (file) => {
+      try {
+        const response = await fetch(file.uri);
+        const blob = await response.blob();
+        const fileObject = new File([blob], file.name, { type: file.type });
+
+        formData.append("file", fileObject); //Ensure key matches backend
+      } catch (error) {
+        console.error(" Error converting file to Blob:", error);
+      }
     });
-    
-    const updatedAssignments = assignments.map(assignment => 
-      assignment.id === selectedAssignment.id 
-        ? { ...assignment, status: "submitted" as const } 
+
+    await Promise.all(filePromises); // Ensure all files are processed before sending request
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found!");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://192.168.142.247:3000/api/assignment/submit", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`, //Send token for authentication
+        },
+      });
+
+      console.log("Raw response from backend:", response);
+
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Assignment submitted successfully:", data);
+      } else {
+        console.error("Failed to submit assignment:", data.error);
+      }
+    } catch (error) {
+      console.error("Error submitting assignment:", error);
+    }
+    // Update the assignment status
+    const updatedAssignments = assignments.map(assignment =>
+      assignment.id === selectedAssignment.id
+        ? { ...assignment, status: "submitted" as const }
         : assignment
     );
-    
+
     setAssignments(updatedAssignments);
     setIsSubmissionModalVisible(false);
-    
+
+
     alert("Assignment submitted successfully!");
+    Alert.alert("Assignment submitted successfully!");
   };
+
 
   const calculateAttendancePercentage = (courseId: string): number => {
     const courseAttendance = attendance.filter(a => a.courseId === courseId);
     if (courseAttendance.length === 0) return 0;
-    
+
     const presentCount = courseAttendance.filter(a => a.status === "present" || a.status === "excused").length;
     return Math.round((presentCount / courseAttendance.length) * 100);
   };
 
+
   const calculateAverageScore = (courseId: string): number => {
     const courseMarks = marks.filter(m => m.courseId === courseId);
     if (courseMarks.length === 0) return 0;
-    
+
     const totalPercentage = courseMarks.reduce((sum, mark) => sum + (mark.score / mark.maxScore), 0);
     return Math.round((totalPercentage / courseMarks.length) * 100);
   };
 
-  // Show loading indicator while checking auth
+
   if (auth?.isLoading || isLoading) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
@@ -476,6 +255,8 @@ export default function StudentDashboard(): React.ReactElement {
     );
   }
 
+
+  
   if (!auth?.user || auth.user.role !== "student" || !userData) {
     return (
       <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
@@ -485,7 +266,7 @@ export default function StudentDashboard(): React.ReactElement {
     );
   }
 
-  // Render course details modal
+
   const renderCourseModal = () => (
     <Modal
       visible={isCourseModalVisible}
@@ -553,11 +334,11 @@ export default function StudentDashboard(): React.ReactElement {
                       <View key={c.id} style={styles.curriculumSection}>
                         <Text style={styles.curriculumTitle}>{c.title}</Text>
                         <Text style={styles.curriculumDescription}>{c.description}</Text>
-                        
+
                         {c.units.map(unit => (
                           <View key={unit.id} style={styles.curriculumUnit}>
                             <Text style={styles.unitTitle}>{unit.title}</Text>
-                            
+
                             <Text style={styles.topicsHeader}>Topics:</Text>
                             {unit.topics.map((topic, index) => (
                               <View key={index} style={styles.topicItem}>
@@ -565,7 +346,7 @@ export default function StudentDashboard(): React.ReactElement {
                                 <Text style={styles.topicText}>{topic}</Text>
                               </View>
                             ))}
-                            
+
                             <Text style={styles.resourcesHeader}>Resources:</Text>
                             {unit.resources.map((resource, index) => (
                               <View key={index} style={styles.resourceItem}>
@@ -617,11 +398,11 @@ export default function StudentDashboard(): React.ReactElement {
                             {new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </Text>
                         </View>
-                        <View 
+                        <View
                           style={[
-                            styles.attendanceStatus, 
-                            a.status === "present" ? styles.statusPresent : 
-                            a.status === "excused" ? styles.statusExcused : styles.statusAbsent
+                            styles.attendanceStatus,
+                            a.status === "present" ? styles.statusPresent :
+                              a.status === "excused" ? styles.statusExcused : styles.statusAbsent
                           ]}
                         >
                           <Text style={styles.attendanceStatusText}>
@@ -676,12 +457,12 @@ export default function StudentDashboard(): React.ReactElement {
                     .filter(r => r.courseId === selectedCourse.id)
                     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
                     .map(r => (
-                      <View 
-                        key={r.id} 
+                      <View
+                        key={r.id}
                         style={[
-                          styles.remarkItem, 
-                          r.type === "positive" ? styles.remarkPositive : 
-                          r.type === "negative" ? styles.remarkNegative : styles.remarkNeutral
+                          styles.remarkItem,
+                          r.type === "positive" ? styles.remarkPositive :
+                            r.type === "negative" ? styles.remarkNegative : styles.remarkNeutral
                         ]}
                       >
                         <View style={styles.remarkHeader}>
@@ -776,8 +557,8 @@ export default function StudentDashboard(): React.ReactElement {
                 )}
               </View>
 
-              <TouchableOpacity 
-                style={styles.submitButton} 
+              <TouchableOpacity
+                style={styles.submitButton}
                 onPress={submitAssignment}
                 disabled={submissionFiles.length === 0 && submissionText.trim() === ""}
               >
@@ -815,6 +596,10 @@ export default function StudentDashboard(): React.ReactElement {
             <Text style={styles.statLabel}>GPA</Text>
           </View>
           <View style={styles.statCard}>
+            <Text style={styles.statValue}>75%</Text>
+            <Text style={styles.statLabel}>Semester Completed</Text>
+          </View>
+          <View style={styles.statCard}>
             <Text style={styles.statValue}>{courses.length}</Text>
             <Text style={styles.statLabel}>Courses</Text>
           </View>
@@ -844,8 +629,8 @@ export default function StudentDashboard(): React.ReactElement {
 
         {/* Course Items */}
         {courses.map(course => (
-          <TouchableOpacity 
-            key={course.id} 
+          <TouchableOpacity
+            key={course.id}
             style={styles.courseItem}
             onPress={() => handleCourseSelect(course)}
           >
@@ -890,9 +675,9 @@ export default function StudentDashboard(): React.ReactElement {
               <View style={[
                 styles.statusBadge,
                 assignment.status === "submitted" ? styles.statusSubmitted :
-                assignment.status === "graded" ? styles.statusGraded :
-                assignment.status === "late" ? styles.statusLate :
-                styles.statusPending
+                  assignment.status === "graded" ? styles.statusGraded :
+                    assignment.status === "late" ? styles.statusLate :
+                      styles.statusPending
               ]}>
                 <Text style={styles.statusText}>
                   {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
@@ -917,12 +702,12 @@ export default function StudentDashboard(): React.ReactElement {
   const renderCoursesTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Your Courses</Text>
-      
+
       <FlatList
         data={courses}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.courseCard}
             onPress={() => handleCourseSelect(item)}
           >
@@ -933,7 +718,7 @@ export default function StudentDashboard(): React.ReactElement {
             <View style={styles.courseCardBody}>
               <Text style={styles.courseCardTitle}>{item.title}</Text>
               <Text style={styles.courseCardProfessor}>{item.professor}</Text>
-              
+
               <View style={styles.courseCardStats}>
                 <View style={styles.courseCardStat}>
                   <MaterialIcons name="date-range" size={16} color="#5c51f3" />
@@ -948,7 +733,7 @@ export default function StudentDashboard(): React.ReactElement {
                   </Text>
                 </View>
               </View>
-              
+
               <View style={styles.courseCardProgress}>
                 <View style={styles.courseCardProgressBar}>
                   <View
@@ -972,7 +757,7 @@ export default function StudentDashboard(): React.ReactElement {
   const renderAssignmentsTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Your Assignments</Text>
-      
+
       <View style={styles.assignmentFilters}>
         <TouchableOpacity style={[styles.assignmentFilter, styles.assignmentFilterActive]}>
           <Text style={styles.assignmentFilterTextActive}>All</Text>
@@ -987,7 +772,7 @@ export default function StudentDashboard(): React.ReactElement {
           <Text style={styles.assignmentFilterText}>Graded</Text>
         </TouchableOpacity>
       </View>
-      
+
       <FlatList
         data={assignments}
         keyExtractor={(item) => item.id}
@@ -999,25 +784,25 @@ export default function StudentDashboard(): React.ReactElement {
               </View>
               <Text style={styles.assignmentCardDue}>Due: {item.dueDate}</Text>
             </View>
-            
+
             <Text style={styles.assignmentCardTitle}>{item.title}</Text>
             <Text style={styles.assignmentCardDescription}>{item.description}</Text>
-            
+
             <View style={styles.assignmentCardFooter}>
               <View style={[
                 styles.assignmentCardStatus,
                 item.status === "submitted" ? styles.statusSubmitted :
-                item.status === "graded" ? styles.statusGraded :
-                item.status === "late" ? styles.statusLate :
-                styles.statusPending
+                  item.status === "graded" ? styles.statusGraded :
+                    item.status === "late" ? styles.statusLate :
+                      styles.statusPending
               ]}>
                 <Text style={styles.assignmentCardStatusText}>
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                 </Text>
               </View>
-              
+
               {item.status !== "submitted" && item.status !== "graded" && (
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.assignmentCardAction}
                   onPress={() => handleAssignmentSelect(item)}
                 >
@@ -1036,13 +821,13 @@ export default function StudentDashboard(): React.ReactElement {
   const renderAttendanceTab = () => (
     <View style={styles.tabContent}>
       <Text style={styles.tabTitle}>Your Attendance</Text>
-      
+
       <View style={styles.attendanceOverview}>
         <View style={styles.attendanceOverviewChart}>
           <Text style={styles.attendanceOverviewPercentage}>85%</Text>
           {/* <Text style={styles.attendanceOverviewLabel}>Overall Attendance</Text> */}
         </View>
-        
+
         <View style={styles.attendanceOverviewLegend}>
           <View style={styles.attendanceLegendItem}>
             <View style={[styles.attendanceLegendColor, { backgroundColor: "#4CAF50" }]} />
@@ -1058,14 +843,14 @@ export default function StudentDashboard(): React.ReactElement {
           </View>
         </View>
       </View>
-      
+
       <Text style={styles.attendanceCoursesTitle}>Attendance by Course</Text>
-      
+
       {courses.map(course => {
         const attendancePercentage = calculateAttendancePercentage(course.id);
         return (
-          <TouchableOpacity 
-            key={course.id} 
+          <TouchableOpacity
+            key={course.id}
             style={styles.attendanceCourseItem}
             onPress={() => {
               setSelectedCourse(course);
@@ -1079,7 +864,7 @@ export default function StudentDashboard(): React.ReactElement {
               </View>
               <Text style={styles.attendanceCourseTitle}>{course.title}</Text>
             </View>
-            
+
             <View style={styles.attendanceCourseStats}>
               <View style={styles.attendanceCourseProgress}>
                 <View style={styles.attendanceCourseProgressBar}>
@@ -1177,28 +962,28 @@ export default function StudentDashboard(): React.ReactElement {
 
       {/* Navigation Bar */}
       <View style={styles.navigationBar}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("home")}
         >
           <Ionicons name="home" size={24} color={activeTab === "home" ? "#5c51f3" : "#777"} />
           <Text style={[styles.navText, activeTab === "home" && styles.navActive]}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("courses")}
         >
           <MaterialIcons name="menu-book" size={24} color={activeTab === "courses" ? "#5c51f3" : "#777"} />
           <Text style={[styles.navText, activeTab === "courses" && styles.navActive]}>Courses</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("assignments")}
         >
           <MaterialIcons name="assignment" size={24} color={activeTab === "assignments" ? "#5c51f3" : "#777"} />
           <Text style={[styles.navText, activeTab === "assignments" && styles.navActive]}>Assignments</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("attendance")}
         >
