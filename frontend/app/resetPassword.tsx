@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -24,6 +24,7 @@ export default function ResetPasswordScreen() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
+  const [passwordsMatch, setPasswordsMatch] = useState("");
 
 
   const togglePasswordVisibility = () => {
@@ -35,21 +36,34 @@ export default function ResetPasswordScreen() {
   };
 
 
- const validatePassword = (value: string): void => {
-   const length: boolean = value.length >= 8;
-   const hasDigit: boolean = /\d/.test(value);
-   const hasLowerCase: boolean = /[a-z]/.test(value);
+  const validatePassword = (value: string): void => {
+    const length: boolean = value.length >= 8;
+    const hasDigit: boolean = /\d/.test(value);
+    const hasLowerCase: boolean = /[a-z]/.test(value);
 
-   if (!length) {
-     setPasswordError("Password must be at least 8 characters!");
-   } else if (!hasDigit) {
-     setPasswordError("Password must include at least one digit!");
-   } else if (!hasLowerCase) {
-     setPasswordError("Password must include at least one lowercase letter!");
-   } else {
-     setPasswordError("");
-   }
- };
+    if (!length) {
+      setPasswordError("Password must be at least 8 characters!");
+    } else if (!hasDigit) {
+      setPasswordError("Password must include at least one digit!");
+    } else if (!hasLowerCase) {
+      setPasswordError("Password must include at least one lowercase letter!");
+    } else {
+      setPasswordError("");
+    }
+  };
+
+
+  useEffect(() => {
+    const isPasswordsMatch = () => {
+      if(newPassword != confirmPassword){
+        setPasswordsMatch("Passwords do not match");
+      } else {
+        setPasswordsMatch("");
+      }
+    }
+
+    isPasswordsMatch();
+  }, [confirmPassword]);
 
 
   const handleResetPassword = async () => {
@@ -62,6 +76,7 @@ export default function ResetPasswordScreen() {
     }
 
     if (newPassword !== confirmPassword) {
+      setPasswordsMatch("Passwords do not match");
       setTimeout(() => {
         Alert.alert(
           "Password Mismatch",
@@ -220,15 +235,20 @@ export default function ResetPasswordScreen() {
                   />
                 </TouchableOpacity>
               </View>
+              {passwordsMatch && (
+                <Text style={forgotResetPassStyle.errorText}>
+                  {passwordsMatch}
+                </Text>
+              )}
             </View>
 
             {/* Reset Password Button */}
             <TouchableOpacity
               style={[
                 forgotResetPassStyle.primaryButton,
-                (!newPassword || isLoading || !!passwordError) && forgotResetPassStyle.disabledButton]}
+                (!newPassword || isLoading || !!passwordError || !!passwordsMatch) && forgotResetPassStyle.disabledButton]}
               onPress={handleResetPassword}
-              disabled={!newPassword || isLoading || !!passwordError}
+              disabled={!newPassword || isLoading || !!passwordError || !!passwordsMatch}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
