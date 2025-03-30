@@ -48,6 +48,7 @@ export default function LoginScreen() {
   const [emailError, setEmailError] = useState("")
   const [passwordError, setPasswordError] = useState("");
   const [progressAnim] = useState(new Animated.Value(0))
+  const [otpError, setOtpError] = useState("");
 
 
   useEffect(() => {
@@ -148,24 +149,63 @@ export default function LoginScreen() {
     setEmail(text)
   }
 
-  const handleVerifyOtp = async () => {
-    setIsLoading(true)
-    try {
-      const success = await verifyLoginOTP(email.trim(), otpCode.trim())
+  // const handleVerifyOtp = async () => {
+  //   // setIsLoading(true)
+  //   // try {
+  //   //   const success = await verifyLoginOTP(email.trim(), otpCode.trim())
 
+  //   //   if (success) {
+  //   //     setCurrentStep(LoginStep.PASSWORD)
+  //   //   } else {
+  //   //     Alert.alert("Error", "Invalid verification code. Please try again.")
+  //   //   }
+  //   // } catch (error) {
+  //   //   const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+  //   //   console.error("OTP verification failed:", errorMessage)
+  //   //   Alert.alert("Verification Failed", errorMessage)
+  //   // } finally {
+  //   //   setIsLoading(false)
+  //   // }
+
+
+  //   setIsLoading(true)
+  // try {
+  //   const success = await verifyLoginOTP(email.trim(), otpCode.trim())
+
+  //   if (success) {
+  //     setCurrentStep(LoginStep.PASSWORD)
+  //   } else {
+  //     Alert.alert("Invalid OTP", "Please check the code and try again.")
+  //   }
+  // } catch (error) {
+  //   console.error("OTP verification crashed:", error)
+  //   Alert.alert("Verification Failed", "An unexpected error occurred.")
+  // } finally {
+  //   setIsLoading(false)
+  // }
+  // }
+
+
+  const handleVerifyOtp = async () => {
+    setIsLoading(true);
+    setOtpError(""); // Clear previous error
+  
+    try {
+      const success = await verifyLoginOTP(email.trim(), otpCode.trim());
+  
       if (success) {
-        setCurrentStep(LoginStep.PASSWORD)
+        setCurrentStep(LoginStep.PASSWORD);
       } else {
-        Alert.alert("Error", "Invalid verification code. Please try again.")
+        setOtpError("Invalid verification code. Please try again.");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
-      console.error("OTP verification failed:", errorMessage)
-      Alert.alert("Verification Failed", errorMessage)
+      console.error("OTP verification failed:", error);
+      setOtpError("Verification failed. Please check the code or try again later.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+  
 
   const handleResendOtp = async () => {
     setIsLoading(true)
@@ -248,6 +288,7 @@ export default function LoginScreen() {
               autoCapitalize="none"
             />
           </View>
+          
           {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
         </View>
 
@@ -297,6 +338,7 @@ export default function LoginScreen() {
               maxLength={6}
             />
           </View>
+          {otpError ? <Text style={styles.errorText}>{otpError}</Text> : null}
         </View>
 
         {/* Verify Button */}

@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
         color: "#5c51f3",
         fontSize: 14,
     },
+   
     loginButton: {
         backgroundColor: "#5c51f3",
         borderRadius: 8,
@@ -170,6 +171,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginTop: 4,
         marginLeft: 4,
+        
     }
 });
 

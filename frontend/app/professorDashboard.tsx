@@ -247,7 +247,7 @@ export default function ProfessorDashboard() {
 					return;
 				}
 
-				const response = await fetch(`http://192.168.142.247:3000/api/user/${authContext.user.userId}`);
+				const response = await fetch(`http://localhost:3000/api/user/${authContext.user.userId}`);
 
 				if (!response.ok) {
 					throw new Error(`API request failed with status ${response.status}`);
