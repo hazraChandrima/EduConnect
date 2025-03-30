@@ -68,7 +68,6 @@ export default function StudentDashboard(): React.ReactElement {
   const [marks, setMarks] = useState<Mark[]>(sampleMarks);
   const [remarks, setRemarks] = useState<ProfessorRemark[]>(sampleRemarks);
 
-  // Default name for fallback
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
@@ -110,6 +109,8 @@ export default function StudentDashboard(): React.ReactElement {
     checkAuthAndFetchData();
   }, [auth, router]);
 
+
+  
   const handleLogout = () => {
     if (auth?.logout) {
       auth.logout().then(() => router.replace("/login"));

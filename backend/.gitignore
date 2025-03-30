@@ -27,3 +27,6 @@ build/
 
 # OS-specific files
 Thumbs.db
+
+# temporary files
+uploads/
