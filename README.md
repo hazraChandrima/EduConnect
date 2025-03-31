@@ -1,7 +1,5 @@
 # 🎓 EduConnect
 
-## 🌟 Problem Statement
-
 We have developed a **secure, multi-role** web/mobile application tailored for college environments that will serve as a centralized platform for college students, professors, and administrators.
 
 ---
