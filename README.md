@@ -181,7 +181,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
    ```bash
    uvicorn api_text:app --host 127.0.0.1 --port 8000 --reload
    ```
-   The PDF-to-Quiz app will be available at http://127.0.0.1:8000/text_to_quizz
+   The Text-to-Quiz app will be available at http://127.0.0.1:8000/text_to_quizz
 
 ---
 
