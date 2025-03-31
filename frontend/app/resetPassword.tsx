@@ -102,7 +102,7 @@ export default function ResetPasswordScreen() {
     try {
       console.log(token, newPassword);
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/reset-password",
+        "http://localhost:3000/api/auth/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

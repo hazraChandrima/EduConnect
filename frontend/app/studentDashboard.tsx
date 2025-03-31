@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
+
+import NetInfo from "@react-native-community/netinfo";
+
 import {
   View,
   Text,
@@ -14,7 +17,14 @@ import {
   Alert,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Ionicons, FontAwesome, MaterialIcons, AntDesign, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  FontAwesome,
+  MaterialIcons,
+  AntDesign,
+  Feather,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import styles from "./styles/StudentDashboard.style";
 import { useRouter } from "expo-router";
 import AcademicAnalytics from "./components/AcademicAnalytics";
@@ -53,16 +63,23 @@ export default function StudentDashboard(): React.ReactElement {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const isSmallDevice = useIsSmallDevice();
   const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<"home" | "courses" | "assignments" | "attendance">("home");
+  const [activeTab, setActiveTab] = useState<
+    "home" | "courses" | "assignments" | "attendance"
+  >("home");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isCourseModalVisible, setIsCourseModalVisible] = useState(false);
-  const [activeCourseTab, setActiveCourseTab] = useState<"curriculum" | "attendance" | "marks" | "remarks">("curriculum");
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [isSubmissionModalVisible, setIsSubmissionModalVisible] = useState(false);
+  const [activeCourseTab, setActiveCourseTab] = useState<
+    "curriculum" | "attendance" | "marks" | "remarks"
+  >("curriculum");
+  const [selectedAssignment, setSelectedAssignment] =
+    useState<Assignment | null>(null);
+  const [isSubmissionModalVisible, setIsSubmissionModalVisible] =
+    useState(false);
   const [submissionText, setSubmissionText] = useState("");
   const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>([]);
   const [courses, setCourses] = useState<Course[]>(sampleCourses);
-  const [assignments, setAssignments] = useState<Assignment[]>(sampleAssignments);
+  const [assignments, setAssignments] =
+    useState<Assignment[]>(sampleAssignments);
   const [curriculum, setCurriculum] = useState<Curriculum[]>(sampleCurriculum);
   const [attendance, setAttendance] = useState<Attendance[]>(sampleAttendance);
   const [marks, setMarks] = useState<Mark[]>(sampleMarks);
@@ -71,6 +88,14 @@ export default function StudentDashboard(): React.ReactElement {
   const displayName = userData?.name || "Student";
   const firstName = displayName.split(" ")[0];
 
+  const [isOffline, setIsOffline] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOffline(!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const checkAuthAndFetchData = async (): Promise<void> => {
@@ -84,23 +109,59 @@ export default function StudentDashboard(): React.ReactElement {
         }
 
         if (auth.user.role !== "student") {
-          console.log(`User role is ${auth.user.role}, not authorized for student dashboard`);
+          console.log(
+            `User role is ${auth.user.role}, not authorized for student dashboard`
+          );
           router.replace(`/${auth.user.role}Dashboard`);
           return;
         }
 
-        const response = await fetch(`http://192.168.142.247:3000/api/user/${auth.user.userId}`);
+        const response = await fetch(
+          `http://localhost:3000/api/user/${auth.user.userId}`
+        );
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
 
-        const data = await response.json() as UserData;
+        const data = (await response.json()) as UserData;
         if (data && data.name) {
           setUserData(data);
+          await AsyncStorage.setItem(
+            "studentDashboardUserData",
+            JSON.stringify(data)
+          ); // <-- Save Offline
         }
       } catch (error) {
         console.error("Error in StudentDashboard:", error);
+        console.error("Error in StudentDashboard:", error);
+        const offlineData = await AsyncStorage.getItem(
+          "studentDashboardUserData"
+        );
+
+        if (offlineData) {
+          setUserData(JSON.parse(offlineData));
+          
+          if (isOffline) {
+            // Show message only when actually offline
+            console.log("Offline mode: loaded cached data");
+          } else {
+            // Optional: you may silently load without alerts if backend is just temporarily unreachable
+            console.warn("Backend unreachable. Showing cached data.");
+          }
+        }
+        
+        if (offlineData) {
+          setUserData(JSON.parse(offlineData));
+
+          if (isOffline) {
+            // Show message only when actually offline
+            console.log("Offline mode: loaded cached data");
+          } else {
+            // Optional: you may silently load without alerts if backend is just temporarily unreachable
+            console.warn("Backend unreachable. Showing cached data.");
+          }
+        }
       } finally {
         setIsLoading(false);
       }
@@ -215,6 +276,8 @@ export default function StudentDashboard(): React.ReactElement {
     }
     // Update the assignment status
     const updatedAssignments = assignments.map(assignment =>
+
+
       assignment.id === selectedAssignment.id
         ? { ...assignment, status: "submitted" as const }
         : assignment
@@ -223,33 +286,44 @@ export default function StudentDashboard(): React.ReactElement {
     setAssignments(updatedAssignments);
     setIsSubmissionModalVisible(false);
 
-
     alert("Assignment submitted successfully!");
     Alert.alert("Assignment submitted successfully!");
   };
 
 
   const calculateAttendancePercentage = (courseId: string): number => {
-    const courseAttendance = attendance.filter(a => a.courseId === courseId);
+    const courseAttendance = attendance.filter((a) => a.courseId === courseId);
     if (courseAttendance.length === 0) return 0;
 
-    const presentCount = courseAttendance.filter(a => a.status === "present" || a.status === "excused").length;
+
+    const presentCount = courseAttendance.filter(
+      (a) => a.status === "present" || a.status === "excused"
+    ).length;
     return Math.round((presentCount / courseAttendance.length) * 100);
   };
 
 
   const calculateAverageScore = (courseId: string): number => {
-    const courseMarks = marks.filter(m => m.courseId === courseId);
+    const courseMarks = marks.filter((m) => m.courseId === courseId);
     if (courseMarks.length === 0) return 0;
 
-    const totalPercentage = courseMarks.reduce((sum, mark) => sum + (mark.score / mark.maxScore), 0);
+
+    const totalPercentage = courseMarks.reduce(
+      (sum, mark) => sum + mark.score / mark.maxScore,
+      0
+    );
     return Math.round((totalPercentage / courseMarks.length) * 100);
   };
 
 
   if (auth?.isLoading || isLoading) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#5c51f3" />
         <Text style={{ marginTop: 10 }}>Loading...</Text>
       </SafeAreaView>
@@ -260,7 +334,12 @@ export default function StudentDashboard(): React.ReactElement {
   
   if (!auth?.user || auth.user.role !== "student" || !userData) {
     return (
-      <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+      <SafeAreaView
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
         <ActivityIndicator size="large" color="#5c51f3" />
         <Text style={{ marginTop: 10 }}>Redirecting...</Text>
       </SafeAreaView>
@@ -279,12 +358,23 @@ export default function StudentDashboard(): React.ReactElement {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <View style={[styles.courseModalIcon, { backgroundColor: selectedCourse.color }]}>
-                <FontAwesome name={selectedCourse.icon as any} size={24} color="white" />
+              <View
+                style={[
+                  styles.courseModalIcon,
+                  { backgroundColor: selectedCourse.color },
+                ]}
+              >
+                <FontAwesome
+                  name={selectedCourse.icon as any}
+                  size={24}
+                  color="white"
+                />
               </View>
               <View style={styles.modalHeaderText}>
                 <Text style={styles.modalTitle}>{selectedCourse.title}</Text>
-                <Text style={styles.modalSubtitle}>{selectedCourse.code} • {selectedCourse.professor}</Text>
+                <Text style={styles.modalSubtitle}>
+                  {selectedCourse.code} • {selectedCourse.professor}
+                </Text>
               </View>
               <TouchableOpacity onPress={() => setIsCourseModalVisible(false)}>
                 <AntDesign name="close" size={24} color="#333" />
@@ -293,34 +383,68 @@ export default function StudentDashboard(): React.ReactElement {
 
             <View style={styles.courseTabs}>
               <TouchableOpacity
-                style={[styles.courseTab, activeCourseTab === "curriculum" && styles.courseTabActive]}
+                style={[
+                  styles.courseTab,
+                  activeCourseTab === "curriculum" && styles.courseTabActive,
+                ]}
                 onPress={() => setActiveCourseTab("curriculum")}
               >
-                <Text style={[styles.courseTabText, activeCourseTab === "curriculum" && styles.courseTabTextActive]}>
+                <Text
+                  style={[
+                    styles.courseTabText,
+                    activeCourseTab === "curriculum" &&
+                      styles.courseTabTextActive,
+                  ]}
+                >
                   Curriculum
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.courseTab, activeCourseTab === "attendance" && styles.courseTabActive]}
+                style={[
+                  styles.courseTab,
+                  activeCourseTab === "attendance" && styles.courseTabActive,
+                ]}
                 onPress={() => setActiveCourseTab("attendance")}
               >
-                <Text style={[styles.courseTabText, activeCourseTab === "attendance" && styles.courseTabTextActive]}>
+                <Text
+                  style={[
+                    styles.courseTabText,
+                    activeCourseTab === "attendance" &&
+                      styles.courseTabTextActive,
+                  ]}
+                >
                   Attendance
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.courseTab, activeCourseTab === "marks" && styles.courseTabActive]}
+                style={[
+                  styles.courseTab,
+                  activeCourseTab === "marks" && styles.courseTabActive,
+                ]}
                 onPress={() => setActiveCourseTab("marks")}
               >
-                <Text style={[styles.courseTabText, activeCourseTab === "marks" && styles.courseTabTextActive]}>
+                <Text
+                  style={[
+                    styles.courseTabText,
+                    activeCourseTab === "marks" && styles.courseTabTextActive,
+                  ]}
+                >
                   Marks
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.courseTab, activeCourseTab === "remarks" && styles.courseTabActive]}
+                style={[
+                  styles.courseTab,
+                  activeCourseTab === "remarks" && styles.courseTabActive,
+                ]}
                 onPress={() => setActiveCourseTab("remarks")}
               >
-                <Text style={[styles.courseTabText, activeCourseTab === "remarks" && styles.courseTabTextActive]}>
+                <Text
+                  style={[
+                    styles.courseTabText,
+                    activeCourseTab === "remarks" && styles.courseTabTextActive,
+                  ]}
+                >
                   Remarks
                 </Text>
               </TouchableOpacity>
@@ -330,13 +454,16 @@ export default function StudentDashboard(): React.ReactElement {
               {activeCourseTab === "curriculum" && (
                 <View style={styles.curriculumContainer}>
                   {curriculum
-                    .filter(c => c.courseId === selectedCourse.id)
-                    .map(c => (
+                    .filter((c) => c.courseId === selectedCourse.id)
+                    .map((c) => (
                       <View key={c.id} style={styles.curriculumSection}>
                         <Text style={styles.curriculumTitle}>{c.title}</Text>
-                        <Text style={styles.curriculumDescription}>{c.description}</Text>
 
-                        {c.units.map(unit => (
+                        <Text style={styles.curriculumDescription}>
+                          {c.description}
+                        </Text>
+
+                        {c.units.map((unit) => (
                           <View key={unit.id} style={styles.curriculumUnit}>
                             <Text style={styles.unitTitle}>{unit.title}</Text>
 
@@ -348,11 +475,19 @@ export default function StudentDashboard(): React.ReactElement {
                               </View>
                             ))}
 
-                            <Text style={styles.resourcesHeader}>Resources:</Text>
+                            <Text style={styles.resourcesHeader}>
+                              Resources:
+                            </Text>
                             {unit.resources.map((resource, index) => (
                               <View key={index} style={styles.resourceItem}>
-                                <MaterialIcons name="description" size={16} color="#5c51f3" />
-                                <Text style={styles.resourceText}>{resource}</Text>
+                                <MaterialIcons
+                                  name="description"
+                                  size={16}
+                                  color="#5c51f3"
+                                />
+                                <Text style={styles.resourceText}>
+                                  {resource}
+                                </Text>
                               </View>
                             ))}
                           </View>
@@ -374,40 +509,68 @@ export default function StudentDashboard(): React.ReactElement {
                     </View>
                     <View style={styles.attendanceStats}>
                       <View style={styles.attendanceStat}>
-                        <View style={[styles.attendanceIndicator, { backgroundColor: "#4CAF50" }]} />
+                        <View
+                          style={[
+                            styles.attendanceIndicator,
+                            { backgroundColor: "#4CAF50" },
+                          ]}
+                        />
                         <Text style={styles.attendanceStatText}>Present</Text>
                       </View>
                       <View style={styles.attendanceStat}>
-                        <View style={[styles.attendanceIndicator, { backgroundColor: "#FFC107" }]} />
+                        <View
+                          style={[
+                            styles.attendanceIndicator,
+                            { backgroundColor: "#FFC107" },
+                          ]}
+                        />
                         <Text style={styles.attendanceStatText}>Excused</Text>
                       </View>
                       <View style={styles.attendanceStat}>
-                        <View style={[styles.attendanceIndicator, { backgroundColor: "#F44336" }]} />
+                        <View
+                          style={[
+                            styles.attendanceIndicator,
+                            { backgroundColor: "#F44336" },
+                          ]}
+                        />
                         <Text style={styles.attendanceStatText}>Absent</Text>
                       </View>
                     </View>
                   </View>
 
-                  <Text style={styles.attendanceHistoryTitle}>Attendance History</Text>
+                  <Text style={styles.attendanceHistoryTitle}>
+                    Attendance History
+                  </Text>
                   {attendance
-                    .filter(a => a.courseId === selectedCourse.id)
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map(a => (
+                    .filter((a) => a.courseId === selectedCourse.id)
+                    .sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    )
+                    .map((a) => (
                       <View key={a.id} style={styles.attendanceRecord}>
                         <View style={styles.attendanceDate}>
                           <Text style={styles.attendanceDateText}>
-                            {new Date(a.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            {new Date(a.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                            })}
                           </Text>
                         </View>
                         <View
                           style={[
                             styles.attendanceStatus,
-                            a.status === "present" ? styles.statusPresent :
-                              a.status === "excused" ? styles.statusExcused : styles.statusAbsent
+
+                            a.status === "present"
+                              ? styles.statusPresent
+                              : a.status === "excused"
+                              ? styles.statusExcused
+                              : styles.statusAbsent,
                           ]}
                         >
                           <Text style={styles.attendanceStatusText}>
-                            {a.status.charAt(0).toUpperCase() + a.status.slice(1)}
+                            {a.status.charAt(0).toUpperCase() +
+                              a.status.slice(1)}
                           </Text>
                         </View>
                       </View>
@@ -419,32 +582,44 @@ export default function StudentDashboard(): React.ReactElement {
                 <View style={styles.marksContainer}>
                   <View style={styles.marksSummary}>
                     <View style={styles.marksChart}>
-                      <Text style={styles.marksAverage}>{calculateAverageScore(selectedCourse.id)}%</Text>
-                      <Text style={styles.marksAverageLabel}>Average Score</Text>
+                      <Text style={styles.marksAverage}>
+                        {calculateAverageScore(selectedCourse.id)}%
+                      </Text>
+                      <Text style={styles.marksAverageLabel}>
+                        Average Score
+                      </Text>
                     </View>
                   </View>
 
                   <Text style={styles.marksHistoryTitle}>Assessment Marks</Text>
                   {marks
-                    .filter(m => m.courseId === selectedCourse.id)
-                    .map(m => (
+                    .filter((m) => m.courseId === selectedCourse.id)
+                    .map((m) => (
                       <View key={m.id} style={styles.markRecord}>
                         <View style={styles.markHeader}>
                           <Text style={styles.markTitle}>{m.title}</Text>
                           <View style={styles.markType}>
-                            <Text style={styles.markTypeText}>{m.type.charAt(0).toUpperCase() + m.type.slice(1)}</Text>
+                            <Text style={styles.markTypeText}>
+                              {m.type.charAt(0).toUpperCase() + m.type.slice(1)}
+                            </Text>
                           </View>
                         </View>
                         <View style={styles.markScoreContainer}>
-                          <Text style={styles.markScore}>{m.score}/{m.maxScore}</Text>
+                          <Text style={styles.markScore}>
+                            {m.score}/{m.maxScore}
+                          </Text>
                           <Text style={styles.markPercentage}>
                             {Math.round((m.score / m.maxScore) * 100)}%
                           </Text>
                         </View>
                         {m.feedback && (
                           <View style={styles.markFeedback}>
-                            <Text style={styles.markFeedbackLabel}>Feedback:</Text>
-                            <Text style={styles.markFeedbackText}>{m.feedback}</Text>
+                            <Text style={styles.markFeedbackLabel}>
+                              Feedback:
+                            </Text>
+                            <Text style={styles.markFeedbackText}>
+                              {m.feedback}
+                            </Text>
                           </View>
                         )}
                       </View>
@@ -455,20 +630,32 @@ export default function StudentDashboard(): React.ReactElement {
               {activeCourseTab === "remarks" && (
                 <View style={styles.remarksContainer}>
                   {remarks
-                    .filter(r => r.courseId === selectedCourse.id)
-                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-                    .map(r => (
+
+                    .filter((r) => r.courseId === selectedCourse.id)
+                    .sort(
+                      (a, b) =>
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
+                    )
+                    .map((r) => (
                       <View
                         key={r.id}
                         style={[
                           styles.remarkItem,
-                          r.type === "positive" ? styles.remarkPositive :
-                            r.type === "negative" ? styles.remarkNegative : styles.remarkNeutral
+
+                          r.type === "positive"
+                            ? styles.remarkPositive
+                            : r.type === "negative"
+                            ? styles.remarkNegative
+                            : styles.remarkNeutral,
                         ]}
                       >
                         <View style={styles.remarkHeader}>
                           <Text style={styles.remarkDate}>
-                            {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            {new Date(r.date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })}
                           </Text>
                           <View style={styles.remarkTypeIndicator}>
                             <Text style={styles.remarkTypeText}>
@@ -502,22 +689,32 @@ export default function StudentDashboard(): React.ReactElement {
             <View style={styles.modalHeader}>
               <View style={styles.modalHeaderText}>
                 <Text style={styles.modalTitle}>Submit Assignment</Text>
-                <Text style={styles.modalSubtitle}>{selectedAssignment.courseCode} • {selectedAssignment.title}</Text>
+                <Text style={styles.modalSubtitle}>
+                  {selectedAssignment.courseCode} • {selectedAssignment.title}
+                </Text>
               </View>
-              <TouchableOpacity onPress={() => setIsSubmissionModalVisible(false)}>
+              <TouchableOpacity
+                onPress={() => setIsSubmissionModalVisible(false)}
+              >
                 <AntDesign name="close" size={24} color="#333" />
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.modalContent}>
               <View style={styles.submissionSection}>
-                <Text style={styles.submissionLabel}>Assignment Description:</Text>
-                <Text style={styles.submissionDescription}>{selectedAssignment.description}</Text>
+                <Text style={styles.submissionLabel}>
+                  Assignment Description:
+                </Text>
+                <Text style={styles.submissionDescription}>
+                  {selectedAssignment.description}
+                </Text>
               </View>
 
               <View style={styles.submissionSection}>
                 <Text style={styles.submissionLabel}>Due Date:</Text>
-                <Text style={styles.submissionDueDate}>{selectedAssignment.dueDate}</Text>
+                <Text style={styles.submissionDueDate}>
+                  {selectedAssignment.dueDate}
+                </Text>
               </View>
 
               <View style={styles.submissionSection}>
@@ -534,7 +731,10 @@ export default function StudentDashboard(): React.ReactElement {
 
               <View style={styles.submissionSection}>
                 <Text style={styles.submissionLabel}>Attach Files:</Text>
-                <TouchableOpacity style={styles.attachButton} onPress={pickDocument}>
+                <TouchableOpacity
+                  style={styles.attachButton}
+                  onPress={pickDocument}
+                >
                   <Feather name="paperclip" size={20} color="white" />
                   <Text style={styles.attachButtonText}>Attach File</Text>
                 </TouchableOpacity>
@@ -544,8 +744,16 @@ export default function StudentDashboard(): React.ReactElement {
                     {submissionFiles.map((file, index) => (
                       <View key={index} style={styles.attachedFile}>
                         <View style={styles.fileInfo}>
-                          <MaterialIcons name="insert-drive-file" size={20} color="#5c51f3" />
-                          <Text style={styles.fileName} numberOfLines={1} ellipsizeMode="middle">
+                          <MaterialIcons
+                            name="insert-drive-file"
+                            size={20}
+                            color="#5c51f3"
+                          />
+                          <Text
+                            style={styles.fileName}
+                            numberOfLines={1}
+                            ellipsizeMode="middle"
+                          >
                             {file.name}
                           </Text>
                         </View>
@@ -561,7 +769,9 @@ export default function StudentDashboard(): React.ReactElement {
               <TouchableOpacity
                 style={styles.submitButton}
                 onPress={submitAssignment}
-                disabled={submissionFiles.length === 0 && submissionText.trim() === ""}
+                disabled={
+                  submissionFiles.length === 0 && submissionText.trim() === ""
+                }
               >
                 <Text style={styles.submitButtonText}>Submit Assignment</Text>
               </TouchableOpacity>
@@ -635,7 +845,9 @@ export default function StudentDashboard(): React.ReactElement {
             style={styles.courseItem}
             onPress={() => handleCourseSelect(course)}
           >
-            <View style={[styles.courseIcon, { backgroundColor: course.color }]}>
+            <View
+              style={[styles.courseIcon, { backgroundColor: course.color }]}
+            >
               <FontAwesome name={course.icon as any} size={24} color="white" />
             </View>
             <View style={styles.courseDetails}>
@@ -645,7 +857,9 @@ export default function StudentDashboard(): React.ReactElement {
                 <Text style={styles.professorName}>{course.professor}</Text>
               </View>
               <View style={styles.progressBarContainer}>
-                <View style={[styles.progressBar, { width: `${course.progress}%` }]} />
+                <View
+                  style={[styles.progressBar, { width: `${course.progress}%` }]}
+                />
               </View>
             </View>
           </TouchableOpacity>
@@ -662,36 +876,55 @@ export default function StudentDashboard(): React.ReactElement {
         </View>
 
         {/* Assignment Items */}
-        {assignments.slice(0, 3).map(assignment => (
+        {assignments.slice(0, 3).map((assignment) => (
           <View key={assignment.id} style={styles.assignmentItem}>
             <View style={styles.assignmentHeader}>
-              <View style={[styles.courseTag, { backgroundColor: assignment.color }]}>
-                <Text style={styles.courseTagText}>{assignment.courseCode}</Text>
-              </View>
-              <Text style={styles.assignmentDueDate}>Due: {assignment.dueDate}</Text>
-            </View>
-            <Text style={styles.assignmentTitle}>{assignment.title}</Text>
-            <Text style={styles.assignmentDescription}>{assignment.description}</Text>
-            <View style={styles.assignmentFooter}>
-              <View style={[
-                styles.statusBadge,
-                assignment.status === "submitted" ? styles.statusSubmitted :
-                  assignment.status === "graded" ? styles.statusGraded :
-                    assignment.status === "late" ? styles.statusLate :
-                      styles.statusPending
-              ]}>
-                <Text style={styles.statusText}>
-                  {assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)}
+              <View
+                style={[
+                  styles.courseTag,
+                  { backgroundColor: assignment.color },
+                ]}
+              >
+                <Text style={styles.courseTagText}>
+                  {assignment.courseCode}
                 </Text>
               </View>
-              {assignment.status !== "submitted" && assignment.status !== "graded" && (
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleAssignmentSelect(assignment)}
-                >
-                  <Text style={styles.actionButtonText}>Submit Now</Text>
-                </TouchableOpacity>
-              )}
+              <Text style={styles.assignmentDueDate}>
+                Due: {assignment.dueDate}
+              </Text>
+            </View>
+            <Text style={styles.assignmentTitle}>{assignment.title}</Text>
+            <Text style={styles.assignmentDescription}>
+              {assignment.description}
+            </Text>
+            <View style={styles.assignmentFooter}>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  assignment.status === "submitted"
+                    ? styles.statusSubmitted
+                    : assignment.status === "graded"
+                    ? styles.statusGraded
+                    : assignment.status === "late"
+                    ? styles.statusLate
+                    : styles.statusPending,
+                ]}
+              >
+                <Text style={styles.statusText}>
+                  {assignment.status.charAt(0).toUpperCase() +
+                    assignment.status.slice(1)}
+                </Text>
+              </View>
+              {assignment.status !== "submitted" &&
+                assignment.status !== "graded" && (
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleAssignmentSelect(assignment)}
+                  >
+                    <Text style={styles.actionButtonText}>Submit Now</Text>
+                  </TouchableOpacity>
+                )}
             </View>
           </View>
         ))}
@@ -712,7 +945,9 @@ export default function StudentDashboard(): React.ReactElement {
             style={styles.courseCard}
             onPress={() => handleCourseSelect(item)}
           >
-            <View style={[styles.courseCardHeader, { backgroundColor: item.color }]}>
+            <View
+              style={[styles.courseCardHeader, { backgroundColor: item.color }]}
+            >
               <FontAwesome name={item.icon as any} size={24} color="white" />
               <Text style={styles.courseCardCode}>{item.code}</Text>
             </View>
@@ -740,11 +975,16 @@ export default function StudentDashboard(): React.ReactElement {
                   <View
                     style={[
                       styles.courseCardProgressFill,
-                      { width: `${item.progress}%`, backgroundColor: item.color }
+                      {
+                        width: `${item.progress}%`,
+                        backgroundColor: item.color,
+                      },
                     ]}
                   />
                 </View>
-                <Text style={styles.courseCardProgressText}>{item.progress}% Complete</Text>
+                <Text style={styles.courseCardProgressText}>
+                  {item.progress}% Complete
+                </Text>
               </View>
             </View>
           </TouchableOpacity>
@@ -760,7 +1000,9 @@ export default function StudentDashboard(): React.ReactElement {
       <Text style={styles.tabTitle}>Your Assignments</Text>
 
       <View style={styles.assignmentFilters}>
-        <TouchableOpacity style={[styles.assignmentFilter, styles.assignmentFilterActive]}>
+        <TouchableOpacity
+          style={[styles.assignmentFilter, styles.assignmentFilterActive]}
+        >
           <Text style={styles.assignmentFilterTextActive}>All</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.assignmentFilter}>
@@ -780,23 +1022,38 @@ export default function StudentDashboard(): React.ReactElement {
         renderItem={({ item }) => (
           <View style={styles.assignmentCard}>
             <View style={styles.assignmentCardHeader}>
-              <View style={[styles.assignmentCardTag, { backgroundColor: item.color }]}>
-                <Text style={styles.assignmentCardTagText}>{item.courseCode}</Text>
+              <View
+                style={[
+                  styles.assignmentCardTag,
+                  { backgroundColor: item.color },
+                ]}
+              >
+                <Text style={styles.assignmentCardTagText}>
+                  {item.courseCode}
+                </Text>
               </View>
               <Text style={styles.assignmentCardDue}>Due: {item.dueDate}</Text>
             </View>
 
             <Text style={styles.assignmentCardTitle}>{item.title}</Text>
-            <Text style={styles.assignmentCardDescription}>{item.description}</Text>
+
+            <Text style={styles.assignmentCardDescription}>
+              {item.description}
+            </Text>
 
             <View style={styles.assignmentCardFooter}>
-              <View style={[
-                styles.assignmentCardStatus,
-                item.status === "submitted" ? styles.statusSubmitted :
-                  item.status === "graded" ? styles.statusGraded :
-                    item.status === "late" ? styles.statusLate :
-                      styles.statusPending
-              ]}>
+              <View
+                style={[
+                  styles.assignmentCardStatus,
+                  item.status === "submitted"
+                    ? styles.statusSubmitted
+                    : item.status === "graded"
+                    ? styles.statusGraded
+                    : item.status === "late"
+                    ? styles.statusLate
+                    : styles.statusPending,
+                ]}
+              >
                 <Text style={styles.assignmentCardStatusText}>
                   {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
                 </Text>
@@ -831,15 +1088,30 @@ export default function StudentDashboard(): React.ReactElement {
 
         <View style={styles.attendanceOverviewLegend}>
           <View style={styles.attendanceLegendItem}>
-            <View style={[styles.attendanceLegendColor, { backgroundColor: "#4CAF50" }]} />
+            <View
+              style={[
+                styles.attendanceLegendColor,
+                { backgroundColor: "#4CAF50" },
+              ]}
+            />
             <Text style={styles.attendanceLegendText}>Present</Text>
           </View>
           <View style={styles.attendanceLegendItem}>
-            <View style={[styles.attendanceLegendColor, { backgroundColor: "#FFC107" }]} />
+            <View
+              style={[
+                styles.attendanceLegendColor,
+                { backgroundColor: "#FFC107" },
+              ]}
+            />
             <Text style={styles.attendanceLegendText}>Excused</Text>
           </View>
           <View style={styles.attendanceLegendItem}>
-            <View style={[styles.attendanceLegendColor, { backgroundColor: "#F44336" }]} />
+            <View
+              style={[
+                styles.attendanceLegendColor,
+                { backgroundColor: "#F44336" },
+              ]}
+            />
             <Text style={styles.attendanceLegendText}>Absent</Text>
           </View>
         </View>
@@ -860,8 +1132,17 @@ export default function StudentDashboard(): React.ReactElement {
             }}
           >
             <View style={styles.attendanceCourseHeader}>
-              <View style={[styles.attendanceCourseIcon, { backgroundColor: course.color }]}>
-                <FontAwesome name={course.icon as any} size={20} color="white" />
+              <View
+                style={[
+                  styles.attendanceCourseIcon,
+                  { backgroundColor: course.color },
+                ]}
+              >
+                <FontAwesome
+                  name={course.icon as any}
+                  size={20}
+                  color="white"
+                />
               </View>
               <Text style={styles.attendanceCourseTitle}>{course.title}</Text>
             </View>
@@ -873,18 +1154,21 @@ export default function StudentDashboard(): React.ReactElement {
                     style={[
                       styles.attendanceCourseProgressFill,
                       {
-                        width: `${attendancePercentage ?? 0}%`,  // Ensure it always has a value
-                        backgroundColor: attendancePercentage >= 75
-                          ? "#4CAF50"
-                          : attendancePercentage >= 60
+                        width: `${attendancePercentage ?? 0}%`, // Ensure it always has a value
+                        backgroundColor:
+                          attendancePercentage >= 75
+                            ? "#4CAF50"
+                            : attendancePercentage >= 60
                             ? "#FFC107"
-                            : "#F44336"
-                      }
+                            : "#F44336",
+                      },
                     ]}
                   />
                 </View>
               </View>
-              <Text style={styles.attendanceCoursePercentage}>{attendancePercentage}%</Text>
+              <Text style={styles.attendanceCoursePercentage}>
+                {attendancePercentage}%
+              </Text>
             </View>
           </TouchableOpacity>
         );
@@ -894,6 +1178,14 @@ export default function StudentDashboard(): React.ReactElement {
 
   return (
     <SafeAreaView style={styles.container}>
+      {isOffline && (
+        <View style={{ backgroundColor: "orange", padding: 10 }}>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            You are offline. Showing cached data.
+          </Text>
+        </View>
+      )}
+
       <StatusBar backgroundColor="#4252e5" barStyle="light-content" />
 
       {/* Header */}
@@ -967,29 +1259,70 @@ export default function StudentDashboard(): React.ReactElement {
           style={styles.navItem}
           onPress={() => setActiveTab("home")}
         >
-          <Ionicons name="home" size={24} color={activeTab === "home" ? "#5c51f3" : "#777"} />
-          <Text style={[styles.navText, activeTab === "home" && styles.navActive]}>Home</Text>
+          <Ionicons
+            name="home"
+            size={24}
+            color={activeTab === "home" ? "#5c51f3" : "#777"}
+          />
+          <Text
+            style={[styles.navText, activeTab === "home" && styles.navActive]}
+          >
+            Home
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("courses")}
         >
-          <MaterialIcons name="menu-book" size={24} color={activeTab === "courses" ? "#5c51f3" : "#777"} />
-          <Text style={[styles.navText, activeTab === "courses" && styles.navActive]}>Courses</Text>
+          <MaterialIcons
+            name="menu-book"
+            size={24}
+            color={activeTab === "courses" ? "#5c51f3" : "#777"}
+          />
+          <Text
+            style={[
+              styles.navText,
+              activeTab === "courses" && styles.navActive,
+            ]}
+          >
+            Courses
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("assignments")}
         >
-          <MaterialIcons name="assignment" size={24} color={activeTab === "assignments" ? "#5c51f3" : "#777"} />
-          <Text style={[styles.navText, activeTab === "assignments" && styles.navActive]}>Assignments</Text>
+          <MaterialIcons
+            name="assignment"
+            size={24}
+            color={activeTab === "assignments" ? "#5c51f3" : "#777"}
+          />
+          <Text
+            style={[
+              styles.navText,
+              activeTab === "assignments" && styles.navActive,
+            ]}
+          >
+            Assignments
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.navItem}
           onPress={() => setActiveTab("attendance")}
         >
-          <MaterialIcons name="date-range" size={24} color={activeTab === "attendance" ? "#5c51f3" : "#777"} />
-          <Text style={[styles.navText, activeTab === "attendance" && styles.navActive]}>Attendance</Text>
+          <MaterialIcons
+            name="date-range"
+            size={24}
+            color={activeTab === "attendance" ? "#5c51f3" : "#777"}
+          />
+          <Text
+            style={[
+              styles.navText,
+              activeTab === "attendance" && styles.navActive,
+            ]}
+          >
+            Attendance
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -998,4 +1331,4 @@ export default function StudentDashboard(): React.ReactElement {
       {renderSubmissionModal()}
     </SafeAreaView>
   );
-};
+}

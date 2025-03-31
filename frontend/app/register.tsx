@@ -160,7 +160,7 @@ export default function RegisterScreen() {
       }
 
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/register",
+        "http://localhost:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -207,7 +207,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/verifyEmail",
+        "http://localhost:3000/api/auth/verifyEmail",
         {
           method: "POST",
           headers: {
@@ -244,7 +244,7 @@ export default function RegisterScreen() {
     try {
       // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/register",
+        "http://localhost:3000/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -291,7 +291,7 @@ export default function RegisterScreen() {
     try {
       // Update the user's password
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/updatePassword",
+        "http://localhost:3000/api/auth/updatePassword",
         {
           method: "POST",
           headers: {

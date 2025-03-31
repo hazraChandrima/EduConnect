@@ -13,13 +13,14 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style"
+import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
 
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const router = useRouter();
+  const [successMessage, setSuccessMessage] = useState("");
 
   const handleForgotPassword = async () => {
     // Validate email
@@ -31,6 +32,9 @@ export default function ForgotPasswordScreen() {
     }
 
     setIsLoading(true);
+    setSuccessMessage(""); // Clear previous success message
+    setEmailError("");
+
     try {
       const response = await fetch(
         "http://192.168.142.247:3000/api/auth/forgot-password",
@@ -47,16 +51,24 @@ export default function ForgotPasswordScreen() {
         throw new Error(data.message || "Failed to send reset link.");
       }
 
-      setTimeout(() => {
-        Alert.alert(
-          "Success",
-          "Password reset instructions have been sent to your email.",
-          [{ text: "OK", onPress: () => router.back() }]
-        );
-      }, 100);
-    } catch (error) {
-      setEmailError("The email you've entered is either invalid or does not exist.")
-      console.log("Something went wrong")
+      setSuccessMessage("Password reset instructions have been sent to your email.");
+
+      // setTimeout(() => {
+      //   Alert.alert(
+      //     "Success",
+      //     "Password reset instructions have been sent to your email.",
+      //     [{ text: "OK", onPress: () => router.back() }]
+      //   );
+      // }, 100);
+
+
+    } 
+    
+    catch (error) {
+      setEmailError(
+        "The email you've entered is either invalid or does not exist."
+      );
+      console.log("Something went wrong");
       setTimeout(() => {
         Alert.alert("Error", "Something went wrong. Please try again later.");
       }, 100);
@@ -107,8 +119,9 @@ export default function ForgotPasswordScreen() {
                   autoCapitalize="none"
                 />
               </View>
-              {emailError ? <Text style={forgotResetPassStyle.errorText}>{emailError}</Text> : null}
-
+              {emailError ? (
+                <Text style={forgotResetPassStyle.errorText}>{emailError}</Text>
+              ) : null}
             </View>
 
             {/* Send Reset Link Button */}
@@ -126,9 +139,20 @@ export default function ForgotPasswordScreen() {
               )}
             </TouchableOpacity>
 
+            {/* Success Message */}
+            {successMessage ? (
+              <Text
+                style={{ color: "green", marginTop: 15, textAlign: "center" }}
+              >
+                {successMessage}
+              </Text>
+            ) : null}
+
             {/* Login Link */}
             <View style={forgotResetPassStyle.linkContainer}>
-              <Text style={forgotResetPassStyle.linkText}>Remembered your password?</Text>
+              <Text style={forgotResetPassStyle.linkText}>
+                Remembered your password?
+              </Text>
               <TouchableOpacity onPress={() => router.push("/login")}>
                 <Text style={forgotResetPassStyle.link}>Sign In</Text>
               </TouchableOpacity>
