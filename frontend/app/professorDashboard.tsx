@@ -19,6 +19,7 @@ import { AuthContext } from "./context/AuthContext"
 import styles from "./styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
 import FileManagement from "./components/FileManagement"
+import QuizTab from "./components/QuizTab"
 
 interface Assignment {
 	id: string
@@ -925,6 +926,8 @@ export default function ProfessorDashboard() {
 		</>
 	)
 
+	const renderQuizzesTab = () => <QuizTab />
+
 	// Create Assignment Modal
 	const renderAssignmentModal = () => (
 		<Modal
@@ -1203,6 +1206,7 @@ export default function ProfessorDashboard() {
 				{activeTab === "grading" && renderGradingTab()}
 				{activeTab === "students" && renderStudentsTab()}
 				{activeTab === "files" && renderFilesTab()}
+				{activeTab === "quizzes" && renderQuizzesTab()}
 			</ScrollView>
 
 			{/* Navigation Bar */}
@@ -1226,6 +1230,10 @@ export default function ProfessorDashboard() {
 				<TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("files")}>
 					<MaterialIcons name="folder" size={24} color={activeTab === "files" ? "#5c51f3" : "#777"} />
 					<Text style={[styles.navText, activeTab === "files" && styles.navActive]}>Files</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("quizzes")}>
+					<MaterialIcons name="quiz" size={24} color={activeTab === "quizzes" ? "#5c51f3" : "#777"} />
+					<Text style={[styles.navText, activeTab === "quizzes" && styles.navActive]}>Quizzes</Text>
 				</TouchableOpacity>
 			</View>
 

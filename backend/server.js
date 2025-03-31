@@ -58,8 +58,8 @@ app.use(logger("dev"));
 
 
 connectDB().then(() => {
-    console.log("✅ Database connected!");
-    console.log("🔄 Registering routes...");
+    console.log("Database connected!");
+    console.log("Registering routes...");
 
     const authRoutes = require("./routes/authRoutes");
     const userRoutes = require("./routes/userRoutes");
@@ -67,7 +67,7 @@ connectDB().then(() => {
     const assignmentRoutes = require("./routes/assignmentRoutes");
     const courseRoutes = require("./routes/courseRoutes");
 
-    console.log("📌 Routes Loaded: ", {
+    console.log("Routes Loaded: ", {
         authRoutes: !!authRoutes,
         userRoutes: !!userRoutes,
         attendanceRoutes: !!attendanceRoutes,
@@ -81,12 +81,12 @@ connectDB().then(() => {
     app.use("/api/courses", courseRoutes);
     app.use("/api/assignment", assignmentRoutes);
 
-    console.log("✅ All routes registered successfully!");
+    console.log("All routes registered successfully!");
 
     const PORT = process.env.PORT || 3000;
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 }).catch((err) => {
-    console.error("❌ Failed to start server:", err);
+    console.error("Failed to start server:", err);
     process.exit(1);
 });

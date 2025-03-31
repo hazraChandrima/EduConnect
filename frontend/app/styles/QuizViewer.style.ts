@@ -1,0 +1,167 @@
+import { StyleSheet } from "react-native"
+
+export default StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#fff",
+    },
+    header: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+    },
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    backButtonText: {
+        fontSize: 16,
+        color: "#5c51f3",
+        marginLeft: 4,
+    },
+    titleContainer: {
+        flex: 1,
+        alignItems: "center",
+        flexDirection: "row",
+        justifyContent: "center",
+    },
+    title: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+    },
+    titleInput: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#333",
+        borderBottomWidth: 1,
+        borderBottomColor: "#5c51f3",
+        padding: 4,
+        minWidth: 150,
+        textAlign: "center",
+    },
+    editIcon: {
+        position: "absolute",
+        right: -20,
+        top: 2,
+    },
+    saveButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#5c51f3",
+        borderRadius: 8,
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+    },
+    saveButtonText: {
+        color: "#fff",
+        fontSize: 14,
+        fontWeight: "500",
+        marginLeft: 4,
+    },
+    questionsContainer: {
+        flex: 1,
+        padding: 16,
+    },
+    questionCard: {
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        borderLeftWidth: 4,
+        borderLeftColor: "#5c51f3",
+    },
+    questionHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    questionNumber: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#5c51f3",
+    },
+    questionActions: {
+        flexDirection: "row",
+    },
+    actionButton: {
+        padding: 4,
+        marginLeft: 8,
+    },
+    questionText: {
+        fontSize: 16,
+        color: "#333",
+        marginBottom: 16,
+        lineHeight: 22,
+    },
+    questionEditInput: {
+        fontSize: 16,
+        color: "#333",
+        backgroundColor: "#fff",
+        borderRadius: 4,
+        padding: 8,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: "#ddd",
+        minHeight: 60,
+        textAlignVertical: "top",
+    },
+    optionsContainer: {
+        marginTop: 8,
+    },
+    optionRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+    },
+    optionSelector: {
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        borderWidth: 1,
+        borderColor: "#5c51f3",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 12,
+    },
+    selectedOption: {
+        backgroundColor: "#5c51f3",
+    },
+    optionSelectorText: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#5c51f3",
+    },
+    selectedOptionText: {
+        color: "#fff",
+    },
+    optionText: {
+        flex: 1,
+        fontSize: 14,
+        color: "#333",
+    },
+    optionEditInput: {
+        flex: 1,
+        fontSize: 14,
+        color: "#333",
+        backgroundColor: "#fff",
+        borderRadius: 4,
+        padding: 8,
+        borderWidth: 1,
+        borderColor: "#ddd",
+    },
+    emptyState: {
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 32,
+    },
+    emptyStateText: {
+        fontSize: 16,
+        color: "#777",
+        marginTop: 16,
+    },
+})
