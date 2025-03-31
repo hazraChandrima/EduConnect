@@ -171,9 +171,10 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - Context-aware authentication analyzes user behavior patterns
 
 ### 🤖 AI-Powered Chatbot
-- Domain-specific chatbot limited to computer science topics
-- Built using LangChain and FAISS vector indexing
-- FAISS (Facebook AI Similarity Search) enables efficient similarity search in vector space
+- Built using LangChain and FAISS (Facebook AI Similarity Search) vector indexing, enabling efficient similarity search in vector space.
+- Implements a RAG (Retrieval-Augmented Generation) architecture for accurate responses
+- Optimized for academic queries and student support
+- Retrieves information from verified computer science resources before generating responses
 
 ### 📊 PDF-to-Quiz Generator
 - Automatically generates quizzes from PDF documents or text prompts
