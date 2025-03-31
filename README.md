@@ -90,7 +90,8 @@ EduConnect is a comprehensive college management system built with the MERN stac
    ```bash
    npm run dev
    ```
-
+   
+   The backend will be available at http://127.0.0:3000/
 ---
 
 ### 📱 Frontend Setup
@@ -110,6 +111,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
    ```bash
    npx expo start
    ```
+   The frontend will be available at http://127.0.0:8081/
 
 ---
 
