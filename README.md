@@ -14,7 +14,7 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
 ### 📚 Student-Centric Learning Management
 - Comprehensive **Academic Dashboard** (Curriculum, Marks, Attendance)
 - AI-powered **chatbot** for doubt clearing
-- AI-powered **quiz generation**
+- AI-powered **quiz generation** from PDF or text prompt
 - **Seamless Offline Mode**
 
 ### 📊 Efficient Academic Management
@@ -47,7 +47,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ### 🤖 AI Components
 
-- **LangChain & FAISS**: For creating a domain-specific chatbot limited to computer science topics
+- **OpenAI API + LangChain & FAISS**: For creating a domain-specific chatbot limited to computer science topics
 - **OpenAI API**: Powers the quiz generation feature, converting PDFs and text into educational quizzes
 
 ---
@@ -176,7 +176,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - Built using LangChain and FAISS (Facebook AI Similarity Search) vector indexing, enabling efficient similarity search in vector space.
 - Implements a RAG (Retrieval-Augmented Generation) architecture for accurate responses
 - Optimized for academic queries and student support
-- Retrieves information from verified computer science resources before generating responses
+- Retrieves information from verified computer science resources before generating responses, otherwise Google/Wikipedia search 
 
 ### 📊 PDF-to-Quiz Generator
 - Automatically generates quizzes from PDF documents or text prompts
