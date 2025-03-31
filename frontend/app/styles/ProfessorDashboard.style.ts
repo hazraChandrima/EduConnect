@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
     },
     navText: {
-        fontSize: 12,
+        fontSize: 10,
         marginTop: 3,
         color: "#777",
     },

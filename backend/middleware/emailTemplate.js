@@ -177,6 +177,7 @@ module.exports.Welcome_Email_Template = `
 
 
 
+
 module.exports.Alert_Email_On_Login_Template = `
   <!DOCTYPE html>
   <html lang="en">
@@ -273,8 +274,18 @@ module.exports.Alert_Email_On_Login_Template = `
               
               <div class="details-box">
                   <div class="details-item">
-                   <span class="details-label">Date & Time:</span> ${new Date().toLocaleString()}
-
+                   <span class="details-label">Date & Time:</span>  
+                   <strong>${new Date().toLocaleString('en-US', {
+                                weekday: 'long',
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                second: '2-digit',
+                                timeZoneName: 'short'
+                            })}
+                        </strong>
                   </div>
               </div>
               
@@ -297,6 +308,7 @@ module.exports.Alert_Email_On_Login_Template = `
   </body>
   </html>
 `;
+
 
 
 module.exports.Reset_Password_Email_Template = `
@@ -370,6 +382,25 @@ module.exports.Reset_Password_Email_Template = `
           <div class="content">
               <p>Hello,</p>
               <p>We received a request to reset your password. Click the button below to reset it:</p>
+
+                <div class="details-box">
+                  <div class="details-item">
+                   <span class="details-label">Date & Time:</span>
+                   <strong>${new Date().toLocaleString('en-US', {
+                       weekday: 'long',
+                       year: 'numeric',
+                       month: 'long',
+                       day: 'numeric',
+                       hour: '2-digit',
+                       minute: '2-digit',
+                       second: '2-digit',
+                       timeZoneName: 'short'
+                   })}
+                        </strong>
+                  </div>
+              </div>
+              
+
               <a href="{resetLink}" class="button">Reset Password</a>
               <p>If you did not request a password reset, you can safely ignore this email.</p>
               <p>This link will expire in 10 minutes for your security.</p>
