@@ -273,7 +273,7 @@ export default function AdminDashboard() {
         }
 
         // Fetch user data
-        const response = await fetch(`http://192.168.224.247:3000/api/user/${authContext.user.userId}`);
+        const response = await fetch(`http://192.168.142.247:3000/api/user/${authContext.user.userId}`);
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
