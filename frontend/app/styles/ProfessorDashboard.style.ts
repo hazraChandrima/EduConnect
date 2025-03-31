@@ -249,6 +249,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginTop: 10,
+        margin:15,
     },
     createButtonText: {
         color: "white",
@@ -881,6 +882,18 @@ const styles = StyleSheet.create({
         marginLeft: 8,
         fontSize: 16,
         color: '#333',
+    },
+    refreshButton: {
+        padding: 8,
+        borderRadius: 20,
+        backgroundColor: '#f0f0f7',
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 1,
+        elevation: 1,
     },
 });
 

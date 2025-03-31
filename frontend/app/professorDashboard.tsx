@@ -15,10 +15,11 @@ import {
 import { Ionicons, FontAwesome, MaterialIcons, AntDesign, Feather } from "@expo/vector-icons"
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit"
 import { Dimensions } from "react-native"
-import AsyncStorage from "@react-native-async-storage/async-storage"
 import { AuthContext } from "./context/AuthContext"
 import styles from "./styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
+import FileManagement from "./components/FileManagement"
+import QuizTab from "./components/QuizTab"
 
 interface Assignment {
 	id: string
@@ -193,13 +194,12 @@ const assignmentCompletionData = {
 	],
 }
 
-
 interface UserData {
-	_id: string;
-	name: string;
-	email: string;
-	role: string;
-	__v: number;
+	_id: string
+	name: string
+	email: string
+	role: string
+	__v: number
 }
 
 export default function ProfessorDashboard() {
@@ -210,7 +210,7 @@ export default function ProfessorDashboard() {
 	const [isGradingModalVisible, setIsGradingModalVisible] = useState(false)
 	const [isAttendanceModalVisible, setIsAttendanceModalVisible] = useState(false)
 	const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null)
-	const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false);
+	const [isProfileMenuVisible, setIsProfileMenuVisible] = useState(false)
 	const [newAssignment, setNewAssignment] = useState({
 		title: "",
 		description: "",
@@ -221,52 +221,49 @@ export default function ProfessorDashboard() {
 	const [feedbackInput, setFeedbackInput] = useState("")
 	const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split("T")[0])
 	const [attendanceStatus, setAttendanceStatus] = useState<AttendanceStatus>({})
-	const authContext = useContext(AuthContext);
-	const router = useRouter();
-	const [userData, setUserData] = useState<UserData | null>(null);
-	const [isLoading, setIsLoading] = useState<boolean>(true);
-	const displayName = userData?.name || "Professor";
-	const firstName = displayName.split(" ")[0];
-
-
+	const authContext = useContext(AuthContext)
+	const router = useRouter()
+	const [userData, setUserData] = useState<UserData | null>(null)
+	const [isLoading, setIsLoading] = useState<boolean>(true)
+	const displayName = userData?.name || "Professor"
+	const firstName = displayName.split(" ")[0]
 
 	useEffect(() => {
 		const checkAuthAndFetchData = async (): Promise<void> => {
 			try {
-				setIsLoading(true);
+				setIsLoading(true)
 
 				if (!authContext?.user) {
-					console.log("No authenticated user, redirecting to login");
-					router.replace("/login");
-					return;
+					console.log("No authenticated user, redirecting to login")
+					router.replace("/login")
+					return
 				}
 
 				if (authContext.user.role !== "professor") {
-					console.log(`User role is ${authContext.user.role}, not authorized for professor dashboard`);
+					console.log(`User role is ${authContext.user.role}, not authorized for professor dashboard`)
 					router.replace(`/${authContext.user.role}Dashboard`) // Redirect to an unauthorized page
-					return;
+					return
 				}
 
-				const response = await fetch(`http://localhost:3000/api/user/${authContext.user.userId}`);
+				const response = await fetch(`http://192.168.142.247:3000/api/user/${authContext.user.userId}`)
 
 				if (!response.ok) {
-					throw new Error(`API request failed with status ${response.status}`);
+					throw new Error(`API request failed with status ${response.status}`)
 				}
 
-				const data = await response.json() as UserData;
+				const data = (await response.json()) as UserData
 				if (data && data.name) {
-					setUserData(data);
+					setUserData(data)
 				}
 			} catch (error) {
-				console.error("Error in ProfessorDashboard:", error);
+				console.error("Error in ProfessorDashboard:", error)
 			} finally {
-				setIsLoading(false);
+				setIsLoading(false)
 			}
-		};
+		}
 
-		checkAuthAndFetchData();
-	}, [authContext?.user, router]);
-
+		checkAuthAndFetchData()
+	}, [authContext?.user, router])
 
 	if (isLoading) {
 		return (
@@ -274,15 +271,14 @@ export default function ProfessorDashboard() {
 				<ActivityIndicator size="large" color="#5c51f3" />
 				<Text style={{ marginTop: 10 }}>Loading...</Text>
 			</SafeAreaView>
-		);
+		)
 	}
 
 	// Redirect if user is not authorized
 	if (!authContext?.user || authContext.user.role !== "professor" || !userData) {
-		router.replace("/login");
-		return <></>;
+		router.replace("/login")
+		return <></>
 	}
-
 
 	const handleLogout = async () => {
 		try {
@@ -390,8 +386,6 @@ export default function ProfessorDashboard() {
 					</View>
 				</ScrollView>
 
-
-
 				<ScrollView horizontal showsHorizontalScrollIndicator={true}>
 					<View style={styles.chartCard}>
 						<Text style={styles.chartTitle}>Grade Distribution</Text>
@@ -416,13 +410,10 @@ export default function ProfessorDashboard() {
 							paddingLeft="15"
 							absolute
 						/>
-
 					</View>
 				</ScrollView>
 
-
 				<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-
 					<View style={styles.chartCard}>
 						<Text style={styles.chartTitle}>Assignment Completion Rate (%)</Text>
 						<BarChart
@@ -922,6 +913,21 @@ export default function ProfessorDashboard() {
 		</>
 	)
 
+	const renderFilesTab = () => (
+		<>
+			<View style={styles.tabHeader}>
+				<Text style={styles.tabTitle}>Student Submissions</Text>
+				<TouchableOpacity style={styles.refreshButton} onPress={() => setActiveTab("files")}>
+					<Ionicons name="refresh" size={24} color="#5c51f3" />
+				</TouchableOpacity>
+			</View>
+
+			<FileManagement />
+		</>
+	)
+
+	const renderQuizzesTab = () => <QuizTab />
+
 	// Create Assignment Modal
 	const renderAssignmentModal = () => (
 		<Modal
@@ -1169,10 +1175,7 @@ export default function ProfessorDashboard() {
 			<View style={styles.header}>
 				<Text style={styles.logo}>EduConnect</Text>
 				<View style={styles.profileContainer}>
-					<TouchableOpacity
-						style={styles.profileButton}
-						onPress={() => setIsProfileMenuVisible(!isProfileMenuVisible)}
-					>
+					<TouchableOpacity style={styles.profileButton} onPress={() => setIsProfileMenuVisible(!isProfileMenuVisible)}>
 						<View style={styles.profilePic}>
 							<Ionicons name="person" size={24} color="white" />
 						</View>
@@ -1187,10 +1190,7 @@ export default function ProfessorDashboard() {
 
 					{isProfileMenuVisible && (
 						<View style={styles.profileDropdown}>
-							<TouchableOpacity
-								style={styles.profileMenuItem}
-								onPress={handleLogout}
-							>
+							<TouchableOpacity style={styles.profileMenuItem} onPress={handleLogout}>
 								<Ionicons name="log-out-outline" size={20} color="#333" />
 								<Text style={styles.profileMenuItemText}>Logout</Text>
 							</TouchableOpacity>
@@ -1205,6 +1205,8 @@ export default function ProfessorDashboard() {
 				{activeTab === "attendance" && renderAttendanceTab()}
 				{activeTab === "grading" && renderGradingTab()}
 				{activeTab === "students" && renderStudentsTab()}
+				{activeTab === "files" && renderFilesTab()}
+				{activeTab === "quizzes" && renderQuizzesTab()}
 			</ScrollView>
 
 			{/* Navigation Bar */}
@@ -1225,9 +1227,13 @@ export default function ProfessorDashboard() {
 					<MaterialIcons name="grading" size={24} color={activeTab === "grading" ? "#5c51f3" : "#777"} />
 					<Text style={[styles.navText, activeTab === "grading" && styles.navActive]}>Grading</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("students")}>
-					<Ionicons name="people" size={24} color={activeTab === "students" ? "#5c51f3" : "#777"} />
-					<Text style={[styles.navText, activeTab === "students" && styles.navActive]}>Students</Text>
+				<TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("files")}>
+					<MaterialIcons name="folder" size={24} color={activeTab === "files" ? "#5c51f3" : "#777"} />
+					<Text style={[styles.navText, activeTab === "files" && styles.navActive]}>Files</Text>
+				</TouchableOpacity>
+				<TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("quizzes")}>
+					<MaterialIcons name="quiz" size={24} color={activeTab === "quizzes" ? "#5c51f3" : "#777"} />
+					<Text style={[styles.navText, activeTab === "quizzes" && styles.navActive]}>Quizzes</Text>
 				</TouchableOpacity>
 			</View>
 
@@ -1238,3 +1244,4 @@ export default function ProfessorDashboard() {
 		</SafeAreaView>
 	)
 }
+
