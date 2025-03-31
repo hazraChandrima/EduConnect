@@ -4,24 +4,24 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
 
 ---
 
-### ✨ Core Features:
+## ✨ Core Features:
 
-#### 🔒 Authentication and Security
+### 🔒 Authentication and Security
 - Using **multi-factor authentication (2FA)** during login
 - **Role-Based Access Control** for each user type
 
 
-#### 📚 Student-Centric Learning Management
+### 📚 Student-Centric Learning Management
 - Comprehensive **Academic Dashboard** (Curriculum, Marks, Attendance)
 - AI-powered **chatbot** for doubt clearing
 - AI-powered **quiz generation**
 - **Seamless Offline Mode**
 
-#### 📊 Efficient Academic Management
+### 📊 Efficient Academic Management
 - Easily **update marks** and **attendance** through the app in **real-time**
 - Evaluate assignments and give **instant feedback** for better learning
 
-#### ⚙️ Intelligent Administrative Control
+### ⚙️ Intelligent Administrative Control
 - Dynamic User Role and **System Configuration** Management
 - **Controlled Temporary Role Escalation**
 
@@ -213,10 +213,11 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-## 📱 UI/UX Screenshots
+## 📱 UI/UX Mockups
 
-[Insert 5 UI/UX Screenshots Here]
-
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/ef8d90fd-0362-434e-8605-6083a6b7e811" width="800" alt="Description">
+</div>
 
 
 ## 🤝 Contributors
