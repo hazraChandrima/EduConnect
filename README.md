@@ -2,7 +2,28 @@
 
 We have developed a **secure, multi-role** web/mobile application tailored for college environments that will serve as a centralized platform for college students, professors, and administrators.
 
----
+## 📖 Table of Contents  
+
+- [Core Features](#-core-features)  
+   - [Authentication and Security](#-authentication-and-security)  
+   - [Student-Centric Learning Management](#-student-centric-learning-management)  
+   - [Efficient Academic Management](#-efficient-academic-management)  
+   - [Intelligent Administrative Control](#%EF%B8%8F-intelligent-administrative-control)  
+- [Our Solution](#-our-solution)  
+- [Tech Stack](#-tech-stack)  
+   - [Why MERN Stack with React Native?](#-why-mern-stack-with-react-native)  
+   - [AI Components](#-ai-components)  
+- [Installation and Setup](#-installation-and-setup)  
+   - [Prerequisites](#-prerequisites)  
+   - [Backend Setup](#-backend-setup)  
+   - [Frontend Setup](#-frontend-setup)  
+   - [EduConnect Chatbot Setup](#-educonnect-chatbot-setup)  
+   - [PDF-to-Quiz Generator Setup](#-pdf-to-quiz-generator-setup)  
+- [Key Features Explained](#%EF%B8%8F-key-features-explained)    
+- [Architecture and Data Flow](#%EF%B8%8F-architecture-and-data-flow)  
+- [UI/UX Mockups](#-uiux-mockups)  
+- [Contributors](#-contributors)  
+
 
 ## ✨ Core Features:
 
