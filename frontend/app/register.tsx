@@ -17,6 +17,9 @@ import {
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
 
+
+const IP_ADDRESS ="192.168.142.247";
+
 enum RegistrationStep {
   INITIAL_INFO = 0,
   VERIFY_EMAIL = 1,
@@ -160,7 +163,7 @@ export default function RegisterScreen() {
       }
 
       const response = await fetch(
-        "http://localhost:3000/api/auth/register",
+        `http://${IP_ADDRESS}:3000/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -207,7 +210,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:3000/api/auth/verifyEmail",
+        `http://${IP_ADDRESS}:3000/api/auth/verifyEmail`,
         {
           method: "POST",
           headers: {
@@ -244,7 +247,7 @@ export default function RegisterScreen() {
     try {
       // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        "http://localhost:3000/api/auth/register",
+        `http://${IP_ADDRESS}:3000/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -291,7 +294,7 @@ export default function RegisterScreen() {
     try {
       // Update the user's password
       const response = await fetch(
-        "http://localhost:3000/api/auth/updatePassword",
+        `http://${IP_ADDRESS}:3000/api/auth/updatePassword`,
         {
           method: "POST",
           headers: {

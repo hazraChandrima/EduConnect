@@ -15,6 +15,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
 
+const IP_ADDRESS = "192.168.142.247"
+
+
 export default function ForgotPasswordScreen() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,7 +40,7 @@ export default function ForgotPasswordScreen() {
 
     try {
       const response = await fetch(
-        "http://192.168.142.247:3000/api/auth/forgot-password",
+        `http://${IP_ADDRESS}:3000/api/auth/forgot-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

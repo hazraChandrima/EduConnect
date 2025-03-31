@@ -22,6 +22,8 @@ import { useRouter } from "expo-router"
 import styles from "./styles/Chabot.style"
 import { AuthContext } from "./context/AuthContext"
 
+const IP_ADDRESS = "192.168.142.247"
+
 
 interface ScrollableChipsProps {
     suggestions: string[]
@@ -130,7 +132,7 @@ const ChatbotScreen = () => {
     
     const fetchBotResponse = async (query: string): Promise<string> => {
         try {
-            const response = await fetch('http://192.168.142.247:5000/ask', {
+            const response = await fetch(`http://${IP_ADDRESS}:5000/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

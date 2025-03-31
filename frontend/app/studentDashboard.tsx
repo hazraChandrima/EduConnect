@@ -56,6 +56,8 @@ const useIsSmallDevice = () => {
 };
 
 
+const IP_ADDRESS ="192.168.142.247";
+
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
   const auth = useContext(AuthContext);
@@ -117,7 +119,7 @@ export default function StudentDashboard(): React.ReactElement {
         }
 
         const response = await fetch(
-          `http://localhost:3000/api/user/${auth.user.userId}`
+          `http://${IP_ADDRESS}:3000/api/user/${auth.user.userId}`
         );
 
         if (!response.ok) {
