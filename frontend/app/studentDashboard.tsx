@@ -228,6 +228,11 @@ export default function StudentDashboard(): React.ReactElement {
   };
 
 
+
+
+
+  // this only works for web 
+
   // const submitAssignment = async () => {
   //   if (!selectedAssignment) return;
 
@@ -293,6 +298,13 @@ export default function StudentDashboard(): React.ReactElement {
   //   Alert.alert("Assignment submitted successfully!");
   // };
 
+
+
+
+
+
+  // this works for mobile only
+
   const submitAssignment = async () => {
     if (!selectedAssignment) return;
 
@@ -328,7 +340,6 @@ export default function StudentDashboard(): React.ReactElement {
 
       }
 
-      // Platform-specific storage
       let token;
       if (Platform.OS === 'web') {
         token = localStorage.getItem("token");
@@ -354,7 +365,7 @@ export default function StudentDashboard(): React.ReactElement {
         body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
+          // "Content-Type": "multipart/form-data",
         },
       });
 

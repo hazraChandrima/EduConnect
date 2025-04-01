@@ -41,10 +41,3 @@ async def txt_to_quizz(content: str, num_questions: int):
 @app.post("/text_to_quizz/")
 async def generate_text_quizz(request: QuizRequest):
     return await txt_to_quizz(request.content, request.num_questions)
-
-
-
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000, reload=True)
