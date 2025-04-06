@@ -1,9 +1,10 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendVerificationCode, sendWelcomeEmail, sendAlertOnLogin } = require('../middleware/email');
+const { sendVerificationCode, sendWelcomeEmail, sendAlertOnLogin, sendAccountSuspensionAlert } = require('../middleware/email');
 const UserContext = require("../models/UserContext");
 const { calculateRiskScore } = require("../utils/calculateRisk");
+const crypto = require('crypto');
 
 
 const generateToken = (id, role) => {
@@ -141,7 +142,7 @@ exports.updatePassword = async (req, res) => {
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: "Email, password are required" });
+      return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
     const user = await User.findOne({ email });
@@ -154,31 +155,61 @@ exports.updatePassword = async (req, res) => {
       console.log("User already verified, but updating password and saving context");
     }
 
-
     const hashedPassword = await bcrypt.hash(password, 10);
     user.password = hashedPassword;
     user.isVerified = true;
     await user.save();
 
-    // Save UserContext
+    // Save UserContext (if not already exists)
     if (contextData && contextData.deviceId && contextData.location) {
-      const userContext = new UserContext({
-        userId: user._id,
-        knownDevices: [contextData.deviceId],
-        knownLocations: [{
-          latitude: contextData.location.latitude,
-          longitude: contextData.location.longitude,
-          radius: 5,
-        }],
-        loginHistory: [{
+      let userContext = await UserContext.findOne({ userId: user._id });
+
+      if (!userContext) {
+        userContext = new UserContext({
+          userId: user._id,
+          knownDevices: [contextData.deviceId],
+          knownLocations: [{
+            latitude: contextData.location.latitude,
+            longitude: contextData.location.longitude,
+            radius: 5,
+          }],
+          loginHistory: [{
+            timestamp: new Date(),
+            location: contextData.location,
+            deviceId: contextData.deviceId,
+          }]
+        });
+        await userContext.save();
+        console.log("UserContext created for", user.email);
+      } else {
+        // If already exists, just update if necessary
+        if (!userContext.knownDevices.includes(contextData.deviceId)) {
+          userContext.knownDevices.push(contextData.deviceId);
+        }
+
+        const locationExists = userContext.knownLocations.some(loc =>
+          loc.latitude === contextData.location.latitude &&
+          loc.longitude === contextData.location.longitude
+        );
+
+        if (!locationExists) {
+          userContext.knownLocations.push({
+            latitude: contextData.location.latitude,
+            longitude: contextData.location.longitude,
+            radius: 5,
+          });
+        }
+
+        userContext.loginHistory.push({
           timestamp: new Date(),
           location: contextData.location,
           deviceId: contextData.deviceId,
-        }]
-      });
+        });
 
-      await userContext.save();
-      console.log("UserContext saved for", user.email);
+        await userContext.save();
+        console.log("UserContext updated for", user.email);
+      }
+
     } else {
       console.warn("No contextData provided during updatePassword");
     }
@@ -269,43 +300,6 @@ exports.verifyLoginOTP = async (req, res) => {
 
 
 
-// // Modify the existing loginUser function to support 2FA
-// exports.loginUser = async (req, res) => {
-//   const { email, password, otpVerified } = req.body
-
-//   try {
-//     const user = await User.findOne({ email })
-//     if (!user) return res.status(400).json({ message: "User not found" })
-
-//     if (!user.isVerified) {
-//       return res.status(403).json({ message: "Email not verified. Please check your email." })
-//     }
-
-//     // Check if OTP was verified (required for 2FA login)
-//     if (!otpVerified) {
-//       return res.status(403).json({ message: "Email verification required" })
-//     }
-
-//     const isMatch = await bcrypt.compare(password, user.password)
-//     if (!isMatch) return res.status(400).json({ message: "Invalid credentials" })
-
-//     const token = generateToken(user._id, user.role)
-
-//     res.json({
-//       userId: user._id,
-//       token,
-//       role: user.role,
-//     })
-
-//     sendAlertOnLogin(user.email, user.name);
-
-//   } catch (error) {
-//     res.status(500).json({ error: error.message })
-//   }
-// }
-
-
-
 
 // Context Aware Adaptive Authentication during login by calculating Risk score 
 exports.loginUser = async (req, res) => {
@@ -335,6 +329,7 @@ exports.loginUser = async (req, res) => {
       console.log("OTP not verified for user:", user.email);
       return res.status(403).json({ message: "Email verification required" });
     }
+
 
     if (user.suspendedUntil && new Date() < user.suspendedUntil) {
       console.log(`User ${user.email} is suspended until ${user.suspendedUntil}`);
@@ -370,11 +365,34 @@ exports.loginUser = async (req, res) => {
     if (riskScore >= 8) {
       const suspensionTime = new Date();
       suspensionTime.setHours(suspensionTime.getHours() + 24);
-
+      user.isSuspended = true;
       user.suspendedUntil = suspensionTime;
       await user.save();
 
       console.log(`Suspended user ${user.email} due to high risk:`, riskScore);
+
+      // Generate a verification link with token
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      user.verificationToken = verificationToken;
+      user.verificationTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      await user.save();
+
+      const verificationLink = `${process.env.FRONTEND_URL}/verify-device/${verificationToken}`;
+
+      // Get location info in readable format
+      const locationInfo = contextData.location.city ?
+        `${contextData.location.city}, ${contextData.location.country}` :
+        'Unknown location';
+
+      // Send suspension email with details
+      await sendAccountSuspensionAlert(
+        user.email,
+        user.name,
+        contextData.deviceInfo || 'Unknown device',
+        locationInfo,
+        contextData.ipAddress || 'Unknown IP',
+        verificationLink
+      );
 
       return res.status(403).json({
         success: false,

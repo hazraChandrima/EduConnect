@@ -37,6 +37,15 @@ const UserSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  isSuspended: {
+    type: Boolean,
+    default: false,
+  },
+  suspendedUntil: {
+    type: Date,
+    default: null,
+  },
+
 })
 
 module.exports = mongoose.model("User", UserSchema)

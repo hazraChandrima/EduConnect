@@ -8,6 +8,7 @@ import { router } from "expo-router"
 import { Platform, Alert } from "react-native"
 import type { ContextDataType } from "../register"
 
+
 interface User {
   userId: string
   email: string
@@ -67,6 +68,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     loadUser()
   }, [])
 
+
+
+
+
   // Step 1: Request OTP with email
   const requestLoginOTP = async (email: string): Promise<boolean> => {
     setIsLoading(true)
@@ -90,6 +95,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false)
     }
   }
+
+
+
+
 
   // Step 2: Verify OTP
   const verifyLoginOTP = async (email: string, code: string): Promise<boolean> => {
@@ -116,90 +125,100 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
+
+
+
+
   // Step 3: Complete login with password and context data
   const login = async (
     email: string,
     password: string,
     contextData: ContextDataType,
-    otpVerified: boolean,
+    otpVerified: boolean
   ): Promise<void> => {
-    // Check if OTP is verified
     if (!otpVerified && !isOtpVerified) {
-      throw new Error("Email verification required")
+      throw new Error("Email verification required");
     }
 
-    console.log("Sending login request to backend...")
-    console.log(API_URL)
+    if (!contextData || !contextData.deviceId || !contextData.location) {
+      throw new Error("Device information required for login");
+    }
 
-    setIsLoading(true)
+    console.log("Sending login request to backend...");
+    console.log("Login Payload:", {
+      email: currentEmail || email,
+      password: "********",
+      contextData,
+      otpVerified: otpVerified || isOtpVerified,
+    });
+
+    setIsLoading(true);
 
     try {
-      if (!contextData || !contextData.deviceId || !contextData.location) {
-        throw new Error("Device information required for login")
-      }
-
-      console.log(email, password, contextData, otpVerified)
-
       const response = await axios.post(`${API_URL}/login`, {
         email: currentEmail || email,
         password,
         contextData,
         otpVerified: otpVerified || isOtpVerified,
-      })
+      });
 
-      // Handle suspension response
-      if (response.data?.forceLogout) {
-        const msg = response.data.message || "Your account has been suspended."
+      const data = response.data;
+
+      // Suspension handling from server response
+      if (data?.isSuspended) {
+        const suspendedUntil = new Date(data.suspendedUntil);
+        const formattedDate = suspendedUntil.toLocaleString();
+
+        const message = `Your account has been suspended until ${formattedDate}. Please try again later.`;
 
         if (Platform.OS === "web") {
-          alert(msg) // Use browser's alert for web
-          localStorage.clear()
+          alert(message);
+          localStorage.clear();
         } else {
-          Alert.alert("Suspended", msg)
-          await AsyncStorage.clear()
+          Alert.alert("Account Suspended", message);
+          await AsyncStorage.clear();
         }
 
-        router.replace("/login")
-        return
+        router.replace("/login");
+        return;
       }
-
-      console.log("Server response:", response.data)
 
       const userData: User = {
-        userId: response.data.userId,
+        userId: data.userId,
         email: currentEmail || email,
-        role: response.data.role,
-        token: response.data.token,
-      }
+        role: data.role,
+        token: data.token,
+      };
 
-      setUser(userData)
+      setUser(userData);
 
-      // Store user data based on platform
       if (Platform.OS === "web") {
-        localStorage.setItem("token", response.data.token)
-        localStorage.setItem("user", JSON.stringify(userData))
-        localStorage.setItem("userId", response.data.userId)
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(userData));
+        localStorage.setItem("userId", data.userId);
       } else {
-        await AsyncStorage.setItem("token", response.data.token)
-        await AsyncStorage.setItem("user", JSON.stringify(userData))
-        await AsyncStorage.setItem("userId", response.data.userId)
+        await AsyncStorage.setItem("token", data.token);
+        await AsyncStorage.setItem("user", JSON.stringify(userData));
+        await AsyncStorage.setItem("userId", data.userId);
       }
 
-      console.log("User logged in and stored:", userData)
+      axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-      axios.defaults.headers.common["Authorization"] = `Bearer ${response.data.token}`
+      resetAuthFlow();
 
-      resetAuthFlow()
-
-      router.replace(`/${userData.role}Dashboard`)
+      router.replace(`/${userData.role}Dashboard`);
     } catch (error: unknown) {
-      const err = error as Error
-      console.error("Login request failed:", err.message)
-      throw err // Re-throw to handle in the component
+      const err = error as Error;
+      console.error("Login request failed:", err.message);
+      throw err;
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
+
+
+
+
 
   const logout = async (): Promise<void> => {
     console.log("Logging out...")

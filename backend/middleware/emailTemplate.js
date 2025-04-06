@@ -413,3 +413,140 @@ module.exports.Reset_Password_Email_Template = `
   </body>
   </html>
 `;
+
+
+
+
+module.exports.Alert_Suspension_Template = `
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Account Security Alert</title>
+      <style>
+          body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 0;
+              background-color: #f4f4f4;
+              color: #333;
+          }
+          .container {
+              max-width: 600px;
+              margin: 30px auto;
+              background: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+              overflow: hidden;
+              border: 1px solid #ddd;
+          }
+          .header {
+              background-color: #f0ad4e;
+              color: white;
+              padding: 20px;
+              text-align: center;
+              font-size: 26px;
+              font-weight: bold;
+          }
+          .content {
+              padding: 25px;
+              line-height: 1.8;
+          }
+          .details-box {
+              background-color: #f8f8f8;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+              padding: 15px;
+              margin: 20px 0;
+          }
+          .details-item {
+              margin: 10px 0;
+          }
+          .details-label {
+              font-weight: bold;
+              display: inline-block;
+              min-width: 100px;
+              margin-right: 10px;
+          }
+          .button {
+              display: inline-block;
+              padding: 12px 25px;
+              margin: 20px 0;
+              background-color: #5cb85c;
+              color: white;
+              text-decoration: none;
+              border-radius: 5px;
+              text-align: center;
+              font-size: 16px;
+              font-weight: bold;
+              transition: background-color 0.3s;
+          }
+          .button:hover {
+              background-color: #4cae4c;
+          }
+          .footer {
+              background-color: #f4f4f4;
+              padding: 15px;
+              text-align: center;
+              color: #777;
+              font-size: 12px;
+              border-top: 1px solid #ddd;
+          }
+          p {
+              margin: 0 0 15px;
+          }
+      </style>
+  </head>
+  <body>
+      <div class="container">
+          <div class="header">Account Security Alert</div>
+          <div class="content">
+              <p>Hello {userName},</p>
+              <p><strong>Your account has been temporarily suspended for security reasons.</strong></p>
+              <p>We detected a login attempt from an unrecognized location or device. To protect your account, we've temporarily suspended access until we can verify your identity.</p>
+              
+              <div class="details-box">
+                  <div class="details-item">
+                      <span class="details-label">Date & Time:</span>
+                      <strong>${new Date().toLocaleString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            timeZoneName: 'short'
+                        })}
+                        </strong>
+                  </div>
+                  <div class="details-item">
+                      <span class="details-label">Device:</span>
+                      <strong>{deviceType}</strong>
+                  </div>
+                  <div class="details-item">
+                      <span class="details-label">Location:</span>
+                      <strong>{location}</strong>
+                  </div>
+                  <div class="details-item">
+                      <span class="details-label">IP Address:</span>
+                      <strong>{ipAddress}</strong>
+                  </div>
+              </div>
+              
+              <p>If this was you, please verify your identity and restore access to your account by clicking the button below:</p>
+              <a href="{verificationLink}" class="button">Verify Identity</a>
+              
+              <p>If this wasn't you, please contact our support team immediately at <a href="mailto:support@educonnect.com">support@educonnect.com</a> or call our security hotline at <strong>1-800-XXX-XXXX</strong>.</p>
+              
+              <p>For your security, the verification link will expire in 24 hours.</p>
+          </div>
+          <div class="footer">
+              <p>&copy; ${new Date().getFullYear()} EduConnect. All rights reserved.</p>
+              <p>This is an automated security message. Please do not reply directly to this email.</p>
+          </div>
+      </div>
+  </body>
+  </html>
+`;

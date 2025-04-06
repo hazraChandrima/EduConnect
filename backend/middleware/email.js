@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const { Verification_Email_Template, Welcome_Email_Template, Alert_Email_On_Login_Template , Reset_Password_Email_Template } = require("./emailTemplate");
+const { Verification_Email_Template, Welcome_Email_Template, Alert_Email_On_Login_Template , Reset_Password_Email_Template, Alert_Suspension_Template } = require("./emailTemplate");
 
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
@@ -90,5 +90,34 @@ module.exports.sendResetPasswordEmail = async (email, resetLink) => {
         console.log("Reset link email sent");
     } catch (error) {
         console.error('Error sending reset email:', error);
+    }
+}
+
+
+
+module.exports.sendAccountSuspensionAlert = async (email, userName, deviceType, location, ipAddress, verificationLink) => {
+    try {
+        // Use the existing transporter instead of creating a new one
+        const htmlContent = Alert_Suspension_Template
+            .replace("{userName}", userName)
+            .replace("{deviceType}", deviceType)
+            .replace("{location}", location)
+            .replace("{ipAddress}", ipAddress)
+            .replace("{verificationLink}", verificationLink);
+
+        const mailOptions = {
+            from: `"EduConnect Security" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: 'Security Alert: Account Suspended',
+            text: `Your EduConnect account has been suspended due to suspicious login activity from ${location}`,
+            html: htmlContent,
+        };
+
+        const response = await transporter.sendMail(mailOptions);
+        console.log("Account suspension alert email sent", response);
+        return true;
+    } catch (error) {
+        console.error('Error sending account suspension alert:', error);
+        return false;
     }
 }

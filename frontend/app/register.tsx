@@ -593,14 +593,15 @@ export default function RegisterScreen() {
     }
   };
 
-  // Handle password submission and complete registration
+
+
+
   const handleCompleteRegistration = async () => {
     // Validate password once more before submission
     if (!validatePassword(registrationData.password)) {
       return;
     }
 
-    // Refresh context data before completing registration
     const freshContextData = await getContextData();
     setContextData(freshContextData);
 
@@ -629,7 +630,6 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to update password");
       }
 
-      // Log in the user
       try {
         if (authContext?.login && freshContextData) {
           await authContext.login(
@@ -672,8 +672,6 @@ export default function RegisterScreen() {
             "Your account has been created successfully. Please log in manually."
           );
         }
-
-        // Redirect to login instead
         setTimeout(() => {
           router.replace("/login");
         }, 2000);
@@ -696,6 +694,10 @@ export default function RegisterScreen() {
       setIsLoading(false);
     }
   };
+
+
+
+
 
   // Check if initial form is filled properly
   const isInitialFormFilled = !!(
