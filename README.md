@@ -20,7 +20,7 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
    - [EduConnect Chatbot Setup](#-educonnect-chatbot-setup)  
    - [PDF-to-Quiz Generator Setup](#-pdf-to-quiz-generator-setup)  
 - [Key Features Explained](#%EF%B8%8F-key-features-explained)    
-- [Architecture and Data Flow](#%EF%B8%8F-architecture-and-data-flow)  
+- [Architecture](#%EF%B8%8F-architecture)  
 - [UI/UX Mockups](#-uiux-mockups)  
 - [Contributors](#-contributors)  
 
@@ -223,17 +223,19 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-## 🏗️ Architecture and Data Flow
+## 🏗️ Architecture
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c6e0cf77-ebb8-400e-9ea9-b3f30046fce6" width="800" alt="Description">
 </div>
 
+<!--
 <br/>
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/07c0c3af-95d4-43ab-8dbe-4b651f487458" width="800" alt="Description">
 </div>
+
 
 
 ### The application follows a microservices architecture:
@@ -244,7 +246,8 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - Frontend web application (React)
 - Mobile application (React Native)
 
----
+-->
+
 
 ## 📱 UI/UX Mockups
 
