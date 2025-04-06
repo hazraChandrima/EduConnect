@@ -2,7 +2,7 @@
 import * as Location from "expo-location"
 import * as Device from "expo-device"
 import * as SecureStore from "expo-secure-store"
-
+import SuspensionModal from './components/SuspensionModal';
 import { useContext, useEffect, useState, useCallback } from "react"
 import { AuthContext } from "./context/AuthContext"
 
@@ -51,7 +51,13 @@ type AuthContextType = {
   requestLoginOTP: (email: string) => Promise<boolean>
   verifyLoginOTP: (email: string, otpCode: string) => Promise<boolean>
   login: (email: string, password: string, contextData: ContextDataType, rememberMe: boolean) => Promise<void>
+  // Update to match SuspensionModal's expected props
+  isSuspensionModalVisible: boolean
+  suspendedUntil: string | null  // Changed from string | Date | null
+  closeSuspensionModal: () => void
 }
+
+
 
 // Define AlertConfig type
 type AlertConfig = {
@@ -957,6 +963,8 @@ export default function LoginScreen() {
     )
   }
 
+  
+
   const renderLocationStatusButton = () => {
     const getStatusColor = () => {
       if (locationPermissionStatus === "granted" && locationFunctionallyEnabled) {
@@ -1050,9 +1058,23 @@ export default function LoginScreen() {
     return null
   }
 
+
+  const {
+    isSuspensionModalVisible,
+    suspendedUntil,
+    closeSuspensionModal
+  } = authContext;
+
   return (
     <SafeAreaView style={styles.container}>
       {renderPermissionModal()}
+
+      <SuspensionModal
+        isVisible={isSuspensionModalVisible}
+        suspendedUntil={suspendedUntil}
+        onClose={closeSuspensionModal}
+      />
+
 
       {/* Custom Alert for web */}
       {Platform.OS === "web" && (

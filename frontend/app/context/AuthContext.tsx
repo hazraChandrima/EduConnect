@@ -5,7 +5,7 @@ import { createContext, useState, useEffect, useCallback, type ReactNode } from 
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import axios from "axios"
 import { router } from "expo-router"
-import { Platform, Alert } from "react-native"
+import { Platform } from "react-native"
 import type { ContextDataType } from "../register"
 
 
@@ -21,11 +21,14 @@ interface AuthContextProps {
   isLoading: boolean
   currentEmail: string | null
   isOtpVerified: boolean
+  isSuspensionModalVisible: boolean
+  suspendedUntil: string | null
   requestLoginOTP: (email: string) => Promise<boolean>
   verifyLoginOTP: (email: string, code: string) => Promise<boolean>
   login: (email: string, password: string, contextData: ContextDataType, otpVerified: boolean) => Promise<void>
   logout: () => Promise<void>
   resetAuthFlow: () => void
+  closeSuspensionModal: () => void
 }
 
 export const AuthContext = createContext<AuthContextProps | null>(null)
@@ -35,9 +38,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true)
   const [currentEmail, setCurrentEmail] = useState<string | null>(null)
   const [isOtpVerified, setIsOtpVerified] = useState(false)
+  const [isSuspensionModalVisible, setIsSuspensionModalVisible] = useState(false)
+  const [suspendedUntil, setSuspendedUntil] = useState<string | null>(null)
 
   const IP_ADDRESS = "192.168.142.247"
   const API_URL = `http://${IP_ADDRESS}:3000/api/auth`
+
+
 
   useEffect(() => {
     console.log("Checking for stored user...")
@@ -71,7 +78,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-
   // Step 1: Request OTP with email
   const requestLoginOTP = async (email: string): Promise<boolean> => {
     setIsLoading(true)
@@ -95,8 +101,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false)
     }
   }
-
-
 
 
 
@@ -124,6 +128,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsLoading(false)
     }
   }
+
+
+
+  const closeSuspensionModal = useCallback((): void => {
+    setIsSuspensionModalVisible(false)
+    setSuspendedUntil(null)
+  }, [])
 
 
 
@@ -164,22 +175,24 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const data = response.data;
 
-      // Suspension handling from server response
-      if (data?.isSuspended) {
-        const suspendedUntil = new Date(data.suspendedUntil);
-        const formattedDate = suspendedUntil.toLocaleString();
+      if (data?.success === false && data?.message?.includes("suspended")) {
+        // Extract date from message if available
+        const suspensionDate = data?.suspendedUntil ?
+          new Date(data.suspendedUntil).toLocaleString() :
+          extractDateFromMessage(data?.message);
 
-        const message = `Your account has been suspended until ${formattedDate}. Please try again later.`;
+        // Show suspension modal
+        setSuspendedUntil(suspensionDate);
+        setIsSuspensionModalVisible(true);
 
+        // Clean up storage
         if (Platform.OS === "web") {
-          alert(message);
           localStorage.clear();
         } else {
-          Alert.alert("Account Suspended", message);
           await AsyncStorage.clear();
         }
 
-        router.replace("/login");
+        setIsLoading(false);
         return;
       }
 
@@ -208,9 +221,35 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       router.replace(`/${userData.role}Dashboard`);
     } catch (error: unknown) {
-      const err = error as Error;
-      console.error("Login request failed:", err.message);
-      throw err;
+      console.error("Login request failed:", error);
+
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        const responseData = error.response.data;
+
+        if (responseData?.message?.includes("suspended")) {
+          const suspensionDate = responseData?.suspendedUntil ?
+            new Date(responseData.suspendedUntil).toLocaleString() :
+            extractDateFromMessage(responseData?.message);
+
+          setSuspendedUntil(suspensionDate);
+          setIsSuspensionModalVisible(true);
+
+          // Clean up storage
+          if (Platform.OS === "web") {
+            localStorage.clear();
+          } else {
+            await AsyncStorage.clear();
+          }
+
+          return;
+        }
+      }
+
+      if (error instanceof Error) {
+        throw error;
+      } else {
+        throw new Error('Unknown error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -219,6 +258,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
+  const extractDateFromMessage = (message?: string): string | null => {
+    if (!message) return null;
+
+    const dateMatch = message.match(/until\s(.+)$/);
+    return dateMatch ? dateMatch[1] : null;
+  };
 
   const logout = async (): Promise<void> => {
     console.log("Logging out...")
@@ -249,6 +294,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
+
+
   // Reset the authentication flow state
   const resetAuthFlow = useCallback((): void => {
     setCurrentEmail(null)
@@ -262,15 +309,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         currentEmail,
         isOtpVerified,
+        isSuspensionModalVisible,
+        suspendedUntil,
         requestLoginOTP,
         verifyLoginOTP,
         login,
         logout,
         resetAuthFlow,
+        closeSuspensionModal,
       }}
     >
       {children}
     </AuthContext.Provider>
   )
 }
-
