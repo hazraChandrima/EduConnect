@@ -16,6 +16,8 @@ const {
     requestLoginOTP, 
     verifyLoginOTP 
 } = require('../controllers/authController');
+const UserContext = require("../models/UserContext");
+const { calculateRiskScore } = require("../utils/calculateRisk");
 
 
 router.post('/register', registerUser);
@@ -26,9 +28,8 @@ router.post("/requestLoginOTP", requestLoginOTP)
 router.post("/verifyLoginOTP", verifyLoginOTP)
 
 
+
 // Send password reset link
-
-
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
 
@@ -51,6 +52,8 @@ router.post('/forgot-password', async (req, res) => {
         res.status(500).json({ message: 'Error sending reset email.' });
     }
 });
+
+
 
 // router.post('/forgot-password', async (req, res) => {
 //     const { email } = req.body;
@@ -90,6 +93,8 @@ router.post('/forgot-password', async (req, res) => {
 //         res.status(500).json({ message: 'Error sending reset email.' });
 //     }
 // });
+
+
 
 
 // Reset Password
