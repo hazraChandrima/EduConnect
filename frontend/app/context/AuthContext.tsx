@@ -39,7 +39,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [currentEmail, setCurrentEmail] = useState<string | null>(null);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
 
-  const API_URL = "http://192.168.142.247:3000/api/auth";
+  const API_URL = "http://localhost:3000/api/auth";
 
   useEffect(() => {
     console.log("Checking for stored user...");

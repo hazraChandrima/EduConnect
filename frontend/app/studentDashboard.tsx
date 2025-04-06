@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
-
+import { storage } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import NetInfo from "@react-native-community/netinfo";
 
 import {
@@ -56,7 +57,7 @@ const useIsSmallDevice = () => {
 };
 
 
-const IP_ADDRESS ="192.168.142.247";
+const IP_ADDRESS ="localhost";
 
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
@@ -228,70 +229,125 @@ export default function StudentDashboard(): React.ReactElement {
   };
 
 
+  // const submitAssignment = async () => {
+  //   if (!selectedAssignment) return;
+
+  //   const formData = new FormData();
+  //   formData.append("assignmentId", selectedAssignment.id);
+  //   formData.append("text", submissionText);
+
+
+  //   const filePromises = submissionFiles.map(async (file) => {
+  //     try {
+  //       const response = await fetch(file.uri);
+  //       const blob = await response.blob();
+  //       const fileObject = new File([blob], file.name, { type: file.type });
+
+  //       formData.append("file", fileObject); //Ensure key matches backend
+  //     } catch (error) {
+  //       console.error(" Error converting file to Blob:", error);
+  //     }
+  //   });
+
+  //   await Promise.all(filePromises); // Ensure all files are processed before sending request
+
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     console.error("No authentication token found!");
+  //     return;
+  //   }
+
+  //   try {
+  //     const response = await fetch("http://192.168.142.247:3000/api/assignment/submit", {
+  //       method: "POST",
+  //       body: formData,
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, //Send token for authentication
+  //       },
+  //     });
+
+  //     console.log("Raw response from backend:", response);
+
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       console.log("Assignment submitted successfully:", data);
+  //     } else {
+  //       console.error("Failed to submit assignment:", data.error);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting assignment:", error);
+  //   }
+  //   // Update the assignment status
+  //   const updatedAssignments = assignments.map(assignment =>
+
+
+  //     assignment.id === selectedAssignment.id
+  //       ? { ...assignment, status: "submitted" as const }
+  //       : assignment
+  //   );
+
+  //   setAssignments(updatedAssignments);
+  //   setIsSubmissionModalVisible(false);
+
+  //   alert("Assignment submitted successfully!");
+  //   Alert.alert("Assignment submitted successfully!");
+  // };
+  
   const submitAssignment = async () => {
-    if (!selectedAssignment) return;
-
-    const formData = new FormData();
-    formData.append("assignmentId", selectedAssignment.id);
-    formData.append("text", submissionText);
-
-
-    const filePromises = submissionFiles.map(async (file) => {
-      try {
-        const response = await fetch(file.uri);
-        const blob = await response.blob();
-        const fileObject = new File([blob], file.name, { type: file.type });
-
-        formData.append("file", fileObject); //Ensure key matches backend
-      } catch (error) {
-        console.error(" Error converting file to Blob:", error);
-      }
-    });
-
-    await Promise.all(filePromises); // Ensure all files are processed before sending request
-
+    if (!selectedAssignment || submissionFiles.length === 0) return;
+  
     const token = localStorage.getItem("token");
     if (!token) {
       console.error("No authentication token found!");
       return;
     }
-
+  
     try {
-      const response = await fetch("http://192.168.142.247:3000/api/assignment/submit", {
+      const file = submissionFiles[0]; // Assuming one file for simplicity
+      const response = await fetch(file.uri);
+      const blob = await response.blob();
+  
+      const storageRef = ref(storage, `assignments/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, blob);
+  
+      const downloadUrl = await getDownloadURL(storageRef);
+  
+      const backendResponse = await fetch("http://localhost:3000/api/assignment/submit", {
         method: "POST",
-        body: formData,
         headers: {
-          Authorization: `Bearer ${token}`, //Send token for authentication
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
+        body: JSON.stringify({
+          assignmentId: selectedAssignment.id,
+          courseId: selectedAssignment.courseId,
+          downloadUrl,
+        }),
       });
-
-      console.log("Raw response from backend:", response);
-
-      const data = await response.json();
-      if (response.ok) {
+  
+      const data = await backendResponse.json();
+  
+      if (backendResponse.ok) {
         console.log("Assignment submitted successfully:", data);
+        alert("Assignment submitted successfully!");
       } else {
         console.error("Failed to submit assignment:", data.error);
       }
+  
+      // Mark as submitted
+      const updatedAssignments = assignments.map((assignment) =>
+        assignment.id === selectedAssignment.id
+          ? { ...assignment, status: "submitted" as const }
+          : assignment
+      );
+  
+      setAssignments(updatedAssignments);
+      setIsSubmissionModalVisible(false);
     } catch (error) {
       console.error("Error submitting assignment:", error);
+      alert("Something went wrong. Please try again.");
     }
-    // Update the assignment status
-    const updatedAssignments = assignments.map(assignment =>
-
-
-      assignment.id === selectedAssignment.id
-        ? { ...assignment, status: "submitted" as const }
-        : assignment
-    );
-
-    setAssignments(updatedAssignments);
-    setIsSubmissionModalVisible(false);
-
-    alert("Assignment submitted successfully!");
-    Alert.alert("Assignment submitted successfully!");
   };
-
 
   const calculateAttendancePercentage = (courseId: string): number => {
     const courseAttendance = attendance.filter((a) => a.courseId === courseId);

@@ -18,7 +18,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
 
 
-const IP_ADDRESS ="192.168.142.247";
+const IP_ADDRESS ="localhost";
 
 enum RegistrationStep {
   INITIAL_INFO = 0,
