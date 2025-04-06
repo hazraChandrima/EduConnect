@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const forgotResetPassStyle = StyleSheet.create({
+const forgotResetPassStyle = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f9fafb",
@@ -121,3 +121,4 @@ export const forgotResetPassStyle = StyleSheet.create({
     },
 });
 
+export default forgotResetPassStyle;

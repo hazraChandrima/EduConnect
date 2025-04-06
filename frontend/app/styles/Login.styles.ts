@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 
 
 const styles = StyleSheet.create({
@@ -113,8 +113,6 @@ const styles = StyleSheet.create({
     testButtonText: {
         color: "#333",
     },
-
-    // Progress bar styles
     progressContainer: {
         width: "100%",
         height: 4,
@@ -127,8 +125,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#5c51f3",
         borderRadius: 2,
     },
-
-    // Back button styles
     backButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -140,8 +136,6 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         fontSize: 14,
     },
-
-    // Resend code styles
     resendContainer: {
         flexDirection: "row",
         justifyContent: "center",
@@ -172,7 +166,135 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginLeft: 4,
         
-    }
+    },
+    // Add these to your styles.js file in the Login.styles
+
+    locationStatusButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+        borderColor: '#ff9800',
+    },
+
+    locationStatusText: {
+        marginLeft: 6,
+        fontSize: 12,
+        fontWeight: '500',
+        color: '#ff9800',
+    },
+
+    modalOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+
+    modalContent: {
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 24,
+        width: Platform.OS === 'web' ? '80%' : '90%',
+        maxWidth: 400,
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '600',
+        marginBottom: 12,
+        color: '#333',
+    },
+
+    modalText: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 20,
+        lineHeight: 20,
+    },
+
+    modalButtons: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+
+    modalButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        marginLeft: 12,
+        borderRadius: 8,
+    },
+
+    modalButtonText: {
+        fontSize: 14,
+        color: '#666',
+    },
+
+    primaryButton: {
+        backgroundColor: '#5c6bc0',
+    },
+
+    primaryButtonText: {
+        color: '#fff',
+        fontWeight: '500',
+    },
+
+    permissionButton: {
+        backgroundColor: 'rgba(92, 107, 192, 0.1)',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        marginVertical: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(92, 107, 192, 0.3)',
+    },
+
+    permissionButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+
+    permissionButtonText: {
+        marginLeft: 8,
+        color: '#5c6bc0',
+        fontWeight: '500',
+    },
+    permissionButtonEnabled: {
+        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+        borderColor: 'rgba(76, 175, 80, 0.3)',
+    },
+
+    permissionButtonDisabled: {
+        backgroundColor: 'rgba(92, 107, 192, 0.1)',
+        borderColor: 'rgba(92, 107, 192, 0.3)',
+    },
+
+    permissionButtonWarning: {
+        backgroundColor: 'rgba(255, 152, 0, 0.1)',
+        borderColor: 'rgba(255, 152, 0, 0.3)',
+    },
+
+    locationStatusButtonDisabled: {
+        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+        borderColor: 'rgba(244, 67, 54, 0.3)',
+    },
+    
 });
 
 

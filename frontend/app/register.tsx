@@ -1,4 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import * as Location from "expo-location";
+import * as SecureStore from "expo-secure-store";
+import { useContext, useEffect, useState, useCallback } from "react";
 import { AuthContext } from "./context/AuthContext";
 import { useRouter } from "expo-router";
 import {
@@ -13,12 +15,14 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Animated,
+  Linking,
 } from "react-native";
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
+import CustomAlert from "./components/CustomAlert";
+import { useAlert } from "./hooks/useAlert";
 
-
-const IP_ADDRESS ="192.168.142.247";
+const IP_ADDRESS = "192.168.142.247";
 
 enum RegistrationStep {
   INITIAL_INFO = 0,
@@ -35,16 +39,21 @@ interface RegistrationData {
   verificationCode: string;
 }
 
+// Define the type for context data
+export interface ContextDataType {
+  deviceId: string;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  permissionStatus: string;
+  locationEnabled?: boolean;
+}
+
 export default function RegisterScreen() {
   const authContext = useContext(AuthContext);
   const router = useRouter();
-
-  if (!authContext) {
-    Alert.alert("Error", "AuthContext is not available");
-    return null;
-  }
-
-  const { login, user } = authContext;
+  const { showAlert, hideAlert, isVisible, alertConfig } = useAlert();
 
   const [registrationData, setRegistrationData] = useState<RegistrationData>({
     name: "",
@@ -60,56 +69,181 @@ export default function RegisterScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [resendDisabled, setResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [emailError, setEmailError] = useState("")
-  const [passwordError, setPasswordError] = useState("")
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [progressAnim] = useState(new Animated.Value(0));
+  const [locationFunctionallyEnabled, setLocationFunctionallyEnabled] = useState(true);
+  const [locationPermissionStatus, setLocationPermissionStatus] = useState<string>("undetermined");
+  const [contextData, setContextData] = useState<ContextDataType | null>(null);
 
   const roleOptions = ["student", "professor", "admin"];
 
-  const validatePassword = (value: string): void => {
+  // Load location preferences on component mount
+  useEffect(() => {
+    const loadLocationPreference = async () => {
+      try {
+        if (Platform.OS === 'web') {
+          const savedPref = localStorage.getItem("locationEnabled");
+          setLocationFunctionallyEnabled(savedPref !== "false");
+        } else {
+          const savedPref = await SecureStore.getItemAsync("locationEnabled");
+          setLocationFunctionallyEnabled(savedPref !== "false");
+        }
+
+        // Get current permission status
+        try {
+          const { status } = await Location.getForegroundPermissionsAsync();
+          setLocationPermissionStatus(status);
+          console.log('Initial location permission status:', status);
+        } catch (error) {
+          console.error('Error getting location permission status:', error);
+          setLocationPermissionStatus('error');
+        }
+      } catch (error) {
+        console.error('Error loading location preference:', error);
+      }
+    };
+
+    loadLocationPreference();
+  }, []);
+
+  // Get device ID from secure storage or generate a new one
+  const getDeviceId = useCallback(async (): Promise<string> => {
+    if (Platform.OS === 'web') {
+      // Use localStorage for web instead of SecureStore
+      let deviceId = localStorage.getItem("deviceId");
+
+      if (!deviceId) {
+        deviceId = `web-${Math.random().toString(36).substring(2, 15)}`;
+        localStorage.setItem("deviceId", deviceId);
+      }
+
+      return deviceId;
+    }
+
+    // For native platforms, use SecureStore
+    try {
+      let deviceId = await SecureStore.getItemAsync("deviceId");
+
+      if (!deviceId) {
+        const generatedId = `${Platform.OS}-${Math.random().toString(36).substring(2, 15)}`;
+        deviceId = generatedId;
+        await SecureStore.setItemAsync("deviceId", deviceId);
+      }
+
+      return deviceId;
+    } catch (error) {
+      console.error("Error getting device ID:", error);
+      return `${Platform.OS}-fallback-${Date.now()}`;
+    }
+  }, []);
+
+  // Get context data including location if permitted
+  const getContextData = useCallback(async (): Promise<ContextDataType> => {
+    try {
+      // Get the device ID first
+      const deviceId = await getDeviceId();
+
+      // Check location permission status
+      const { status } = await Location.getForegroundPermissionsAsync();
+      console.log("[DEBUG] Current permission status:", status);
+      setLocationPermissionStatus(status);
+
+      // If location is not enabled (either by permission or user preference), return basic context
+      if (status !== "granted" || !locationFunctionallyEnabled) {
+        return {
+          deviceId,
+          location: { latitude: 0, longitude: 0 },
+          permissionStatus: status,
+          locationEnabled: false,
+        };
+      }
+
+      // If location is enabled and permitted, get current position
+      try {
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+
+        return {
+          deviceId,
+          location: {
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude,
+          },
+          permissionStatus: status,
+          locationEnabled: true,
+        };
+      } catch (locationError) {
+        console.error("[ERROR] Error getting current position:", locationError);
+        return {
+          deviceId,
+          location: { latitude: 0, longitude: 0 },
+          permissionStatus: status,
+          locationEnabled: false,
+        };
+      }
+    } catch (error) {
+      console.error("[ERROR] Error fetching context data:", error);
+
+      // Return fallback context data with device ID
+      const deviceId = await getDeviceId().catch(() => "unknown-device");
+      return {
+        deviceId,
+        location: { latitude: 0, longitude: 0 },
+        permissionStatus: "error",
+        locationEnabled: false,
+      };
+    }
+  }, [locationFunctionallyEnabled, getDeviceId]);
+
+  // Fetch context data on component mount
+  useEffect(() => {
+    const fetchContextData = async () => {
+      const data = await getContextData();
+      setContextData(data);
+    };
+
+    fetchContextData();
+  }, [getContextData]);
+
+  // Validate email on change
+  useEffect(() => {
+    if (registrationData.email.trim() === "") {
+      setEmailError("");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(registrationData.email)) {
+      setEmailError("Please enter a valid email address");
+    } else {
+      setEmailError("");
+    }
+  }, [registrationData.email]);
+
+  // Validate password function
+  const validatePassword = useCallback((value: string): boolean => {
     const length: boolean = value.length >= 8;
     const hasDigit: boolean = /\d/.test(value);
     const hasLowerCase: boolean = /[a-z]/.test(value);
 
     if (!length) {
       setPasswordError("Password must be at least 8 characters!");
+      return false;
     } else if (!hasDigit) {
       setPasswordError("Password must include at least one digit!");
+      return false;
     } else if (!hasLowerCase) {
       setPasswordError("Password must include at least one lowercase letter!");
+      return false;
     } else {
       setPasswordError("");
+      return true;
     }
-  };
+  }, []);
 
-
-  useEffect(() => {
-    Animated.timing(progressAnim, {
-      toValue: (currentStep / 3) * 100,
-      duration: 500,
-      useNativeDriver: false,
-    }).start();
-  }, [currentStep]);
-
-
-
-  useEffect(() => {
-    if (registrationData.email.trim() === "") {
-      setEmailError("")
-      return
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(registrationData.email)) {
-      setEmailError("Please enter a valid email address")
-    } else {
-      setEmailError("")
-    }
-  }, [registrationData.email])
-
-
-
-
+  // Handle resend countdown timer
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -120,25 +254,23 @@ export default function RegisterScreen() {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-
+  // Handle redirect after successful registration
   useEffect(() => {
-    if (user && !isRedirecting && currentStep === RegistrationStep.COMPLETE) {
+    if (authContext?.user && !isRedirecting && currentStep === RegistrationStep.COMPLETE) {
       setIsRedirecting(true);
-      console.log(`User registered (${user.role}), navigating to dashboard...`);
-      router.replace(`/${user.role}Dashboard`);
+      console.log(`User registered (${authContext.user.role}), navigating to dashboard...`);
+      router.replace(`/${authContext.user.role}Dashboard`);
     }
-  }, [user, currentStep]);
+  }, [authContext?.user, currentStep, router, isRedirecting]);
 
-
-  const isInitialFormFilled = !!(
-    registrationData.name.trim() &&
-    registrationData.email.trim() &&
-    registrationData.role.trim()
-  );
-
-  const isVerificationCodeFilled = !!(
-    registrationData.verificationCode.trim().length === 6
-  );
+  // Update progress animation when step changes
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: (currentStep / 3) * 100,
+      duration: 500,
+      useNativeDriver: false,
+    }).start();
+  }, [currentStep, progressAnim]);
 
   // Handle input changes
   const handleInputChange = (field: keyof RegistrationData, value: string) => {
@@ -146,22 +278,103 @@ export default function RegisterScreen() {
       ...prev,
       [field]: value
     }));
+
+    // Validate password on change if we're updating the password field
+    if (field === "password") {
+      validatePassword(value);
+    }
   };
 
-
+  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
+  // Request location permission
+  const requestLocationPermission = async () => {
+    try {
+      const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
+
+      if (currentStatus !== 'granted') {
+        if (Platform.OS === 'web') {
+          showAlert({
+            title: "Location Permission",
+            message: "This app uses your location for security purposes. Please enable location services in your browser.",
+            buttons: [
+              { text: "Later", style: "cancel" },
+              {
+                text: "Enable",
+                onPress: async () => {
+                  try {
+                    const { status } = await Location.requestForegroundPermissionsAsync();
+                    setLocationPermissionStatus(status);
+                    if (status === 'granted') {
+                      setLocationFunctionallyEnabled(true);
+                      if (Platform.OS === 'web') {
+                        localStorage.setItem("locationEnabled", "true");
+                      } else {
+                        await SecureStore.setItemAsync("locationEnabled", "true");
+                      }
+                      // Refresh context data
+                      const data = await getContextData();
+                      setContextData(data);
+                    }
+                  } catch (error) {
+                    console.error("Error requesting location permission:", error);
+                  }
+                }
+              }
+            ]
+          });
+        } else {
+          Alert.alert(
+            "Location Permission",
+            "This app uses your location for security purposes. Please enable location services.",
+            [
+              { text: "Later", style: "cancel" },
+              { text: "Open Settings", onPress: () => Linking.openSettings() },
+              {
+                text: "Enable",
+                onPress: async () => {
+                  const { status } = await Location.requestForegroundPermissionsAsync();
+                  setLocationPermissionStatus(status);
+                  if (status === 'granted') {
+                    setLocationFunctionallyEnabled(true);
+                    await SecureStore.setItemAsync("locationEnabled", "true");
+                    // Refresh context data
+                    const data = await getContextData();
+                    setContextData(data);
+                  }
+                }
+              }
+            ]
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error requesting location permission:", error);
+    }
+  };
+
+  // Handle initial form submission (name, email, role)
   const handleInitialSubmit = async () => {
+    if (!isInitialFormFilled || !!emailError) {
+      return;
+    }
+
+    // Request location permission before proceeding
+    if (locationPermissionStatus !== 'granted') {
+      await requestLocationPermission();
+    }
+
+    // Refresh context data
+    if (!contextData) {
+      const data = await getContextData();
+      setContextData(data);
+    }
+
     setIsLoading(true);
     try {
-
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(registrationData.email)) {
-        throw new Error("Please enter a valid email address");
-      }
-
       const response = await fetch(
         `http://${IP_ADDRESS}:3000/api/auth/register`,
         {
@@ -175,6 +388,7 @@ export default function RegisterScreen() {
             email: registrationData.email.trim(),
             password: "temporary_" + Math.random().toString(36).substring(2),
             role: registrationData.role.trim(),
+            contextData: contextData, // Send context data with registration
           }),
         }
       );
@@ -191,15 +405,32 @@ export default function RegisterScreen() {
       setResendDisabled(true);
       setCountdown(60);
 
-      Alert.alert(
-        "Verification Code Sent",
-        "Please check your email for the verification code."
-      );
+      if (Platform.OS === 'web') {
+        showAlert({
+          title: "Verification Code Sent",
+          message: "Please check your email for the verification code.",
+          buttons: [{ text: "OK" }]
+        });
+      } else {
+        Alert.alert(
+          "Verification Code Sent",
+          "Please check your email for the verification code."
+        );
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Initial registration failed:", errorMessage);
-      Alert.alert("Registration Failed", errorMessage);
+
+      if (Platform.OS === 'web') {
+        showAlert({
+          title: "Registration Failed",
+          message: errorMessage,
+          buttons: [{ text: "OK" }]
+        });
+      } else {
+        Alert.alert("Registration Failed", errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +438,10 @@ export default function RegisterScreen() {
 
   // Handle verification code submission
   const handleVerifyCode = async () => {
+    if (!isVerificationCodeFilled) {
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch(
@@ -219,6 +454,7 @@ export default function RegisterScreen() {
           },
           body: JSON.stringify({
             code: registrationData.verificationCode.trim(),
+            email: registrationData.email.trim(), // Add email to help identify the verification
           }),
         }
       );
@@ -235,7 +471,16 @@ export default function RegisterScreen() {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Verification failed:", errorMessage);
-      Alert.alert("Verification Failed", errorMessage);
+
+      if (Platform.OS === 'web') {
+        showAlert({
+          title: "Verification Failed",
+          message: errorMessage,
+          buttons: [{ text: "OK" }]
+        });
+      } else {
+        Alert.alert("Verification Failed", errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -243,11 +488,14 @@ export default function RegisterScreen() {
 
   // Handle resend verification code
   const handleResendCode = async () => {
+    if (resendDisabled) {
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Re-send the initial registration request to trigger a new verification code
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/register`,
+        `http://${IP_ADDRESS}:3000/api/auth/resendVerification`, // Use a dedicated endpoint if available
         {
           method: "POST",
           headers: {
@@ -255,11 +503,7 @@ export default function RegisterScreen() {
             Accept: "application/json",
           },
           body: JSON.stringify({
-            name: registrationData.name.trim(),
             email: registrationData.email.trim(),
-            role: registrationData.role.trim(),
-            password: "temporary_" + Math.random().toString(36).substring(2),
-            // Send a temporary password that will be updated later
           }),
         }
       );
@@ -274,15 +518,76 @@ export default function RegisterScreen() {
       setResendDisabled(true);
       setCountdown(60);
 
-      Alert.alert(
-        "Verification Code Sent",
-        "A new verification code has been sent to your email."
-      );
+      if (Platform.OS === 'web') {
+        showAlert({
+          title: "Verification Code Sent",
+          message: "A new verification code has been sent to your email.",
+          buttons: [{ text: "OK" }]
+        });
+      } else {
+        Alert.alert(
+          "Verification Code Sent",
+          "A new verification code has been sent to your email."
+        );
+      }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
-      console.error("Resend code failed:", errorMessage);
-      Alert.alert("Failed to Resend Code", errorMessage);
+      // Fallback to the registration endpoint if resendVerification doesn't exist
+      try {
+        const response = await fetch(
+          `http://${IP_ADDRESS}:3000/api/auth/register`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({
+              name: registrationData.name.trim(),
+              email: registrationData.email.trim(),
+              role: registrationData.role.trim(),
+              password: "temporary_" + Math.random().toString(36).substring(2),
+              contextData: contextData, // Send context data with registration
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to resend verification code");
+        }
+
+        // Start countdown for resend
+        setResendDisabled(true);
+        setCountdown(60);
+
+        if (Platform.OS === 'web') {
+          showAlert({
+            title: "Verification Code Sent",
+            message: "A new verification code has been sent to your email.",
+            buttons: [{ text: "OK" }]
+          });
+        } else {
+          Alert.alert(
+            "Verification Code Sent",
+            "A new verification code has been sent to your email."
+          );
+        }
+      } catch (secondError) {
+        const errorMessage =
+          secondError instanceof Error ? secondError.message : "Unknown error occurred";
+        console.error("Resend code failed:", errorMessage);
+
+        if (Platform.OS === 'web') {
+          showAlert({
+            title: "Failed to Resend Code",
+            message: errorMessage,
+            buttons: [{ text: "OK" }]
+          });
+        } else {
+          Alert.alert("Failed to Resend Code", errorMessage);
+        }
+      }
     } finally {
       setIsLoading(false);
     }
@@ -290,6 +595,15 @@ export default function RegisterScreen() {
 
   // Handle password submission and complete registration
   const handleCompleteRegistration = async () => {
+    // Validate password once more before submission
+    if (!validatePassword(registrationData.password)) {
+      return;
+    }
+
+    // Refresh context data before completing registration
+    const freshContextData = await getContextData();
+    setContextData(freshContextData);
+
     setIsLoading(true);
     try {
       // Update the user's password
@@ -304,6 +618,7 @@ export default function RegisterScreen() {
           body: JSON.stringify({
             email: registrationData.email.trim(),
             password: registrationData.password.trim(),
+            contextData: freshContextData, // Send updated context data
           }),
         }
       );
@@ -314,25 +629,86 @@ export default function RegisterScreen() {
         throw new Error(data.message || "Failed to update password");
       }
 
-      // Move to complete step
-      setCurrentStep(RegistrationStep.COMPLETE);
-
       // Log in the user
-      await login(registrationData.email, registrationData.password, true);
+      try {
+        if (authContext?.login && freshContextData) {
+          await authContext.login(
+            registrationData.email,
+            registrationData.password,
+            freshContextData,
+            true
+          );
+        }
 
-      Alert.alert(
-        "Registration Complete",
-        "Your account has been created successfully!"
-      );
+        // Move to complete step
+        setCurrentStep(RegistrationStep.COMPLETE);
+
+        if (Platform.OS === 'web') {
+          showAlert({
+            title: "Registration Complete",
+            message: "Your account has been created successfully!",
+            buttons: [{ text: "OK" }]
+          });
+        } else {
+          Alert.alert(
+            "Registration Complete",
+            "Your account has been created successfully!"
+          );
+        }
+      } catch (loginError) {
+        console.error("Auto-login failed:", loginError);
+        // Even if login fails, consider registration complete
+        setCurrentStep(RegistrationStep.COMPLETE);
+
+        if (Platform.OS === 'web') {
+          showAlert({
+            title: "Registration Complete",
+            message: "Your account has been created successfully. Please log in manually.",
+            buttons: [{ text: "OK" }]
+          });
+        } else {
+          Alert.alert(
+            "Registration Complete",
+            "Your account has been created successfully. Please log in manually."
+          );
+        }
+
+        // Redirect to login instead
+        setTimeout(() => {
+          router.replace("/login");
+        }, 2000);
+      }
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Unknown error occurred";
       console.error("Complete registration failed:", errorMessage);
-      Alert.alert("Registration Failed", errorMessage);
+
+      if (Platform.OS === 'web') {
+        showAlert({
+          title: "Registration Failed",
+          message: errorMessage,
+          buttons: [{ text: "OK" }]
+        });
+      } else {
+        Alert.alert("Registration Failed", errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Check if initial form is filled properly
+  const isInitialFormFilled = !!(
+    registrationData.name.trim() &&
+    registrationData.email.trim() &&
+    registrationData.role.trim() &&
+    !emailError
+  );
+
+  // Check if verification code is filled
+  const isVerificationCodeFilled = !!(
+    registrationData.verificationCode.trim().length === 6
+  );
 
   // Render progress bar
   const renderProgressBar = () => {
@@ -355,26 +731,62 @@ export default function RegisterScreen() {
     );
   };
 
-  // Render step indicator
-  // const renderStepIndicator = () => {
-  //   return (
-  //     <View style={styles.stepIndicatorContainer}>
-  //       {[0, 1, 2].map((step) => (
-  //         <View
-  //           key={step}
-  //           style={[
-  //             styles.stepDot,
-  //             currentStep >= step ? styles.stepDotActive : {},
-  //           ]}
-  //         >
-  //           {currentStep > step && (
-  //             <Ionicons name="checkmark" size={12} color="white" />
-  //           )}
-  //         </View>
-  //       ))}
-  //     </View>
-  //   );
-  // };
+  // Render location status indicator
+  const renderLocationStatus = () => {
+    const getStatusColor = () => {
+      if (locationPermissionStatus === 'granted' && locationFunctionallyEnabled) {
+        return "#4caf50"; // Green - fully enabled
+      } else if (locationPermissionStatus === 'granted' && !locationFunctionallyEnabled) {
+        return "#ff9800"; // Orange - permission granted but disabled in app
+      } else if (locationPermissionStatus === 'denied') {
+        return "#f44336"; // Red - denied
+      } else {
+        return "#9e9e9e"; // Gray - undetermined
+      }
+    };
+
+    const getStatusText = () => {
+      if (locationPermissionStatus === 'granted' && locationFunctionallyEnabled) {
+        return "Location enabled (recommended)";
+      } else if (locationPermissionStatus === 'granted' && !locationFunctionallyEnabled) {
+        return "Location disabled (in app)";
+      } else if (locationPermissionStatus === 'denied') {
+        return "Location denied (recommended for security)";
+      } else {
+        return "Enable location (recommended)";
+      }
+    };
+
+    return (
+      <TouchableOpacity
+        style={[
+          styles.locationStatusButton || {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 8,
+            paddingHorizontal: 12,
+            borderRadius: 20,
+            borderWidth: 1,
+            marginBottom: 15,
+            alignSelf: 'center',
+            borderColor: getStatusColor(),
+            backgroundColor: `${getStatusColor()}10`
+          }
+        ]}
+        onPress={requestLocationPermission}
+      >
+        <Ionicons
+          name={locationFunctionallyEnabled ? "location" : "location-outline"}
+          size={16}
+          color={getStatusColor()}
+        />
+
+        <Text style={[styles.locationStatusText || { fontSize: 14, marginLeft: 8, color: getStatusColor() }]}>
+          {getStatusText()}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   // Render initial form (name, email, role)
   const renderInitialForm = () => {
@@ -449,14 +861,17 @@ export default function RegisterScreen() {
           </View>
         </View>
 
+        {/* Location Status */}
+        {renderLocationStatus()}
+
         {/* Continue Button */}
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (!isInitialFormFilled || isLoading || !!emailError) && styles.disabledButton,
+            (!isInitialFormFilled || isLoading) && styles.disabledButton,
           ]}
           onPress={handleInitialSubmit}
-          disabled={!isInitialFormFilled || isLoading || !!emailError}
+          disabled={!isInitialFormFilled || isLoading}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -552,20 +967,17 @@ export default function RegisterScreen() {
         {/* Password Input */}
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Password</Text>
-          <View style={styles.inputWrapper}>
+          <View style={[styles.inputWrapper, passwordError ? styles.inputError : null]}>
             <Ionicons
               name="lock-closed-outline"
               size={20}
-              color="#666"
+              color={passwordError ? "#ff3b30" : "#666"}
               style={styles.inputIcon}
             />
             <TextInput
               style={styles.input}
               value={registrationData.password}
-              onChangeText={(value) => {
-                handleInputChange("password", value);
-                validatePassword(value);
-              }}
+              onChangeText={(value) => handleInputChange("password", value)}
               secureTextEntry={!passwordVisible}
               placeholder="Create a password"
               placeholderTextColor="#999"
@@ -588,23 +1000,27 @@ export default function RegisterScreen() {
           </Text>
         </View>
 
-        <View style={styles.container}>
-          {passwordError && (
-            <Text style={styles.errorText}>
-              {passwordError}
-            </Text>
-          )}
-        </View>
+        {passwordError && (
+          <Text style={styles.errorText}>
+            {passwordError}
+          </Text>
+        )}
 
+        {/* Location Status */}
+        {renderLocationStatus()}
+
+        <Text style={styles.securityNote}>
+          Your device and location information will be used for enhanced security.
+        </Text>
 
         {/* Complete Registration Button */}
         <TouchableOpacity
           style={[
             styles.registerButton,
-            (isLoading || !!passwordError) && styles.disabledButton,
+            (isLoading || !!passwordError || !registrationData.password) && styles.disabledButton,
           ]}
           onPress={handleCompleteRegistration}
-          disabled={isLoading || !!passwordError}
+          disabled={isLoading || !!passwordError || !registrationData.password}
         >
           {isLoading ? (
             <ActivityIndicator color="#fff" />
@@ -642,20 +1058,47 @@ export default function RegisterScreen() {
     );
   };
 
+  // Initialize alert components for web
+  let customAlertComponent = null;
+
+  if (Platform.OS === 'web') {
+    customAlertComponent = (
+      <CustomAlert
+        visible={isVisible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        buttons={alertConfig.buttons}
+        onClose={hideAlert}
+      />
+    );
+  }
+
+  if (!authContext) {
+    if (Platform.OS === 'web') {
+      showAlert({
+        title: "Error",
+        message: "AuthContext is not available",
+        buttons: [{ text: "OK" }]
+      });
+    } else {
+      Alert.alert("Error", "AuthContext is not available");
+    }
+    return null;
+  }
+
   return (
     <SafeAreaView style={styles.container}>
+      {/* Custom Alert for web */}
+      {Platform.OS === 'web' && customAlertComponent}
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardAvoidView}
       >
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.formContainer}>
-            {/* Progress Bar and Step Indicator */}
-            {currentStep < RegistrationStep.COMPLETE && (
-              <>
-                {renderProgressBar()}
-              </>
-            )}
+            {/* Progress Bar */}
+            {currentStep < RegistrationStep.COMPLETE && renderProgressBar()}
 
             {/* Render the appropriate form based on current step */}
             {currentStep === RegistrationStep.INITIAL_INFO && renderInitialForm()}

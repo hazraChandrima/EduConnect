@@ -216,7 +216,28 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginTop: 4,
         marginLeft: 4,
-    }
+    },
+    locationStatusButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 20,
+        borderWidth: 1,
+        marginBottom: 15,
+        alignSelf: "center",
+    },
+    locationStatusText: {
+        fontSize: 14,
+        marginLeft: 8,
+    },
+    securityNote: {
+        fontSize: 12,
+        color: "#777",
+        textAlign: "center",
+        marginBottom: 15,
+        fontStyle: "italic",
+    },
 });
 
 
