@@ -1,0 +1,8 @@
+# my logs
+*.log
+
+# it's not my API key, so I better be careful with it
+.env
+
+# the name of my virtual environment
+venv/
