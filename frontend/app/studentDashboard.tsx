@@ -318,7 +318,7 @@ export default function StudentDashboard(): React.ReactElement {
   
       const downloadUrl = await getDownloadURL(storageRef);
   
-      const backendResponse = await fetch("http://localhost:3000/api/assignment/submit", {
+      const backendResponse = await fetch(`http://${IP_ADDRESS}:3000/api/assignment/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
