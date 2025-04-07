@@ -112,8 +112,10 @@ EduConnect is a comprehensive college management system built with the MERN stac
    npm run dev
    ```
    
-   The backend will be available at http://127.0.0:3000/
+   The backend will be available at http://127.0.0.1:3000/
+
 ---
+
 
 ### 📱 Frontend Setup
 
@@ -123,16 +125,47 @@ EduConnect is a comprehensive college management system built with the MERN stac
    npm install
    ```
 
-2. Create a `.env` file with necessary configuration:
+2. Configure environment variables:
+   
+   Create two configuration files in the root of your frontend project:
+
+   **a. app-config.js**
+   ```javascript
+   // app-config.js
+   // This file contains API URLs for different services
+
+   const IP_ADDRESS = "YOUR_LOCAL_IP_ADDRESS"
+
+   export const APP_CONFIG = {
+     API_BASE_URL: `http://${IP_ADDRESS}:3000`,
+     API_CHATBOT_URL: `http://${IP_ADDRESS}:5000`,
+     API_PDF_QUIZ_URL: `http://${IP_ADDRESS}:8000`,
+   };
    ```
-   API_URL=http://localhost:3000/api
+
+   **b. firebase-config.ts**
+   ```typescript
+   // firebase-config.ts
+   // This file contains your Firebase configuration
+   export const FIREBASE_CONFIG = {
+     apiKey: "YOUR_FIREBASE_API_KEY",
+     authDomain: "YOUR_FIREBASE_AUTH_DOMAIN",
+     projectId: "YOUR_FIREBASE_PROJECT_ID",
+     storageBucket: "YOUR_FIREBASE_STORAGE_BUCKET",
+     messagingSenderId: "YOUR_FIREBASE_MESSAGING_SENDER_ID",
+     appId: "YOUR_FIREBASE_APP_ID",
+     measurementId: "YOUR_FIREBASE_MEASUREMENT_ID"
+   };
    ```
+   
+   > **Note:** Add these configuration files to your `.gitignore`.
 
 3. Start the React Native development server:
    ```bash
    npx expo start
    ```
-   The frontend will be available at http://127.0.0:8081/
+   The frontend will be available at http://127.0.0.1:8081/
+
 
 ---
 

@@ -7,6 +7,7 @@ import * as FileSystem from "expo-file-system"
 import * as Sharing from "expo-sharing"
 import { format } from "date-fns"
 import { Platform } from "react-native"
+import { APP_CONFIG } from "@/app-config"
 
 interface FileItem {
     _id: string
@@ -24,7 +25,8 @@ export default function FileManagement() {
     const [downloadProgress, setDownloadProgress] = useState<{ [key: string]: number }>({})
     const [error, setError] = useState<string | null>(null)
 
-    const API_BASE_URL = "http://192.168.142.247:3000/api"
+    const API_BASE_URL = APP_CONFIG.API_BASE_URL;
+    
 
     useEffect(() => {
         fetchFiles()

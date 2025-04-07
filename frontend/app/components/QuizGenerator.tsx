@@ -6,6 +6,9 @@ import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, Plat
 import { MaterialIcons, AntDesign } from "@expo/vector-icons"
 import * as DocumentPicker from "expo-document-picker"
 import styles from "../styles/QuizGenerator.style"
+import { APP_CONFIG } from "@/app-config"
+
+const API_PDF_QUIZ_URL = APP_CONFIG.API_PDF_QUIZ_URL
 
 interface QuizQuestion {
     question: string
@@ -86,7 +89,7 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onQuizGenerated }) => {
 
             // Add number of questions parameter to the URL
             const numQuestionsInt = Number.parseInt(numQuestions) || 5;
-            const url = `http://192.168.142.247:8000/pdf_to_quizz/?num_questions=${numQuestionsInt}`;
+            const url = `${API_PDF_QUIZ_URL}/pdf_to_quizz/?num_questions=${numQuestionsInt}`;
             console.log(`Sending request to ${url} with file ${selectedFile.name || 'document.pdf'}`);
 
             const response = await fetch(url, {
@@ -162,7 +165,7 @@ const QuizGenerator: React.FC<QuizGeneratorProps> = ({ onQuizGenerated }) => {
         setIsLoading(true)
 
         try {
-            const response = await fetch("http://192.168.142.247:8000/text_to_quizz/", {
+            const response = await fetch(`${API_PDF_QUIZ_URL}/text_to_quizz/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

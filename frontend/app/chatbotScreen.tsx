@@ -21,9 +21,9 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import styles from "./styles/Chabot.style"
 import { AuthContext } from "./context/AuthContext"
+import { APP_CONFIG } from "@/app-config"
 
-const IP_ADDRESS = "192.168.142.247"
-
+const API_CHATBOT_URL = APP_CONFIG.API_CHATBOT_URL;
 
 interface ScrollableChipsProps {
     suggestions: string[]
@@ -132,7 +132,7 @@ const ChatbotScreen = () => {
     
     const fetchBotResponse = async (query: string): Promise<string> => {
         try {
-            const response = await fetch(`http://${IP_ADDRESS}:5000/ask`, {
+            const response = await fetch(`${API_CHATBOT_URL}/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

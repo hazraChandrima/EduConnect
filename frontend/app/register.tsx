@@ -21,8 +21,10 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "./styles/Register.styles";
 import CustomAlert from "./components/CustomAlert";
 import { useAlert } from "./hooks/useAlert";
+import { APP_CONFIG } from "@/app-config";
 
-const IP_ADDRESS = "192.168.142.247";
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
+
 
 enum RegistrationStep {
   INITIAL_INFO = 0,
@@ -376,7 +378,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/register`,
+        `${API_BASE_URL}/api/auth/register`,
         {
           method: "POST",
           headers: {
@@ -445,7 +447,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/verifyEmail`,
+        `${API_BASE_URL}/api/auth/verifyEmail`,
         {
           method: "POST",
           headers: {
@@ -495,7 +497,7 @@ export default function RegisterScreen() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/resendVerification`, // Use a dedicated endpoint if available
+        `${API_BASE_URL}/api/auth/resendVerification`, // Use a dedicated endpoint if available
         {
           method: "POST",
           headers: {
@@ -534,7 +536,7 @@ export default function RegisterScreen() {
       // Fallback to the registration endpoint if resendVerification doesn't exist
       try {
         const response = await fetch(
-          `http://${IP_ADDRESS}:3000/api/auth/register`,
+          `${API_BASE_URL}/api/auth/register`,
           {
             method: "POST",
             headers: {
@@ -609,7 +611,7 @@ export default function RegisterScreen() {
     try {
       // Update the user's password
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/updatePassword`,
+        `${API_BASE_URL}/api/auth/updatePassword`,
         {
           method: "POST",
           headers: {

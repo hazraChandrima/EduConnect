@@ -49,6 +49,9 @@ import {
   sampleMarks,
   sampleRemarks
 } from "./utils/dummy_data/sample_student";
+import { APP_CONFIG } from "@/app-config";
+
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
 
 const useIsSmallDevice = () => {
@@ -124,7 +127,7 @@ export default function StudentDashboard(): React.ReactElement {
         }
 
         const response = await fetch(
-          `http://${IP_ADDRESS}:3000/api/user/${auth.user.userId}`
+          `${API_BASE_URL}/api/user/${auth.user.userId}`
         );
 
         if (!response.ok) {
@@ -318,7 +321,7 @@ export default function StudentDashboard(): React.ReactElement {
   
       const downloadUrl = await getDownloadURL(storageRef);
   
-      const backendResponse = await fetch(`http://${IP_ADDRESS}:3000/api/assignment/submit`, {
+      const backendResponse = await fetch(`${API_BASE_URL}/api/assignment/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -7,6 +7,9 @@ import axios from "axios"
 import { router } from "expo-router"
 import { Platform } from "react-native"
 import type { ContextDataType } from "../register"
+import { APP_CONFIG } from "@/app-config"
+
+const API_BASE_URL = `${APP_CONFIG.API_BASE_URL}/api/auth`
 
 
 interface User {
@@ -40,10 +43,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isOtpVerified, setIsOtpVerified] = useState(false)
   const [isSuspensionModalVisible, setIsSuspensionModalVisible] = useState(false)
   const [suspendedUntil, setSuspendedUntil] = useState<string | null>(null)
-
-  const IP_ADDRESS = "192.168.142.247"
-  const API_URL = `http://${IP_ADDRESS}:3000/api/auth`
-
 
 
   useEffect(() => {
@@ -83,7 +82,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true)
     try {
       console.log("Requesting login OTP for:", email)
-      const response = await axios.post(`${API_URL}/requestLoginOTP`, {
+      const response = await axios.post(`${API_BASE_URL}/requestLoginOTP`, {
         email,
       })
 
@@ -108,7 +107,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const verifyLoginOTP = async (email: string, code: string): Promise<boolean> => {
     setIsLoading(true)
     try {
-      const response = await axios.post(`${API_URL}/verifyLoginOTP`, {
+      const response = await axios.post(`${API_BASE_URL}/verifyLoginOTP`, {
         email,
         code,
       })
@@ -166,7 +165,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setIsLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/login`, {
+      const response = await axios.post(`${API_BASE_URL}/login`, {
         email: currentEmail || email,
         password,
         contextData,

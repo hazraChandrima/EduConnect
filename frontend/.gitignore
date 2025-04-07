@@ -39,5 +39,6 @@ yarn-error.*
 app-example
 
 
-# .config files because env has some issues in Expo Go
+# .config files because env seems to have some issues with Expo Go
 firebase-config.ts
+app-config.ts

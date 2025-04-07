@@ -13,9 +13,10 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { forgotResetPassStyle } from "./styles/Forgot_ResetPassword.style";
+import forgotResetPassStyle from "./styles/Forgot_ResetPassword.style";
+import { APP_CONFIG } from "@/app-config";
 
-const IP_ADDRESS = "192.168.142.247"
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
 
 export default function ResetPasswordScreen() {
@@ -105,7 +106,7 @@ export default function ResetPasswordScreen() {
     try {
       console.log(token, newPassword);
       const response = await fetch(
-        `http://${IP_ADDRESS}:3000/api/auth/reset-password`,
+        `${API_BASE_URL}/api/auth/reset-password`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

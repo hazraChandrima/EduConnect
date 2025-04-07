@@ -20,6 +20,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { AuthContext } from "./context/AuthContext"
 import styles from "./styles/AdminDashboard.style"
 import { useRouter } from "expo-router"
+import { APP_CONFIG } from "@/app-config"
+
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
 // Define types for our data
 interface Professor {
@@ -273,7 +276,7 @@ export default function AdminDashboard() {
         }
 
         // Fetch user data
-        const response = await fetch(`http://192.168.142.247:3000/api/user/${authContext.user.userId}`);
+        const response = await fetch(`${API_BASE_URL}/api/user/${authContext.user.userId}`);
 
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
