@@ -57,7 +57,7 @@ const useIsSmallDevice = () => {
 };
 
 
-const IP_ADDRESS =" 192.168.142.247";
+const IP_ADDRESS ="192.168.142.247";
 
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
