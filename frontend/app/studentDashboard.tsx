@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
+import { storage } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import NetInfo from "@react-native-community/netinfo";
 
 import {
@@ -14,7 +16,6 @@ import {
   FlatList,
   Image,
   Alert,
-  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -56,7 +57,7 @@ const useIsSmallDevice = () => {
 };
 
 
-const IP_ADDRESS ="192.168.142.247";
+const IP_ADDRESS =" 192.168.142.247";
 
 export default function StudentDashboard(): React.ReactElement {
   const router = useRouter();
@@ -92,12 +93,16 @@ export default function StudentDashboard(): React.ReactElement {
 
   const [isOffline, setIsOffline] = useState(false);
 
+
+
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
       setIsOffline(!state.isConnected);
     });
     return () => unsubscribe();
   }, []);
+
+
 
   useEffect(() => {
     const checkAuthAndFetchData = async (): Promise<void> => {
@@ -228,11 +233,6 @@ export default function StudentDashboard(): React.ReactElement {
   };
 
 
-
-
-
-  // this only works for web 
-
   // const submitAssignment = async () => {
   //   if (!selectedAssignment) return;
 
@@ -277,7 +277,6 @@ export default function StudentDashboard(): React.ReactElement {
   //       console.log("Assignment submitted successfully:", data);
   //     } else {
   //       console.error("Failed to submit assignment:", data.error);
-  //       Alert.alert("couldnt submit assignment", data.error);
   //     }
   //   } catch (error) {
   //     console.error("Error submitting assignment:", error);
@@ -299,112 +298,60 @@ export default function StudentDashboard(): React.ReactElement {
   // };
 
 
-
-
-
-
-  // this works for mobile only
-
+  
   const submitAssignment = async () => {
-    if (!selectedAssignment) return;
-
+    if (!selectedAssignment || submissionFiles.length === 0) return;
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("No authentication token found!");
+      return;
+    }
+  
     try {
-      const formData = new FormData();
-      formData.append("assignmentId", selectedAssignment.id);
-      formData.append("text", submissionText);
-
-      // Platform-specific file handling
-      if (Platform.OS === 'web') {
-        // Web approach
-        const filePromises = submissionFiles.map(async (file) => {
-          try {
-            const response = await fetch(file.uri);
-            const blob = await response.blob();
-            const fileObject = new File([blob], file.name, { type: file.type });
-            formData.append("file", fileObject);
-          } catch (error) {
-            console.error("Error converting file to Blob:", error);
-          }
-        });
-
-        await Promise.all(filePromises);
-      } else {
-        // React Native approach
-        for (const file of submissionFiles) {
-          formData.append("file", {
-            uri: file.uri,
-            name: file.name,
-            type: file.type
-          } as any);
-        }
-
-      }
-
-      let token;
-      if (Platform.OS === 'web') {
-        token = localStorage.getItem("token");
-      } else {
-        // For React Native
-        token = await AsyncStorage.getItem("token");
-      }
-
-      if (!token) {
-        console.error("No authentication token found!");
-        if (Platform.OS === 'web') {
-          alert("Please log in again");
-        } else {
-          Alert.alert("Authentication Error", "Please log in again");
-        }
-        return;
-      }
-
-      // API call - works the same on both platforms
-      const API_URL = "http://192.168.142.247:3000/api/assignment/submit";
-      const response = await fetch(API_URL, {
+      const file = submissionFiles[0]; // Assuming one file for simplicity
+      const response = await fetch(file.uri);
+      const blob = await response.blob();
+  
+      const storageRef = ref(storage, `assignments/${Date.now()}_${file.name}`);
+      await uploadBytes(storageRef, blob);
+  
+      const downloadUrl = await getDownloadURL(storageRef);
+  
+      const backendResponse = await fetch("http://localhost:3000/api/assignment/submit", {
         method: "POST",
-        body: formData,
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-          // "Content-Type": "multipart/form-data",
         },
+        body: JSON.stringify({
+          assignmentId: selectedAssignment.id,
+          courseId: selectedAssignment.courseId,
+          downloadUrl,
+        }),
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
+  
+      const data = await backendResponse.json();
+  
+      if (backendResponse.ok) {
         console.log("Assignment submitted successfully:", data);
-
-        // Update the assignment status
-        const updatedAssignments = assignments.map(assignment =>
-          assignment.id === selectedAssignment.id
-            ? { ...assignment, status: "submitted" }
-            : assignment
-        );
-
-        setAssignments(updatedAssignments as Assignment[]);
-        setIsSubmissionModalVisible(false);
-
-        // Platform-specific alerts
-        if (Platform.OS === 'web') {
-          alert("Assignment submitted successfully!");
-        } else {
-          Alert.alert("Success", "Assignment submitted successfully!");
-        }
+        alert("Assignment submitted successfully!");
       } else {
         console.error("Failed to submit assignment:", data.error);
-        if (Platform.OS === 'web') {
-          alert("Could not submit assignment: " + (data.error || "Unknown error"));
-        } else {
-          Alert.alert("Submission Failed", data.error || "Could not submit assignment");
-        }
       }
+  
+      // Mark as submitted
+      const updatedAssignments = assignments.map((assignment) =>
+        assignment.id === selectedAssignment.id
+          ? { ...assignment, status: "submitted" as const }
+          : assignment
+      );
+  
+      setAssignments(updatedAssignments);
+      setIsSubmissionModalVisible(false);
     } catch (error) {
       console.error("Error submitting assignment:", error);
-      if (Platform.OS === 'web') {
-        alert("Network or server error. Check your connection.");
-      } else {
-        Alert.alert("Error", "Network or server error. Check your connection.");
-      }
+      alert("Something went wrong. Please try again.");
     }
   };
 
@@ -420,6 +367,7 @@ export default function StudentDashboard(): React.ReactElement {
     ).length;
     return Math.round((presentCount / courseAttendance.length) * 100);
   };
+
 
 
   const calculateAverageScore = (courseId: string): number => {
@@ -464,6 +412,7 @@ export default function StudentDashboard(): React.ReactElement {
       </SafeAreaView>
     );
   }
+
 
 
   const renderCourseModal = () => (
@@ -794,6 +743,7 @@ export default function StudentDashboard(): React.ReactElement {
     </Modal>
   );
 
+
   // Render assignment submission modal
   const renderSubmissionModal = () => (
     <Modal
@@ -900,6 +850,8 @@ export default function StudentDashboard(): React.ReactElement {
       )}
     </Modal>
   );
+
+
 
   // Render home tab content
   const renderHomeTab = () => (
@@ -1113,6 +1065,8 @@ export default function StudentDashboard(): React.ReactElement {
     </View>
   );
 
+
+
   // Render assignments tab content
   const renderAssignmentsTab = () => (
     <View style={styles.tabContent}>
@@ -1193,6 +1147,8 @@ export default function StudentDashboard(): React.ReactElement {
       />
     </View>
   );
+
+  
 
   // Render attendance tab content
   const renderAttendanceTab = () => (
