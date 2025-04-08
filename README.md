@@ -2,30 +2,30 @@
 
 We have developed a **secure, multi-role** web/mobile application tailored for college environments that will serve as a centralized platform for college students, professors, and administrators.
 
-## 📖 Table of Contents  
+## Table of Contents  
 
-- [Core Features](#-core-features)  
+- [Core Features](#core-features)  
    - [Authentication and Security](#-authentication-and-security)  
    - [Student-Centric Learning Management](#-student-centric-learning-management)  
    - [Efficient Academic Management](#-efficient-academic-management)  
    - [Intelligent Administrative Control](#%EF%B8%8F-intelligent-administrative-control)  
 - [Our Solution](#-our-solution)  
-- [Tech Stack](#-tech-stack)  
+- [Tech Stack](#tech-stack)  
    - [Why MERN Stack with React Native?](#-why-mern-stack-with-react-native)  
-   - [AI Components](#-ai-components)  
-- [Installation and Setup](#-installation-and-setup)  
+   - [AI Components](#ai-components)  
+- [Installation and Setup](#installation-and-setup)  
    - [Prerequisites](#-prerequisites)  
-   - [Backend Setup](#-backend-setup)  
-   - [Frontend Setup](#-frontend-setup)  
-   - [EduConnect Chatbot Setup](#-educonnect-chatbot-setup)  
-   - [PDF-to-Quiz Generator Setup](#-pdf-to-quiz-generator-setup)  
+   - [Backend Setup](#%EF%B8%8F-backend-setup)  
+   - [Frontend Setup](#%EF%B8%8F-frontend-setup)  
+   - [EduConnect Chatbot Setup](#%EF%B8%8F-educonnect-chatbot-setup)  
+   - [PDF-to-Quiz Generator Setup](#%EF%B8%8F-pdf-to-quiz-generator-setup)  
 - [Key Features Explained](#%EF%B8%8F-key-features-explained)    
-- [Architecture](#%EF%B8%8F-architecture)  
-- [UI/UX Mockups](#-uiux-mockups)  
+- [Architecture](#architecture)  
+- [UI/UX Mockups](#uiux-mockups)  
 - [Contributors](#-contributors)  
 
 
-## ✨ Core Features:
+## Core Features:
 
 ### 🔒 Authentication and Security
 - Using **multi-factor authentication (2FA)** during login
@@ -54,7 +54,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-## 💻 Tech Stack
+## Tech Stack
 
 ### 🤔 Why MERN Stack with React Native?
 
@@ -66,16 +66,16 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - **TypeScript**: Adds static typing to JavaScript, improving code quality and developer experience
 - **Expo**: Toolkit for React Native that simplifies mobile app development
 
-### 🤖 AI Components
+### AI Components
 
 - **OpenAI API + LangChain & FAISS**: For creating a domain-specific chatbot limited to computer science topics
 - **OpenAI API**: Powers the quiz generation feature, converting PDFs and text into educational quizzes
 
 ---
 
-## 📋 Installation and Setup
+## Installation and Setup
 
-### 📝 Prerequisites
+### ✅ Prerequisites
 - Node.js (v14.x or higher)
 - MongoDB (v4.x or higher)
 - Python (v3.8 or higher)
@@ -84,7 +84,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-### 🔧 Backend Setup
+### ⚙️ Backend Setup
 
 1. Clone the repository:
    ```bash
@@ -122,7 +122,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 ---
 
 
-### 📱 Frontend Setup
+### ⚙️ Frontend Setup
 
 1. Install frontend dependencies:
    ```bash
@@ -174,7 +174,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-### 💬 EduConnect Chatbot Setup
+### ⚙️ EduConnect Chatbot Setup
 
 1. Install Python dependencies:
    ```bash
@@ -196,7 +196,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ---
 
-### 📝 PDF-to-Quiz Generator Setup
+### ⚙️ PDF-to-Quiz Generator Setup
 
 1. Install Python dependencies:
    ```bash
@@ -237,31 +237,31 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ## 🛠️ Key Features Explained
 
-### 🔐 Authentication and Security
+### Authentication and Security
 - Implemented multi-factor authentication using `speakeasy` and `qrcode` libraries, and `nodemailer` for sending OTP via mail.
 - Secure password hashing with `bcrypt`
 - JWT-based authentication with role-based access control
 - Context-aware authentication analyzes user behavior patterns
 
-### 🤖 AI-Powered Chatbot
+### AI-Powered Chatbot
 - Built using LangChain and FAISS (Facebook AI Similarity Search) vector indexing, enabling efficient similarity search in vector space.
 - Implements a RAG (Retrieval-Augmented Generation) architecture for accurate responses
 - Optimized for academic queries and student support
 - Retrieves information from verified computer science resources before generating responses, otherwise Google/Wikipedia search 
 
-### 📊 PDF-to-Quiz Generator
+### PDF-to-Quiz Generator
 - Automatically generates quizzes from PDF documents or text prompts
 - Uses OpenAI API to extract key concepts and create relevant questions
 - Helps instructors create assessment materials efficiently
 
-### 📈 Academic Dashboard
+### Academic Dashboard
 - Comprehensive student performance tracking
 - Real-time attendance and grade updates
 - Personalized learning analytics
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c6e0cf77-ebb8-400e-9ea9-b3f30046fce6" width="800" alt="Description">
@@ -287,7 +287,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 -->
 
 
-## 📱 UI/UX Mockups
+## UI/UX Mockups
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/ef8d90fd-0362-434e-8605-6083a6b7e811" width="800" alt="Description">
