@@ -1,225 +1,205 @@
 const Assignment = require("../models/Assignment");
-const Course = require("../models/Course");
 const AssignmentSubmission = require("../models/AssignmentSubmission");
+const User = require("../models/User");
+const Course = require("../models/Course");
 
 
 
-// fetch all assignments
-exports.getAllAssignments = async (req, res) => {
+// submit an assignment
+exports.submitAssignment = async (req, res) => {
     try {
-        const assignments = await Assignment.find().populate("courseId", "title code color");
-        res.json(assignments);
+        const { assignmentId, courseId, downloadUrl } = req.body;
+        if (!assignmentId || !courseId || !downloadUrl) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const newSubmission = new AssignmentSubmission({
+            assignmentId,
+            courseId,
+            downloadUrl,
+            uploader: req.user.id,
+        });
+
+        await newSubmission.save();
+        res.status(201).json({
+            message: "Assignment submitted successfully",
+            submission: newSubmission,
+        });
+
     } catch (error) {
-        console.error("Error fetching assignments:", error);
-        res.status(500).json({ error: "Server error" });
+        console.error("Firebase upload metadata save error:", error);
+        res.status(500).json({ error: "Server error saving submission" });
     }
 };
 
 
 
-// fetch assignment by ID
+// get all assignments
+exports.getAllAssignments = async (req, res) => {
+    try {
+        const assignments = await Assignment.find();
+        res.status(200).json(assignments);
+    } catch (error) {
+        console.error("Error fetching assignments:", error);
+        res.status(500).json({ error: "Failed to fetch assignments" });
+    }
+};
+
+
+
+// get assignment by ID
 exports.getAssignmentById = async (req, res) => {
     try {
-        const assignment = await Assignment.findById(req.params.id)
-            .populate("courseId", "title code color");
-
+        const assignment = await Assignment.findById(req.params.id);
         if (!assignment) {
             return res.status(404).json({ error: "Assignment not found" });
         }
-
-        res.json(assignment);
+        res.status(200).json(assignment);
     } catch (error) {
         console.error("Error fetching assignment:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to fetch assignment" });
     }
 };
 
 
 
 
-// fetch assignments by course
+// get assignments by course
 exports.getAssignmentsByCourse = async (req, res) => {
     try {
-        const { courseId } = req.params;
-        const assignments = await Assignment.find({ courseId });
-        res.json(assignments);
+        const assignments = await Assignment.find({ courseId: req.params.courseId });
+        res.status(200).json(assignments);
     } catch (error) {
         console.error("Error fetching course assignments:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to fetch course assignments" });
     }
 };
 
 
 
 
-// fetch assignments for student
-exports.getAssignmentsForStudent = async (req, res) => {
+// get assignments for a student
+exports.getStudentAssignments = async (req, res) => {
     try {
-        const { studentId } = req.params;
+        const studentId = req.params.studentId;
 
-        // Find all courses the student is enrolled in
-        const courses = await Course.find({ students: studentId });
+        const courses = await Course.find({ 'students': studentId });
         const courseIds = courses.map(course => course._id);
+        const assignments = await Assignment.find({ courseId: { $in: courseIds } });
 
-        // Find all assignments for these courses
-        const assignments = await Assignment.find({ courseId: { $in: courseIds } })
-            .populate("courseId", "title code color");
-
-        // For each assignment, check if the student has submitted it
         const assignmentsWithStatus = await Promise.all(assignments.map(async (assignment) => {
             const submission = await AssignmentSubmission.findOne({
                 assignmentId: assignment._id,
                 uploader: studentId
             });
 
-            let status = 'pending';
-            if (submission) {
-                status = submission.status;
-            } else if (new Date(assignment.dueDate) < new Date()) {
-                status = 'late';
-            }
+            const course = courses.find(c => c._id.toString() === assignment.courseId.toString());
 
             return {
                 ...assignment.toObject(),
-                status
+                status: submission ? submission.status : 'pending',
+                courseCode: course ? course.code : '',
+                color: course ? course.color : '#5c51f3'
             };
         }));
 
-        res.json(assignmentsWithStatus);
+        res.status(200).json(assignmentsWithStatus);
     } catch (error) {
         console.error("Error fetching student assignments:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to fetch student assignments" });
     }
 };
 
 
 
 
-// create new assignment
+// create a new assignment
 exports.createAssignment = async (req, res) => {
     try {
         const { title, description, courseId, dueDate } = req.body;
+        if (!title || !description || !courseId || !dueDate) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
 
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).json({ error: "Course not found" });
         }
 
-        const assignment = new Assignment({
+        const newAssignment = new Assignment({
             title,
             description,
             courseId,
-            dueDate
+            dueDate,
         });
 
-        await assignment.save();
-        res.status(201).json({ message: "Assignment created successfully", assignment });
+        await newAssignment.save();
+        res.status(201).json({ message: "Assignment created successfully", assignment: newAssignment });
 
     } catch (error) {
         console.error("Error creating assignment:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to create assignment" });
     }
 };
 
 
 
 
-// update assignment
+// update an assignment
 exports.updateAssignment = async (req, res) => {
     try {
-        const { id } = req.params;
-        const updates = req.body;
-
-        const assignment = await Assignment.findByIdAndUpdate(
-            id,
-            updates,
+        const { title, description, dueDate } = req.body;
+        const updatedAssignment = await Assignment.findByIdAndUpdate(
+            req.params.id,
+            { title, description, dueDate },
             { new: true }
         );
 
-        if (!assignment) {
+        if (!updatedAssignment) {
             return res.status(404).json({ error: "Assignment not found" });
         }
+        res.status(200).json({ message: "Assignment updated successfully", assignment: updatedAssignment });
 
-        res.json({ message: "Assignment updated successfully", assignment });
     } catch (error) {
         console.error("Error updating assignment:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to update assignment" });
     }
 };
 
 
 
 
-// delete assignment
+// delete an assignment
 exports.deleteAssignment = async (req, res) => {
     try {
-        const { id } = req.params;
-        const assignment = await Assignment.findByIdAndDelete(id);
+        const deletedAssignment = await Assignment.findByIdAndDelete(req.params.id);
 
-        if (!assignment) {
+        if (!deletedAssignment) {
             return res.status(404).json({ error: "Assignment not found" });
         }
 
-        await AssignmentSubmission.deleteMany({ assignmentId: id });
+        await AssignmentSubmission.deleteMany({ assignmentId: req.params.id });
+        res.status(200).json({ message: "Assignment deleted successfully" });
 
-        res.json({ message: "Assignment deleted successfully" });
     } catch (error) {
         console.error("Error deleting assignment:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to delete assignment" });
     }
 };
 
 
 
 
-// submit assignment
-exports.submitAssignment = async (req, res) => {
+// get submissions for an assignment
+exports.getAssignmentSubmissions = async (req, res) => {
     try {
-        const { assignmentId, courseId, downloadUrl } = req.body;
-        const userId = req.user.id; 
-        const assignment = await Assignment.findById(assignmentId);
-        if (!assignment) {
-            return res.status(404).json({ error: "Assignment not found" });
-        }
+        const submissions = await AssignmentSubmission.find({ assignmentId: req.params.assignmentId })
+            .populate('uploader', 'name email'); 
 
-        const existingSubmission = await AssignmentSubmission.findOne({
-            assignmentId,
-            uploader: userId
-        });
-
-        if (existingSubmission) {
-            return res.status(400).json({ error: "You have already submitted this assignment" });
-        }
-
-        const submission = new AssignmentSubmission({
-            assignmentId,
-            courseId,
-            downloadUrl,
-            uploader: userId
-        });
-
-        await submission.save();
-        res.status(201).json({ message: "Assignment submitted successfully", submission });
+        res.status(200).json(submissions);
     } catch (error) {
-        console.error("Error submitting assignment:", error);
-        res.status(500).json({ error: "Server error" });
-    }
-};
-
-
-
-// get submissions for assignment
-exports.getSubmissionsForAssignment = async (req, res) => {
-    try {
-        const { assignmentId } = req.params;
-
-        const submissions = await AssignmentSubmission.find({ assignmentId })
-            .populate("uploader", "name email");
-
-        res.json(submissions);
-    } catch (error) {
-        console.error("Error fetching assignment submissions:", error);
-        res.status(500).json({ error: "Server error" });
+        console.error("Error fetching submissions:", error);
+        res.status(500).json({ error: "Failed to fetch submissions" });
     }
 };
 
@@ -229,22 +209,29 @@ exports.getSubmissionsForAssignment = async (req, res) => {
 // grade a submission
 exports.gradeSubmission = async (req, res) => {
     try {
-        const { submissionId } = req.params;
         const { grade, feedback } = req.body;
 
-        const submission = await AssignmentSubmission.findById(submissionId);
+        if (grade === undefined || grade < 0 || grade > 100) {
+            return res.status(400).json({ error: "Invalid grade" });
+        }
+
+        const submission = await AssignmentSubmission.findByIdAndUpdate(
+            req.params.submissionId,
+            {
+                grade,
+                feedback,
+                status: 'graded'
+            },
+            { new: true }
+        );
+
         if (!submission) {
             return res.status(404).json({ error: "Submission not found" });
         }
+        res.status(200).json({ message: "Submission graded successfully", submission });
 
-        submission.grade = grade;
-        submission.feedback = feedback;
-        submission.status = 'graded';
-
-        await submission.save();
-        res.json({ message: "Submission graded successfully", submission });
     } catch (error) {
         console.error("Error grading submission:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ error: "Failed to grade submission" });
     }
 };
