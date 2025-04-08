@@ -1,5 +1,4 @@
 "use client"
-
 import type React from "react"
 import { createContext, useState, useEffect, useCallback, type ReactNode } from "react"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -8,6 +7,7 @@ import { router } from "expo-router"
 import { Platform } from "react-native"
 import type { ContextDataType } from "../register"
 import { APP_CONFIG } from "@/app-config"
+
 
 const API_BASE_URL = `${APP_CONFIG.API_BASE_URL}/api/auth`
 
@@ -18,6 +18,7 @@ interface User {
   role: "student" | "professor" | "admin"
   token: string
 }
+
 
 interface AuthContextProps {
   user: User | null
@@ -33,6 +34,7 @@ interface AuthContextProps {
   resetAuthFlow: () => void
   closeSuspensionModal: () => void
 }
+
 
 export const AuthContext = createContext<AuthContextProps | null>(null)
 
@@ -62,8 +64,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (token && storedUser) {
           axios.defaults.headers.common["Authorization"] = `Bearer ${token}`
-          setUser(JSON.parse(storedUser))
-          console.log("Loaded user from storage:", JSON.parse(storedUser))
+          const parsedUser = JSON.parse(storedUser)
+          setUser(parsedUser)
+          console.log("Loaded user from storage:", parsedUser)
         }
       } catch (error) {
         console.error("Error loading user:", error)
@@ -77,7 +80,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-  // Step 1: Request OTP with email
+  // Request OTP with email
   const requestLoginOTP = async (email: string): Promise<boolean> => {
     setIsLoading(true)
     try {
@@ -103,7 +106,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-  // Step 2: Verify OTP
+
+  // Verify OTP
   const verifyLoginOTP = async (email: string, code: string): Promise<boolean> => {
     setIsLoading(true)
     try {
@@ -128,8 +132,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-
-
   const closeSuspensionModal = useCallback((): void => {
     setIsSuspensionModalVisible(false)
     setSuspendedUntil(null)
@@ -138,8 +140,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-
-  // Step 3: Complete login with password and context data
+  // SComplete login with password and context data
   const login = async (
     email: string,
     password: string,
@@ -175,16 +176,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const data = response.data;
 
       if (data?.success === false && data?.message?.includes("suspended")) {
-        // Extract date from message if available
         const suspensionDate = data?.suspendedUntil ?
           new Date(data.suspendedUntil).toLocaleString() :
           extractDateFromMessage(data?.message);
 
-        // Show suspension modal
         setSuspendedUntil(suspensionDate);
         setIsSuspensionModalVisible(true);
 
-        // Clean up storage
         if (Platform.OS === "web") {
           localStorage.clear();
         } else {
@@ -216,9 +214,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
 
-      resetAuthFlow();
+      resetAuthFlow();  
+      setTimeout(() => {
+        router.replace(`/${userData.role}/${userData.userId}`);
+      }, 100);
 
-      router.replace(`/${userData.role}Dashboard`);
     } catch (error: unknown) {
       console.error("Login request failed:", error);
 
@@ -233,13 +233,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           setSuspendedUntil(suspensionDate);
           setIsSuspensionModalVisible(true);
 
-          // Clean up storage
           if (Platform.OS === "web") {
             localStorage.clear();
           } else {
             await AsyncStorage.clear();
           }
-
           return;
         }
       }
@@ -256,7 +254,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
 
 
-
   const extractDateFromMessage = (message?: string): string | null => {
     if (!message) return null;
 
@@ -264,9 +261,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     return dateMatch ? dateMatch[1] : null;
   };
 
+
+
+
   const logout = async (): Promise<void> => {
     console.log("Logging out...")
     setIsLoading(true)
+
     try {
       if (Platform.OS === "web") {
         localStorage.removeItem("token")
@@ -282,8 +283,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       axios.defaults.headers.common["Authorization"] = ""
       setUser(null)
-      // Reset the 2FA flow state
       resetAuthFlow()
+
+      setTimeout(() => {
+        router.replace("/login");
+      }, 100);
+
       console.log("User logged out.")
     } catch (error: unknown) {
       const err = error as Error
@@ -294,12 +299,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
 
-
-  // Reset the authentication flow state
+  
   const resetAuthFlow = useCallback((): void => {
     setCurrentEmail(null)
     setIsOtpVerified(false)
   }, [])
+
+
 
   return (
     <AuthContext.Provider

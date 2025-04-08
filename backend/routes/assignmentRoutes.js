@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, isProfessor } = require("../middleware/authMiddleware.js");
-const assignmentController = require("../controllers/assignmentControllers");
+const { verifyToken, authorizeRoles } = require("../middleware/authMiddleware.js");
+const assignmentController = require("../controllers/assignmentController");
 
 
 router.post("/submit", verifyToken, assignmentController.submitAssignment);
@@ -11,11 +11,11 @@ router.get("/course/:courseId", verifyToken, assignmentController.getAssignments
 router.get("/student/:studentId", verifyToken, assignmentController.getStudentAssignments);
 
 // for professor only
-router.post("/", verifyToken, isProfessor, assignmentController.createAssignment);
-router.put("/:id", verifyToken, isProfessor, assignmentController.updateAssignment);
-router.delete("/:id", verifyToken, isProfessor, assignmentController.deleteAssignment);
-router.get("/:assignmentId/submissions", verifyToken, isProfessor, assignmentController.getAssignmentSubmissions);
-router.post("/submissions/:submissionId/grade", verifyToken, isProfessor, assignmentController.gradeSubmission);
+router.post("/", verifyToken, authorizeRoles(["professor"]), assignmentController.createAssignment);
+router.put("/:id", verifyToken, authorizeRoles(["professor"]), assignmentController.updateAssignment);
+router.delete("/:id", verifyToken, authorizeRoles(["professor"]), assignmentController.deleteAssignment);
+router.get("/:assignmentId/submissions", verifyToken, authorizeRoles(["professor"]), assignmentController.getAssignmentSubmissions);
+router.post("/submissions/:submissionId/grade", verifyToken, authorizeRoles(["professor"]), assignmentController.gradeSubmission);
 
 
 module.exports = router;
