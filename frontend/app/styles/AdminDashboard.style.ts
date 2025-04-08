@@ -784,7 +784,37 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: '#333',
     },
+    studentItem: {
+        flexDirection: "row",
+        backgroundColor: "white",
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 12,
+        elevation: 2,
+        alignItems: "center",
+    },
+    studentAvatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: "#4169E1",
+        alignItems: "center",
+        justifyContent: "center",
+        marginRight: 16,
+    },
+    studentInfo: {
+        flex: 1,
+    },
+    studentName: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#333",
+        marginBottom: 4,
+    },
+    studentEmail: {
+        color: "#777",
+        fontSize: 14,
+    },
 })
 
-export default styles
-
+export default styles;

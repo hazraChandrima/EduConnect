@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet } from "react-native"
 
 const styles = StyleSheet.create({
     container: {
@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "row",
         alignItems: "center",
-        position: 'relative',
+        position: "relative",
         zIndex: 2000, // Ensure it's above other components
     },
     profilePic: {
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "center",
         marginTop: 10,
-        margin:15,
+        margin: 15,
     },
     createButtonText: {
         color: "white",
@@ -795,7 +795,6 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "bold",
     },
-    // Grading modal
     gradingAssignmentInfo: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -812,7 +811,6 @@ const styles = StyleSheet.create({
         color: "#333",
         marginBottom: 15,
     },
-    // Attendance modal
     attendanceList: {
         marginBottom: 15,
     },
@@ -855,17 +853,17 @@ const styles = StyleSheet.create({
         borderColor: "#F44336",
     },
     profileButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
     },
     profileDropdown: {
-        position: 'absolute',
+        position: "absolute",
         top: 45,
         right: 0,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         padding: 8,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -873,28 +871,62 @@ const styles = StyleSheet.create({
         zIndex: 3000,
     },
     profileMenuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         paddingVertical: 8,
         paddingHorizontal: 12,
     },
     profileMenuItemText: {
         marginLeft: 8,
         fontSize: 16,
-        color: '#333',
+        color: "#333",
     },
     refreshButton: {
         padding: 8,
         borderRadius: 20,
-        backgroundColor: '#f0f0f7',
-        justifyContent: 'center',
-        alignItems: 'center',
-        shadowColor: '#000',
+        backgroundColor: "#f0f0f7",
+        justifyContent: "center",
+        alignItems: "center",
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 1,
         elevation: 1,
     },
-});
+    attendanceRecordDetails: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 10,
+    },
+    attendanceRecordStudent: {
+        fontSize: 14,
+        fontWeight: "500",
+        color: "#333",
+    },
+    attendanceRecordStatus: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#4252e5",
+    },
+    viewSubmissionButton: {
+        backgroundColor: "#4252e5",
+        borderRadius: 5,
+        padding: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        marginVertical: 15,
+    },
+    viewSubmissionButtonText: {
+        color: "white",
+        fontWeight: "500",
+        marginLeft: 10,
+    },
+    excusedOption: {
+        backgroundColor: "#FFC107",
+        borderColor: "#FFC107",
+    },
+})
 
 export default styles;
