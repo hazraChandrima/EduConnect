@@ -43,7 +43,6 @@ import {
   ProfessorRemark,
   SubmissionFile,
   sampleCourses,
-  sampleAssignments,
   sampleCurriculum,
   sampleAttendance,
   sampleMarks,
@@ -81,8 +80,8 @@ export default function StudentDashboard(): React.ReactElement {
   const [submissionText, setSubmissionText] = useState("");
   const [submissionFiles, setSubmissionFiles] = useState<SubmissionFile[]>([]);
   const [courses, setCourses] = useState<Course[]>(sampleCourses);
-  const [assignments, setAssignments] =
-    useState<Assignment[]>(sampleAssignments);
+  const [assignments, setAssignments] = useState<Assignment[]>([]);
+
   const [curriculum, setCurriculum] = useState<Curriculum[]>(sampleCurriculum);
   const [attendance, setAttendance] = useState<Attendance[]>(sampleAttendance);
   const [marks, setMarks] = useState<Mark[]>(sampleMarks);
@@ -92,6 +91,12 @@ export default function StudentDashboard(): React.ReactElement {
   const firstName = displayName.split(" ")[0];
 
   const [isOffline, setIsOffline] = useState(false);
+  
+  // useEffect(() => {
+  //   if (assignments.length > 0) {
+  //     console.log("Fetched assignments:", assignments);
+  //   }
+  // }, [assignments]);
 
   useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -134,6 +139,7 @@ export default function StudentDashboard(): React.ReactElement {
             "studentDashboardUserData",
             JSON.stringify(data)
           ); // <-- Save Offline
+          await fetchAssignments();
         }
       } catch (error) {
         console.error("Error in StudentDashboard:", error);
@@ -228,73 +234,26 @@ export default function StudentDashboard(): React.ReactElement {
     setSubmissionFiles(updatedFiles);
   };
 
-
-  // const submitAssignment = async () => {
-  //   if (!selectedAssignment) return;
-
-  //   const formData = new FormData();
-  //   formData.append("assignmentId", selectedAssignment.id);
-  //   formData.append("text", submissionText);
-
-
-  //   const filePromises = submissionFiles.map(async (file) => {
-  //     try {
-  //       const response = await fetch(file.uri);
-  //       const blob = await response.blob();
-  //       const fileObject = new File([blob], file.name, { type: file.type });
-
-  //       formData.append("file", fileObject); //Ensure key matches backend
-  //     } catch (error) {
-  //       console.error(" Error converting file to Blob:", error);
-  //     }
-  //   });
-
-  //   await Promise.all(filePromises); // Ensure all files are processed before sending request
-
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     console.error("No authentication token found!");
-  //     return;
-  //   }
-
-  //   try {
-  //     const response = await fetch("http://192.168.142.247:3000/api/assignment/submit", {
-  //       method: "POST",
-  //       body: formData,
-  //       headers: {
-  //         Authorization: `Bearer ${token}`, //Send token for authentication
-  //       },
-  //     });
-
-  //     console.log("Raw response from backend:", response);
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       console.log("Assignment submitted successfully:", data);
-  //     } else {
-  //       console.error("Failed to submit assignment:", data.error);
-  //     }
-  //   } catch (error) {
-  //     console.error("Error submitting assignment:", error);
-  //   }
-  //   // Update the assignment status
-  //   const updatedAssignments = assignments.map(assignment =>
-
-
-  //     assignment.id === selectedAssignment.id
-  //       ? { ...assignment, status: "submitted" as const }
-  //       : assignment
-  //   );
-
-  //   setAssignments(updatedAssignments);
-  //   setIsSubmissionModalVisible(false);
-
-  //   alert("Assignment submitted successfully!");
-  //   Alert.alert("Assignment submitted successfully!");
-  // };
+  const fetchAssignments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`http://${IP_ADDRESS}:3000/api/assignment/all`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch assignments: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      setAssignments(data);
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+    } finally {
+      setIsLoading(false); 
+    }
+  };
   
   const submitAssignment = async () => {
     if (!selectedAssignment || submissionFiles.length === 0) return;
+    console.log("Selected Assignment:", selectedAssignment);
   
     const token = localStorage.getItem("token");
     if (!token) {
@@ -311,15 +270,21 @@ export default function StudentDashboard(): React.ReactElement {
       await uploadBytes(storageRef, blob);
   
       const downloadUrl = await getDownloadURL(storageRef);
+      console.log("Submit payload:", {
+        assignmentId: selectedAssignment._id,
+        courseId: selectedAssignment.courseId,
+        downloadUrl,
+      });
+      
   
-      const backendResponse = await fetch("http://localhost:3000/api/assignment/submit", {
+      const backendResponse = await fetch(`http://${IP_ADDRESS}:3000/api/assignment/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          assignmentId: selectedAssignment.id,
+          assignmentId: selectedAssignment._id,
           courseId: selectedAssignment.courseId,
           downloadUrl,
         }),
@@ -336,7 +301,7 @@ export default function StudentDashboard(): React.ReactElement {
   
       // Mark as submitted
       const updatedAssignments = assignments.map((assignment) =>
-        assignment.id === selectedAssignment.id
+        assignment._id === selectedAssignment._id
           ? { ...assignment, status: "submitted" as const }
           : assignment
       );
@@ -934,7 +899,7 @@ export default function StudentDashboard(): React.ReactElement {
         </View>
 
         {/* Assignment Items */}
-        {assignments.slice(0, 3).map((assignment) => (
+        {/* {assignments.map((assignment) => (
           <View key={assignment.id} style={styles.assignmentItem}>
             <View style={styles.assignmentHeader}>
               <View
@@ -970,9 +935,11 @@ export default function StudentDashboard(): React.ReactElement {
                 ]}
               >
                 <Text style={styles.statusText}>
-                  {assignment.status.charAt(0).toUpperCase() +
-                    assignment.status.slice(1)}
-                </Text>
+                {assignment?.status
+                  ? assignment.status.charAt(0).toUpperCase() + assignment.status.slice(1)
+                  : "Unknown"}
+              </Text>
+
               </View>
               {assignment.status !== "submitted" &&
                 assignment.status !== "graded" && (
@@ -985,7 +952,26 @@ export default function StudentDashboard(): React.ReactElement {
                 )}
             </View>
           </View>
-        ))}
+        ))} */}
+        {assignments.map((assignment) => (
+        <View key={assignment._id} style={styles.assignmentCard}>
+          <Text style={styles.assignmentTitle}>{assignment.title}</Text>
+          <Text style={styles.assignmentDescription}>{assignment.description}</Text>
+          <Text style={styles.assignmentDueDate}>
+            Due: {new Date(assignment.dueDate).toLocaleDateString()}
+          </Text>
+
+          {/* Safe rendering of status */}
+          <Text style={styles.statusText}>
+            {(assignment.status ?? "pending")
+              .charAt(0)
+              .toUpperCase() + (assignment.status ?? "pending").slice(1)}
+          </Text>
+        </View>
+      ))}
+
+
+
       </View>
     </>
   );
@@ -1076,7 +1062,7 @@ export default function StudentDashboard(): React.ReactElement {
 
       <FlatList
         data={assignments}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <View style={styles.assignmentCard}>
             <View style={styles.assignmentCardHeader}>
@@ -1113,7 +1099,8 @@ export default function StudentDashboard(): React.ReactElement {
                 ]}
               >
                 <Text style={styles.assignmentCardStatusText}>
-                  {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                  {(item.status ?? "pending").charAt(0).toUpperCase() +
+                    (item.status ?? "pending").slice(1)}
                 </Text>
               </View>
 

@@ -19,14 +19,14 @@ export interface Course {
 }
 
 export interface Assignment {
-    id: string;
+    _id: string;
     courseId: string;
-    courseCode: string;
+    courseCode?: string;
     title: string;
     description: string;
     dueDate: string;
-    status: "pending" | "submitted" | "graded" | "late";
-    color: string;
+    status?: "pending" | "submitted" | "graded" | "late";
+    color?: string;
 }
 
 export interface Curriculum {
@@ -113,50 +113,6 @@ export const sampleCourses: Course[] = [
         progress: 80,
         color: "#ffa726",
         icon: "book",
-    },
-];
-
-
-export const sampleAssignments: Assignment[] = [
-    {
-        id: "1",
-        courseId: "1",
-        courseCode: "CS 101",
-        title: "Algorithm Analysis Report",
-        description: "Submit a report analyzing the time and space complexity of the algorithms discussed in class.",
-        dueDate: "Tomorrow",
-        status: "pending",
-        color: "#52c4eb",
-    },
-    {
-        id: "2",
-        courseId: "2",
-        courseCode: "MATH 202",
-        title: "Calculus Problem Set",
-        description: "Complete problems 1-15 from Chapter 4 of the textbook.",
-        dueDate: "3 days",
-        status: "pending",
-        color: "#ff5694",
-    },
-    {
-        id: "3",
-        courseId: "3",
-        courseCode: "PHYS 101",
-        title: "Lab Report: Forces and Motion",
-        description: "Write a detailed report on the lab experiment conducted on forces and motion.",
-        dueDate: "5 days",
-        status: "pending",
-        color: "#5c51f3",
-    },
-    {
-        id: "4",
-        courseId: "4",
-        courseCode: "ENG 105",
-        title: "Literary Analysis Essay",
-        description: "Write a 1000-word essay analyzing the themes in the assigned novel.",
-        dueDate: "1 week",
-        status: "pending",
-        color: "#ffa726",
     },
 ];
 

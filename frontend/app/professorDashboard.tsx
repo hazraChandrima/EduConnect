@@ -22,7 +22,7 @@ import FileManagement from "./components/FileManagement"
 import QuizTab from "./components/QuizTab"
 
 
-const IP_ADDRESS = "192.168.142.247"
+const IP_ADDRESS = "localhost"
 
 interface Assignment {
 	id: string
@@ -218,7 +218,7 @@ export default function ProfessorDashboard() {
 		title: "",
 		description: "",
 		dueDate: "",
-		course: "",
+		courseId: "",
 	})
 	const [gradeInput, setGradeInput] = useState("")
 	const [feedbackInput, setFeedbackInput] = useState("")
@@ -230,6 +230,15 @@ export default function ProfessorDashboard() {
 	const [isLoading, setIsLoading] = useState<boolean>(true)
 	const displayName = userData?.name || "Professor"
 	const firstName = displayName.split(" ")[0]
+	const handleCloseAssignmentModal = () => {
+		setNewAssignment({
+		  title: "",
+		  description: "",
+		  dueDate: "",
+		  courseId: "",
+		});
+		setIsAssignmentModalVisible(false);
+	  };
 
 	useEffect(() => {
 		const checkAuthAndFetchData = async (): Promise<void> => {
@@ -292,21 +301,57 @@ export default function ProfessorDashboard() {
 		}
 	}
 
-	const handleCreateAssignment = () => {
-		if (!newAssignment.title || !newAssignment.description || !newAssignment.dueDate || !newAssignment.course) {
-			return
-		}
+	// const handleCreateAssignment = () => {
+	// 	if (!newAssignment.title || !newAssignment.description || !newAssignment.dueDate || !newAssignment.course) {
+	// 		return
+	// 	}
 
-		setIsLoading(true)
-		setIsLoading(false)
-		setIsAssignmentModalVisible(false)
+	// 	setIsLoading(true)
+	// 	setIsLoading(false)
+	// 	setIsAssignmentModalVisible(false)
+	// 	setNewAssignment({
+	// 		title: "",
+	// 		description: "",
+	// 		dueDate: "",
+	// 		course: "",
+	// 	})
+	// }
+
+	const handleCreateAssignment = async () => {
+		const token = localStorage.getItem("token");
+		if (!token) return;
+
+		try {
+			console.log("Submitting assignment with data:", newAssignment);
+
+		  const response = await fetch(`http://${IP_ADDRESS}:3000/api/assignment/create`, {
+			method: "POST",
+			headers: {
+			  "Content-Type": "application/json",
+			  Authorization: `Bearer ${token}`,
+			},
+			body: JSON.stringify(newAssignment),
+		  });
+	  
+		  const data = await response.json();
+	  
+		  if (response.ok) {
+			alert("Assignment created!");
+			setIsAssignmentModalVisible(false);
+		  } else {
+			console.error("Error creating assignment:", data.error);
+		  }
+		} catch (error) {
+		  console.error("Error:", error);
+		}
 		setNewAssignment({
 			title: "",
 			description: "",
 			dueDate: "",
-			course: "",
-		})
-	}
+			courseId: "",
+		  });
+		  setIsAssignmentModalVisible(false);
+	  };
 
 	const handleGradeSubmission = () => {
 		if (!gradeInput) {
@@ -937,13 +982,13 @@ export default function ProfessorDashboard() {
 			visible={isAssignmentModalVisible}
 			animationType="slide"
 			transparent={true}
-			onRequestClose={() => setIsAssignmentModalVisible(false)}
+			onRequestClose={handleCloseAssignmentModal}
 		>
 			<View style={styles.modalOverlay}>
 				<View style={styles.modalContainer}>
 					<View style={styles.modalHeader}>
 						<Text style={styles.modalTitle}>Create New Assignment</Text>
-						<TouchableOpacity onPress={() => setIsAssignmentModalVisible(false)}>
+						<TouchableOpacity onPress={handleCloseAssignmentModal}>
 							<AntDesign name="close" size={24} color="#333" />
 						</TouchableOpacity>
 					</View>
@@ -980,13 +1025,13 @@ export default function ProfessorDashboard() {
 							{professorCourses.map((course) => (
 								<TouchableOpacity
 									key={course.id}
-									style={[styles.courseOption, newAssignment.course === course.id && styles.selectedCourseOption]}
-									onPress={() => setNewAssignment({ ...newAssignment, course: course.id })}
+									style={[styles.courseOption, newAssignment.courseId === course.id && styles.selectedCourseOption]}
+									onPress={() => setNewAssignment({ ...newAssignment, courseId: course.id })}
 								>
 									<Text
 										style={[
 											styles.courseOptionText,
-											newAssignment.course === course.id && styles.selectedCourseOptionText,
+											newAssignment.courseId === course.id && styles.selectedCourseOptionText,
 										]}
 									>
 										{course.name}
