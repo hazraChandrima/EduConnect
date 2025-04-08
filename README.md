@@ -102,9 +102,14 @@ EduConnect is a comprehensive college management system built with the MERN stac
    ```
    MONGODB_URI=your_mongodb_connection_string
    PORT=3000
+
    JWT_SECRET=your_jwt_secret
+
    EMAIL_USER=your_email
    EMAIL_PASS=your_email_password
+
+   IP_ADDRESS=your_local_ip_address
+
    ```
 
 4. Start the backend server (using nodemon):
@@ -130,7 +135,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
    Create two configuration files in the root of your frontend project:
 
    **a. app-config.js**
-   ```javascript
+   ```typescript
    // app-config.js
    // This file contains API URLs for different services
 

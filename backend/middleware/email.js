@@ -31,8 +31,6 @@ module.exports.sendVerificationCode = async (email, verificationCode) => {
 
 
 
-
-
 module.exports.sendWelcomeEmail = async (email, name) => {
     try {
         const response = await transporter.sendMail({
@@ -95,9 +93,9 @@ module.exports.sendResetPasswordEmail = async (email, resetLink) => {
 
 
 
+
 module.exports.sendAccountSuspensionAlert = async (email, userName, deviceType, location, ipAddress, verificationLink) => {
     try {
-        // Use the existing transporter instead of creating a new one
         const htmlContent = Alert_Suspension_Template
             .replace("{userName}", userName)
             .replace("{deviceType}", deviceType)
