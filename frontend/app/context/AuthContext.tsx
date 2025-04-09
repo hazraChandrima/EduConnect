@@ -424,10 +424,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     loadUser()
   }, [])
-
-
-
   
+
+
+
+
   // 1: Initiate login with email
   const initiateLogin = async (email: string): Promise<boolean> => {
     setIsLoading(true)
@@ -446,6 +447,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error: unknown) {
       const err = error as Error
       console.error("Login initiation failed:", err.message)
+
+      // Handle suspension at the initiate login step
+      if (axios.isAxiosError(error) && error.response?.status === 403) {
+        const responseData = error.response.data
+
+        if (responseData?.message?.includes("suspended")) {
+          const suspensionDate = responseData?.suspendedUntil
+            ? new Date(responseData.suspendedUntil).toLocaleString()
+            : extractDateFromMessage(responseData?.message)
+
+          setSuspendedUntil(suspensionDate)
+          setIsSuspensionModalVisible(true)
+
+          if (Platform.OS === "web") {
+            localStorage.clear()
+          } else {
+            await AsyncStorage.clear()
+          }
+        }
+      }
+
       return false
     } finally {
       setIsLoading(false)
@@ -481,11 +503,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
+
+
+
   const closeSuspensionModal = useCallback((): void => {
     setIsSuspensionModalVisible(false)
     setSuspendedUntil(null)
   }, [])
-
 
 
 
@@ -523,24 +547,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const data = response.data
 
-      if (data?.success === false && data?.message?.includes("suspended")) {
-        const suspensionDate = data?.suspendedUntil
-          ? new Date(data.suspendedUntil).toLocaleString()
-          : extractDateFromMessage(data?.message)
-
-        setSuspendedUntil(suspensionDate)
-        setIsSuspensionModalVisible(true)
-
-        if (Platform.OS === "web") {
-          localStorage.clear()
-        } else {
-          await AsyncStorage.clear()
-        }
-
-        setIsLoading(false)
-        return
-      }
-
       const userData: User = {
         userId: data.userId,
         email: currentEmail,
@@ -569,26 +575,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error: unknown) {
       console.error("Login completion failed:", error)
 
-      if (axios.isAxiosError(error) && error.response?.status === 403) {
-        const responseData = error.response.data
-
-        if (responseData?.message?.includes("suspended")) {
-          const suspensionDate = responseData?.suspendedUntil
-            ? new Date(responseData.suspendedUntil).toLocaleString()
-            : extractDateFromMessage(responseData?.message)
-
-          setSuspendedUntil(suspensionDate)
-          setIsSuspensionModalVisible(true)
-
-          if (Platform.OS === "web") {
-            localStorage.clear()
-          } else {
-            await AsyncStorage.clear()
-          }
-          return
-        }
-      }
-
       if (error instanceof Error) {
         throw error
       } else {
@@ -599,7 +585,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }
 
-  
+
 
 
 

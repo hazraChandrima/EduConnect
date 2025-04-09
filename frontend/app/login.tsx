@@ -1930,12 +1930,12 @@ export default function LoginScreen() {
         </TouchableOpacity>
 
         {/* Register Link */}
-        <View style={styles.registerContainer}>
+        {/* <View style={styles.registerContainer}>
           <Text style={styles.registerText}>Don't have an account?</Text>
           <TouchableOpacity onPress={() => router.push("/register")}>
             <Text style={styles.registerLink}>Sign Up</Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
       </>
     )
   }

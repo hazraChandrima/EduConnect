@@ -631,8 +631,16 @@ exports.initiateLogin = async (req, res) => {
 			return res.status(404).json({ success: false, message: "User not found" });
 		}
 
-		const loginOTP = Math.floor(100000 + Math.random() * 900000).toString();
+		if (user.suspendedUntil && new Date() < user.suspendedUntil) {
+			console.log(`User ${user.email} is suspended until ${user.suspendedUntil}`);
+			return res.status(403).json({
+				success: false,
+				forceLogout: true,
+				message: `Account suspended until ${user.suspendedUntil.toLocaleString()}`,
+			});
+		}
 
+		const loginOTP = Math.floor(100000 + Math.random() * 900000).toString();
 		// expiry time (10 minutes)
 		user.loginOTP = loginOTP;
 		user.loginOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
@@ -841,6 +849,7 @@ exports.loginUser = async (req, res) => {
 		res.status(500).json({ success: false, error: error.message });
 	}
 };
+
 
 
 
