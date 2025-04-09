@@ -1137,6 +1137,7 @@ import styles from "./styles/Login.styles"
 import CustomAlert from "./components/CustomAlert"
 import { useAlert } from "./hooks/useAlert"
 
+
 enum LoginStep {
   EMAIL = 0,
   VERIFY_OTP = 1,
@@ -1328,21 +1329,15 @@ export default function LoginScreen() {
 
   const { user, isLoading: contextLoading, initiateLogin, verifyLoginOTP, completeLogin } = authContext || {}
 
-  const roleToRoute = {
-    admin: "/adminDashboard",
-    teacher: "/professorDashboard",
-    student: "/studentDashboard",
-  } as const
 
   useEffect(() => {
     if (user && !isRedirecting) {
-      setIsRedirecting(true)
-      console.log(`User detected (${user.role}), navigating to dashboard...`)
-
-      const path = roleToRoute[user.role as keyof typeof roleToRoute]
-      router.replace(path)
+      setIsRedirecting(true);
+      console.log(`User detected (${user.role}), navigating to dashboard...`);
+      router.replace(`/${user.role}/${user.userId}` as never);
     }
-  }, [user, isRedirecting])
+  }, [user, isRedirecting]);
+
 
   useEffect(() => {
     return () => {
@@ -1523,7 +1518,7 @@ export default function LoginScreen() {
           Alert.alert("Verification Code Sent", "Please check your email for the verification code.")
         }
       } else {
-        setEmailError("The email you've entered either does not exist or is not registered.")
+        setEmailError("The email you've entered either does not exist or is not registered. Please contact the admin for help.")
 
         if (Platform.OS === "web") {
           showAlert({

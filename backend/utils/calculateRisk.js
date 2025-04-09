@@ -9,18 +9,18 @@ async function calculateRiskScore(contextData, userContext) {
     riskFactors.push("Unknown device");
   }
 
-  const NEARBY_THRESHOLD_KM = 20; // Consider locations within 20km as "nearby"
+  const NEARBY_THRESHOLD_KM = 2; // Reduced threshold for "nearby" to account for slight variations
 
-  // Check for known locations (exact matches within specified radius)
+  // Check for known locations (within a tighter radius to account for device variations)
   const isKnownLocation = userContext.knownLocations.some((loc) => {
     const distance = getDistance(
       { latitude: contextData.location.latitude, longitude: contextData.location.longitude },
       { latitude: loc.latitude, longitude: loc.longitude }
     );
-    return distance <= loc.radius * 1000;
+    return distance <= (loc.radius ? loc.radius * 1000 : NEARBY_THRESHOLD_KM * 1000); // Use provided radius or default nearby threshold
   });
 
-  // Check for nearby locations (not exact match but close enough)
+  // Check for nearby locations (slightly larger radius than the tighter known location check)
   const isNearbyLocation = userContext.knownLocations.some((loc) => {
     const distance = getDistance(
       { latitude: contextData.location.latitude, longitude: contextData.location.longitude },
@@ -31,8 +31,8 @@ async function calculateRiskScore(contextData, userContext) {
 
   if (!isKnownLocation) {
     if (isNearbyLocation) {
-      riskScore += 2; // Lower risk for nearby locations
-      riskFactors.push("Login from nearby but not exact known location");
+      riskScore += 1; // Even lower risk for very nearby locations with a new device
+      riskFactors.push("Login from a new device at a very nearby known location");
     } else {
       // Location is completely new
       riskScore += 6;

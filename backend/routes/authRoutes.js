@@ -29,7 +29,6 @@ router.post('/initiate-login', authController.initiateLogin); // Step 1: Email e
 router.post('/verify-login-otp', authController.verifyLoginOTP); // Step 2: OTP verification
 router.post('/login', authController.loginUser); // Step 3: Password verification and login completion
 
-// Keep existing routes
 router.post('/verifyEmail', authController.verifyEmail);
 router.post('/updatePassword', authController.updatePassword);
 router.post('/forgot-password', authController.forgotPassword);

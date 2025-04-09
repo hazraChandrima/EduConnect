@@ -21,6 +21,32 @@ import { APP_CONFIG } from "@/app-config"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
+
+// Add these safeguard functions at the top of your file (after your imports)
+
+/**
+ * Ensures array has safe numbers (no NaN, Infinity)
+ */
+const ensureSafeData = (data: number[]): number[] => {
+  return data.map(value => {
+    if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
+      return 0; // Replace problematic values with 0
+    }
+    return value;
+  });
+};
+
+/**
+ * Ensures a minimum dataset length
+ */
+const ensureMinimumDataLength = (data: number[], minLength: number = 2): number[] => {
+  if (!data || data.length === 0) return new Array(minLength).fill(0);
+  if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])];
+  return data;
+};
+
+
+
 type TabType = "performance" | "attendance" | "marks" | "curriculum"
 
 interface TabItem {
@@ -285,6 +311,7 @@ const AcademicAnalytics: React.FC = () => {
     }
   }
 
+
   const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {
     // Process GPA trend (mock data for now as we don't have historical GPA)
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -298,22 +325,30 @@ const AcademicAnalytics: React.FC = () => {
     const currentGPA = calculateGPA(marksData)
 
     // simulating a trend leading up to the current GPA
-    const mockGPAData = [
-      Math.max(2.5, currentGPA - 1.0 + Math.random() * 0.5),
-      Math.max(2.7, currentGPA - 0.8 + Math.random() * 0.4),
-      Math.max(2.8, currentGPA - 0.6 + Math.random() * 0.4),
-      Math.max(2.9, currentGPA - 0.4 + Math.random() * 0.3),
-      Math.max(3.0, currentGPA - 0.3 + Math.random() * 0.3),
-      Math.max(3.1, currentGPA - 0.2 + Math.random() * 0.2),
-      Math.max(3.2, currentGPA - 0.1 + Math.random() * 0.1),
-      currentGPA,
-    ].map((gpa) => Number.parseFloat(gpa.toFixed(1)))
+    const isSafeNumber = (num: number): number => {
+      return isNaN(num) || num === null || num === undefined ? 0 : num;
+    };
+
+    const mockGPAData = (currentGPA: number): number[] => [
+      Math.max(2.5, currentGPA - isSafeNumber(1.0) + Math.random() * 0.5),
+      Math.max(2.7, currentGPA - isSafeNumber(0.8) + Math.random() * 0.4),
+      Math.max(2.8, currentGPA - isSafeNumber(0.6) + Math.random() * 0.4),
+      Math.max(2.9, currentGPA - isSafeNumber(0.4) + Math.random() * 0.3),
+      Math.max(3.0, currentGPA - isSafeNumber(0.3) + Math.random() * 0.3),
+      Math.max(3.1, currentGPA - isSafeNumber(0.2) + Math.random() * 0.2),
+      Math.max(3.2, currentGPA - isSafeNumber(0.1) + Math.random() * 0.1),
+      currentGPA || 3.0, // Provide fallback if currentGPA is invalid
+    ].map((gpa) => Number.parseFloat(gpa.toFixed(1)));
+
+    // Ensure data is safe for SVG paths
+    let gpaValues = mockGPAData(currentGPA);
+    gpaValues = ensureSafeData(gpaValues);
 
     setGpaData({
       labels: lastEightMonths,
       datasets: [
         {
-          data: mockGPAData,
+          data: gpaValues,
           color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
           strokeWidth: 2,
         },
@@ -331,13 +366,20 @@ const AcademicAnalytics: React.FC = () => {
     }
 
     marksData.forEach((mark) => {
-      const percentage = (mark.score / mark.maxScore) * 100
-      if (percentage >= 90) gradeCount.A++
-      else if (percentage >= 80) gradeCount.B++
-      else if (percentage >= 70) gradeCount.C++
-      else if (percentage >= 60) gradeCount.D++
-      else gradeCount.F++
+      if (mark.score != null && mark.maxScore && mark.maxScore > 0) {
+        const percentage = (mark.score / mark.maxScore) * 100
+        if (percentage >= 90) gradeCount.A++
+        else if (percentage >= 80) gradeCount.B++
+        else if (percentage >= 70) gradeCount.C++
+        else if (percentage >= 60) gradeCount.D++
+        else gradeCount.F++
+      }
     })
+
+    // Ensure at least one grade exists to prevent empty charts
+    if (Object.values(gradeCount).reduce((a, b) => a + b, 0) === 0) {
+      gradeCount.A = 1; // Add a default grade if no grades exist
+    }
 
     setGradeDistribution([
       {
@@ -381,12 +423,14 @@ const AcademicAnalytics: React.FC = () => {
     const courseAverages: { [key: string]: { total: number; count: number } } = {}
 
     marksData.forEach((mark) => {
-      const courseId = mark.courseId
-      if (!courseAverages[courseId]) {
-        courseAverages[courseId] = { total: 0, count: 0 }
+      if (mark.score != null && mark.maxScore && mark.maxScore > 0) {
+        const courseId = mark.courseId
+        if (!courseAverages[courseId]) {
+          courseAverages[courseId] = { total: 0, count: 0 }
+        }
+        courseAverages[courseId].total += (mark.score / mark.maxScore) * 100
+        courseAverages[courseId].count += 1
       }
-      courseAverages[courseId].total += (mark.score / mark.maxScore) * 100
-      courseAverages[courseId].count += 1
     })
 
     const courseLabels: string[] = []
@@ -394,17 +438,24 @@ const AcademicAnalytics: React.FC = () => {
 
     Object.entries(courseAverages).forEach(([courseId, data]) => {
       const course = coursesData.find((c) => c._id === courseId)
-      if (course) {
+      if (course && data.count > 0) {
         courseLabels.push(course.code)
         courseScores.push(Math.round(data.total / data.count))
       }
     })
 
+    // Ensure we have at least some data to display
+    if (courseLabels.length === 0) {
+      courseLabels.push("No Data");
+      courseScores.push(0);
+    }
+
     setSubjectPerformanceData({
       labels: courseLabels,
-      datasets: [{ data: courseScores }],
+      datasets: [{ data: ensureSafeData(courseScores) }],
     })
   }
+
 
   const processAttendanceData = (attendanceData: Attendance[], coursesData: Course[]) => {
     const courseAttendance: { [key: string]: { present: number; total: number } } = {}
@@ -432,11 +483,26 @@ const AcademicAnalytics: React.FC = () => {
       }
     })
 
+    // Ensure we have at least some data to display
+    if (courseLabels.length === 0) {
+      courseLabels.push("No Data");
+      attendanceRates.push(0);
+    }
+
     setAttendanceData({
       labels: courseLabels,
-      data: attendanceRates,
+      data: ensureSafeData(attendanceRates),
     })
   }
+
+  // Add this helper function
+  const isSafeNumber = (value: any): number => {
+    if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
+      return 0;
+    }
+    return value;
+  }
+
 
   const calculateGPA = (marksData: MarkItem[]): number => {
     if (marksData.length === 0) return 0
@@ -536,7 +602,13 @@ const AcademicAnalytics: React.FC = () => {
             <Text style={styles.chartSubtitle}>Your academic performance over time</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <LineChart
-                data={gpaData}
+                data={{
+                  ...gpaData,
+                  datasets: gpaData.datasets.map(dataset => ({
+                    ...dataset,
+                    data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
+                  }))
+                }}
                 width={Math.max(getChartWidth(), 300)}
                 height={220}
                 chartConfig={chartConfig}
@@ -570,7 +642,10 @@ const AcademicAnalytics: React.FC = () => {
             <Text style={styles.chartSubtitle}>Your attendance percentage across courses</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <ProgressChart
-                data={attendanceData}
+                data={{
+                  ...attendanceData,
+                  data: ensureSafeData(attendanceData.data)
+                }}
                 width={Math.max(getChartWidth(), 500)}
                 height={300}
                 strokeWidth={16}
@@ -634,7 +709,13 @@ const AcademicAnalytics: React.FC = () => {
             <Text style={styles.chartSubtitle}>Your marks across different subjects</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={true}>
               <BarChart
-                data={subjectPerformanceData}
+                data={{
+                  ...subjectPerformanceData,
+                  datasets: subjectPerformanceData.datasets.map(dataset => ({
+                    ...dataset,
+                    data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1)
+                  }))
+                }}
                 width={Math.max(getChartWidth(), 300)}
                 height={220}
                 yAxisLabel=""
@@ -645,6 +726,7 @@ const AcademicAnalytics: React.FC = () => {
                 }}
                 style={styles.chart}
               />
+
             </ScrollView>
 
             <View style={styles.marksDetails}>

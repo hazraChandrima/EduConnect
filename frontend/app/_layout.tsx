@@ -7,13 +7,12 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="login" options={{ title: "Login", headerShown: true }} />
-        <Stack.Screen name="register" options={{ title: "Register", headerShown: true }} />
         <Stack.Screen name="forgotPassword" options={{ title: "Forgot Password", headerShown: true }} />
         <Stack.Screen name="resetPassword" options={{ title: "Reset Password", headerShown: true }} />
-        <Stack.Screen name="studentDashboard" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="studentDashboard" options={{ headerShown: false }} /> */}
         <Stack.Screen name="[role]" options={{ headerShown: false }} />
-        <Stack.Screen name="professorDashboard" options={{ headerShown: false }} />
-        <Stack.Screen name="adminDashboard" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="professorDashboard" options={{ headerShown: false }} /> */}
+        {/* <Stack.Screen name="adminDashboard" options={{ headerShown: false }} /> */}
         <Stack.Screen name="chatbotScreen" options={{ headerShown: false }} />
       </Stack>
     </AuthProvider>
