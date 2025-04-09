@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const bcrypt = require('bcryptjs');
 
 
 
@@ -55,10 +56,13 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ error: "User already exists" });
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const user = new User({
             name,
             email,
-            password, // hash this password in production
+            password: hashedPassword, // Store the hashed password
             role,
             department,
             program,
@@ -66,12 +70,17 @@ exports.createUser = async (req, res) => {
         });
 
         await user.save();
-        res.status(201).json({ message: "User created successfully", user: { ...user.toObject(), password: undefined } });
+        res.status(201).json({
+            message: "User created successfully",
+            user: { ...user.toObject(), password: undefined }
+        });
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).json({ error: "Server error" });
     }
 };
+
+
 
 
 
