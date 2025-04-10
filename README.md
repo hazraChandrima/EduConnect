@@ -132,7 +132,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 2. Configure environment variables:
    
-   Create two configuration files in the root of your frontend project:
+   Create two configuration files in the root of your frontend project (cuz Expo with Typescript doesn't support .env fr some reason) :
 
    **a. app-config.js**
    ```typescript
