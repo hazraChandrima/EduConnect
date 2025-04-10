@@ -1,51 +1,56 @@
+// components/student/GpaChart.tsx - Updated version with userId prop
 "use client"
-import type React from "react"
-import { useState, useEffect } from "react"
-import { LineChart } from "react-native-chart-kit"
-import { Dimensions, ScrollView, View, Text, StyleSheet, ActivityIndicator } from "react-native"
-import { APP_CONFIG } from "@/app-config"
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { LineChart } from 'react-native-chart-kit';
+import { Dimensions, ScrollView, View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { APP_CONFIG } from '@/app-config';
+import { useToken } from '@/app/hooks/useToken';
 
-const API_BASE_URL = APP_CONFIG.API_BASE_URL
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
-// Type definitions
+
 interface GpaEntry {
-    value: number
-    date: string
-    _id: string
+    value: number;
+    date: string;
+    _id: string;
 }
 
 interface UserData {
-    _id: string
-    name: string
-    email: string
-    role: string
-    department: string
-    program: string
-    year: number
-    gpa: GpaEntry[]
-    isVerified: boolean
-    isSuspended: boolean
-    suspendedUntil: string | null
-    joinDate: string
-    createdAt: string
-    __v: number
+    _id: string;
+    name: string;
+    email: string;
+    role: string;
+    department: string;
+    program: string;
+    year: number;
+    gpa: GpaEntry[];
+    joinDate: string;
+    createdAt: string;
+    __v: number;
 }
 
 interface ChartDataset {
-    data: number[]
-    color: (opacity?: number) => string
-    strokeWidth: number
+    data: number[];
+    color: (opacity?: number) => string;
+    strokeWidth: number;
 }
 
 interface ChartData {
-    labels: string[]
-    datasets: ChartDataset[]
-    legend: string[]
+    labels: string[];
+    datasets: ChartDataset[];
+    legend: string[];
 }
 
-const GPAChart: React.FC = () => {
-    const [loading, setLoading] = useState<boolean>(false)
-    const [error, setError] = useState<string | null>(null)
+interface GPAChartProps {
+    userId: string;
+}
+
+const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
+    const [userData, setUserData] = useState<UserData | null>(null);
+    const { token } = useToken();
 
     const [gpaData, setGpaData] = useState<ChartData>({
         labels: [],
@@ -57,76 +62,85 @@ const GPAChart: React.FC = () => {
             },
         ],
         legend: ["GPA Trend"],
-    })
+    });
 
     const ensureSafeData = (data: number[]): number[] => {
-        return data.map((value) => (isNaN(value) || value === null || value === undefined ? 0 : value))
-    }
+        return data.map(value => (isNaN(value) || value === null || value === undefined) ? 0 : value);
+    };
 
-    const ensureMinimumDataLength = (data: number[], minLength = 2): number[] => {
+    const ensureMinimumDataLength = (data: number[], minLength: number): number[] => {
         if (data.length < minLength) {
-            return [...data, ...Array(minLength - data.length).fill(data[data.length - 1] || 0)]
+            return [...data, ...Array(minLength - data.length).fill(data[data.length - 1] || 0)];
         }
-        return data
-    }
+        return data;
+    };
 
     const getChartWidth = (): number => {
-        const screenWidth = Dimensions.get("window").width
-        const dataPointCount = gpaData.labels.length
-        const minWidthPerDataPoint = 80
-        return Math.max(screenWidth, dataPointCount * minWidthPerDataPoint)
-    }
+        const screenWidth = Dimensions.get('window').width;
+        const dataPointCount = gpaData.labels.length;
+        const minWidthPerDataPoint = 80;
+        return Math.max(screenWidth, dataPointCount * minWidthPerDataPoint);
+    };
+
+    const getLatestGpaValue = (): number => {
+        if (!userData?.gpa || userData.gpa.length === 0) return 0;
+        const sortedGpa = [...userData.gpa].sort((a, b) =>
+            new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        return sortedGpa[0]?.value ?? 0;
+    };
+
+    const getEarliestGpaValue = (): number => {
+        if (!userData?.gpa || userData.gpa.length === 0) return 0;
+        const sortedGpa = [...userData.gpa].sort((a, b) =>
+            new Date(a.date).getTime() - new Date(b.date).getTime()
+        );
+        return sortedGpa[0]?.value ?? 0;
+    };
+
+    const getGpaChange = (): number => {
+        return getLatestGpaValue() - getEarliestGpaValue();
+    };
 
     useEffect(() => {
-        const loadSampleData = () => {
+        const fetchUserData = async () => {
+            if (!userId) {
+                setError("User ID is missing");
+                setLoading(false);
+                return;
+            }
+
             try {
-                setLoading(true)
+                setLoading(true);
 
-                // Sample GPA data
-                const sampleGpaEntries: GpaEntry[] = [
-                    {
-                        value: 3.45,
-                        date: "2024-11-10T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3872",
+                const response = await fetch(`${API_BASE_URL}/api/user/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
                     },
-                    {
-                        value: 3.52,
-                        date: "2024-12-15T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3873",
-                    },
-                    {
-                        value: 3.68,
-                        date: "2025-01-20T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3874",
-                    },
-                    {
-                        value: 3.71,
-                        date: "2025-02-15T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3875",
-                    },
-                    {
-                        value: 3.75,
-                        date: "2025-03-10T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3876",
-                    },
-                    {
-                        value: 3.82,
-                        date: "2025-04-05T00:00:00.000Z",
-                        _id: "67f76c7953a2d450979c3877",
-                    },
-                ]
+                });
 
-                if (sampleGpaEntries && sampleGpaEntries.length > 0) {
-                    const sortedGpa = [...sampleGpaEntries].sort(
-                        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-                    )
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
 
-                    const labels = sortedGpa.map((entry) => {
-                        const date = new Date(entry.date)
-                        return `${date.getMonth() + 1}/${date.getFullYear().toString().substr(2)}`
-                    })
+                const data = await response.json();
+                setUserData(data);
 
-                    const values = sortedGpa.map((entry) => entry.value)
+                if (data.gpa && data.gpa.length > 0) {
+                    const sortedGpa = [...data.gpa].sort((a, b) =>
+                        new Date(a.date).getTime() - new Date(b.date).getTime()
+                    );
+
+
+                    const labels = sortedGpa.map(entry => {
+                        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        const date = new Date(entry.date);
+                        return `${months[(date.getMonth())]}/${date.getFullYear().toString().substr(2)}`;
+                    });
+
+                    const values = sortedGpa.map(entry => entry.value);
 
                     setGpaData({
                         labels,
@@ -138,18 +152,43 @@ const GPAChart: React.FC = () => {
                             },
                         ],
                         legend: ["GPA Trend"],
-                    })
+                    });
+                } else {
+                    // just in case
+                    const mockLabels = ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr"];
+                    const currentGpa = data.gpa || 3.0;
+                    const mockValues = [
+                        Math.max(2.5, currentGpa - 0.5),
+                        Math.max(2.7, currentGpa - 0.3),
+                        Math.max(2.8, currentGpa - 0.2),
+                        Math.max(2.9, currentGpa - 0.1),
+                        currentGpa,
+                        currentGpa,
+                    ].map(val => Number(val.toFixed(1)));
+
+                    setGpaData({
+                        labels: mockLabels,
+                        datasets: [
+                            {
+                                data: mockValues,
+                                color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
+                                strokeWidth: 2,
+                            },
+                        ],
+                        legend: ["GPA Trend"],
+                    });
                 }
 
-                setLoading(false)
+                setLoading(false);
             } catch (err) {
-                setError(err instanceof Error ? err.message : "An unknown error occurred")
-                setLoading(false)
+                console.error("Error fetching GPA data:", err);
+                setError(err instanceof Error ? err.message : 'An unknown error occurred');
+                setLoading(false);
             }
-        }
+        };
 
-        loadSampleData()
-    }, [])
+        fetchUserData();
+    }, [userId, token]);
 
     const chartConfig = {
         backgroundGradientFrom: "#ffffff",
@@ -158,14 +197,14 @@ const GPAChart: React.FC = () => {
         color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
         labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
         style: {
-            borderRadius: 16,
+            borderRadius: 16
         },
         propsForDots: {
             r: "6",
             strokeWidth: "2",
-            stroke: "#5C51F3",
-        },
-    }
+            stroke: "#5C51F3"
+        }
+    };
 
     if (loading) {
         return (
@@ -173,7 +212,7 @@ const GPAChart: React.FC = () => {
                 <ActivityIndicator size="large" color="#5C51F3" />
                 <Text style={styles.loadingText}>Loading GPA data...</Text>
             </View>
-        )
+        );
     }
 
     if (error) {
@@ -181,72 +220,68 @@ const GPAChart: React.FC = () => {
             <View style={styles.container}>
                 <Text style={styles.errorText}>Error loading data: {error}</Text>
             </View>
-        )
-    }
-
-    // Calculate GPA change
-    const getLatestGpaValue = (): number => {
-        if (!gpaData.datasets[0].data || gpaData.datasets[0].data.length === 0) return 0
-        return gpaData.datasets[0].data[gpaData.datasets[0].data.length - 1]
-    }
-
-    const getEarliestGpaValue = (): number => {
-        if (!gpaData.datasets[0].data || gpaData.datasets[0].data.length === 0) return 0
-        return gpaData.datasets[0].data[0]
-    }
-
-    const getGpaChange = (): number => {
-        return getLatestGpaValue() - getEarliestGpaValue()
+        );
     }
 
     return (
         <View style={styles.container}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                <LineChart
-                    data={{
-                        ...gpaData,
-                        datasets: gpaData.datasets.map((dataset) => ({
-                            ...dataset,
-                            data: ensureMinimumDataLength(ensureSafeData(dataset.data)),
-                        })),
-                    }}
-                    width={Math.max(getChartWidth(), 300)}
-                    height={220}
-                    chartConfig={chartConfig}
-                    bezier
-                    style={styles.chart}
-                />
-            </ScrollView>
+            <Text style={styles.header}>GPA Trend Over Past 6 Months</Text>
+            {userData ? (
+                <>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={true}>
+                        <LineChart
+                            data={{
+                                ...gpaData,
+                                datasets: gpaData.datasets.map(dataset => ({
+                                    ...dataset,
+                                    data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
+                                }))
+                            }}
+                            width={Math.max(getChartWidth(), 300)}
+                            height={220}
+                            chartConfig={chartConfig}
+                            style={styles.chart}
+                        />
+                    </ScrollView>
 
-            <View style={styles.statsContainer}>
-                <Text style={styles.statsText}>
-                    Current GPA: <Text style={styles.statsHighlight}>{getLatestGpaValue().toFixed(2)}</Text>
-                </Text>
-                <Text style={styles.statsText}>
-                    GPA Change:{" "}
-                    <Text
-                        style={[
-                            styles.statsHighlight,
-                            {
-                                color: getGpaChange() >= 0 ? "#4CAF50" : "#F44336",
-                            },
-                        ]}
-                    >
-                        {getGpaChange() >= 0 ? "+" : ""}
-                        {getGpaChange().toFixed(2)}
-                    </Text>
-                </Text>
-            </View>
+                    <View style={styles.statsContainer}>
+                        <Text style={styles.statsText}>
+                            Current GPA: <Text style={styles.statsHighlight}>
+                                {typeof userData.gpa === 'number'
+                                    ? userData.gpa[0]
+                                    : getLatestGpaValue().toFixed(2)}
+                            </Text>
+                        </Text>
+                        <Text style={styles.statsText}>
+                            GPA Change: <Text style={[
+                                styles.statsHighlight,
+                                {
+                                    color: getGpaChange() >= 0 ? '#4CAF50' : '#F44336'
+                                }
+                            ]}>
+                                {getGpaChange().toFixed(2)}
+                            </Text>
+                        </Text>
+                    </View>
+                </>
+            ) : (
+                <Text style={styles.noDataText}>No GPA data available</Text>
+            )}
         </View>
-    )
-}
+    );
+};
+
+
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
-        backgroundColor: "#F5F8FF",
-        borderRadius: 12,
         marginVertical: 10,
+    },
+    header: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 15,
+        color: '#333',
     },
     chart: {
         marginVertical: 8,
@@ -254,26 +289,26 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         marginTop: 10,
-        textAlign: "center",
-        color: "#666",
+        textAlign: 'center',
+        color: '#666',
     },
     errorText: {
-        color: "red",
-        textAlign: "center",
+        color: 'red',
+        textAlign: 'center',
     },
     noDataText: {
-        textAlign: "center",
-        color: "#666",
+        textAlign: 'center',
+        color: '#666',
         marginVertical: 20,
     },
     statsContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         marginTop: 15,
         padding: 10,
-        backgroundColor: "#ffffff",
+        backgroundColor: '#ffffff',
         borderRadius: 8,
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 2,
@@ -281,12 +316,13 @@ const styles = StyleSheet.create({
     },
     statsText: {
         fontSize: 14,
-        color: "#555",
+        color: '#555',
     },
     statsHighlight: {
-        fontWeight: "bold",
-        color: "#5C51F3",
+        fontWeight: 'bold',
+        color: '#5C51F3',
     },
-})
+});
 
-export default GPAChart
+
+export default GPAChart;

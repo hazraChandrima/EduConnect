@@ -11,7 +11,7 @@ import {
 	SafeAreaView,
 	ActivityIndicator,
 } from "react-native"
-import { BarChart, PieChart, ProgressChart } from "react-native-chart-kit"
+import { LineChart, BarChart, PieChart, ProgressChart } from "react-native-chart-kit"
 import { Ionicons } from "@expo/vector-icons"
 import styles from "../../styles/AcademicAnalytics.style"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -23,20 +23,25 @@ import GPAChart from "./GpaChart"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
-const ensureSafeData = (data: number[]): number[] => {
-	return data.map((value) => {
-		if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
-			return 0
-		}
-		return value
-	})
-}
 
-const ensureMinimumDataLength = (data: number[], minLength = 2): number[] => {
-	if (!data || data.length === 0) return new Array(minLength).fill(0)
-	if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])]
-	return data
-}
+const ensureSafeData = (data: number[]): number[] => {
+	return data.map(value => {
+		if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
+			return 0;
+		}
+		return value;
+	});
+};
+
+
+
+const ensureMinimumDataLength = (data: number[], minLength: number = 2): number[] => {
+	if (!data || data.length === 0) return new Array(minLength).fill(0);
+	if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])];
+	return data;
+};
+
+
 
 type TabType = "performance" | "attendance" | "marks" | "curriculum"
 
@@ -119,7 +124,7 @@ const AcademicAnalytics: React.FC = () => {
 	const [attendance, setAttendance] = useState<Attendance[]>([])
 	const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
 
-	const { token } = useToken()
+	const { token } = useToken();
 
 	const [gradeDistribution, setGradeDistribution] = useState<GradeDistributionItem[]>([])
 
@@ -148,13 +153,16 @@ const AcademicAnalytics: React.FC = () => {
 		return () => unsubscribe()
 	}, [])
 
+
+
+
 	useEffect(() => {
-		let isMounted = true
+		let isMounted = true;
 
 		const fetchData = async () => {
 			if (!auth?.user?.userId) {
 				console.log("No user ID available")
-				setIsLoading(false)
+				setIsLoading(false);
 				return
 			}
 
@@ -167,7 +175,7 @@ const AcademicAnalytics: React.FC = () => {
 
 				try {
 					if (!token) {
-						throw new Error("No token available")
+						throw new Error("No token available");
 					}
 
 					const coursesResponse = await fetch(`${API_BASE_URL}/api/courses/student/${userId}`, {
@@ -176,7 +184,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					})
+					});
 
 					if (coursesResponse.ok) {
 						coursesData = await coursesResponse.json()
@@ -185,6 +193,7 @@ const AcademicAnalytics: React.FC = () => {
 						}
 						await AsyncStorage.setItem("academicAnalyticsCourses", JSON.stringify(coursesData))
 					}
+
 				} catch (error) {
 					console.error("Error fetching courses:", error)
 					try {
@@ -200,11 +209,12 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
+
 				// Fetch marks
 				let marksData: MarkItem[] = []
 				try {
 					if (!token) {
-						throw new Error("No token available")
+						throw new Error("No token available");
 					}
 
 					const marksResponse = await fetch(`${API_BASE_URL}/api/marks/student/${userId}`, {
@@ -213,7 +223,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					})
+					});
 
 					if (marksResponse.ok) {
 						marksData = await marksResponse.json()
@@ -234,6 +244,7 @@ const AcademicAnalytics: React.FC = () => {
 						await AsyncStorage.setItem("academicAnalyticsMarks", JSON.stringify(enrichedMarks))
 						processMarksData(enrichedMarks, coursesData)
 					}
+
 				} catch (error) {
 					console.error("Error fetching marks:", error)
 					try {
@@ -250,11 +261,12 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
+
 				// Fetch attendance
 				let attendanceData: Attendance[] = []
 				try {
 					if (!token) {
-						throw new Error("No token available")
+						throw new Error("No token available");
 					}
 
 					const attendanceResponse = await fetch(`${API_BASE_URL}/api/attendance/student/${userId}`, {
@@ -263,7 +275,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					})
+					});
 
 					if (attendanceResponse.ok) {
 						attendanceData = await attendanceResponse.json()
@@ -283,6 +295,7 @@ const AcademicAnalytics: React.FC = () => {
 						await AsyncStorage.setItem("academicAnalyticsAttendance", JSON.stringify(enrichedAttendance))
 						processAttendanceData(enrichedAttendance, coursesData)
 					}
+
 				} catch (error) {
 					console.error("Error fetching attendance:", error)
 					try {
@@ -299,18 +312,18 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
+
 				// Fetch curriculum
 				try {
 					if (coursesData.length > 0) {
-						const curriculumPromises = coursesData.map(
-							(course) =>
-								fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`, {
-									headers: {
-										Authorization: `Bearer ${token}`,
-									},
-								})
-									.then((res) => (res.ok ? res.json() : []))
-									.catch(() => []), // Return empty array for any failed requests
+						const curriculumPromises = coursesData.map((course) =>
+							fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`, {
+								headers: {
+									Authorization: `Bearer ${token}`,
+								}
+							})
+								.then((res) => (res.ok ? res.json() : []))
+								.catch(() => []) // Return empty array for any failed requests
 						)
 
 						const curriculumResults = await Promise.all(curriculumPromises)
@@ -352,12 +365,16 @@ const AcademicAnalytics: React.FC = () => {
 			}
 		}
 
-		fetchData()
+		fetchData();
 
 		return () => {
-			isMounted = false
-		}
-	}, [auth, token, auth?.user?.userId])
+			isMounted = false;
+		};
+	}, [auth, token, auth?.user?.userId]);
+
+
+
+
 
 	const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {
 		// Process GPA trend (mock data for now as we don't have historical GPA)
@@ -367,14 +384,7 @@ const AcademicAnalytics: React.FC = () => {
 			const monthIndex = (currentMonth - 7 + i + 12) % 12
 			return months[monthIndex]
 		})
-
-		// Calculate current GPA from marks
-		const currentGPA = calculateGPA(marksData)
-
-		// simulating a trend leading up to the current GPA
-		const isSafeNumber = (num: number): number => {
-			return isNaN(num) || num === null || num === undefined ? 0 : num
-		}
+		
 
 		// Process grade distribution
 		const gradeCount = {
@@ -398,7 +408,7 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure at least one grade exists to prevent empty charts
 		if (Object.values(gradeCount).reduce((a, b) => a + b, 0) === 0) {
-			gradeCount.A = 1 // Add a default grade if no grades exist
+			gradeCount.A = 1; // Add a default grade if no grades exist
 		}
 
 		setGradeDistribution([
@@ -466,8 +476,8 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure we have at least some data to display
 		if (courseLabels.length === 0) {
-			courseLabels.push("No Data")
-			courseScores.push(0)
+			courseLabels.push("No Data");
+			courseScores.push(0);
 		}
 
 		setSubjectPerformanceData({
@@ -475,6 +485,7 @@ const AcademicAnalytics: React.FC = () => {
 			datasets: [{ data: ensureSafeData(courseScores) }],
 		})
 	}
+
 
 	const processAttendanceData = (attendanceData: Attendance[], coursesData: Course[]) => {
 		const courseAttendance: { [key: string]: { present: number; total: number } } = {}
@@ -504,8 +515,8 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure we have at least some data to display
 		if (courseLabels.length === 0) {
-			courseLabels.push("No Data")
-			attendanceRates.push(0)
+			courseLabels.push("No Data");
+			attendanceRates.push(0);
 		}
 
 		setAttendanceData({
@@ -517,10 +528,11 @@ const AcademicAnalytics: React.FC = () => {
 	// Add this helper function
 	const isSafeNumber = (value: any): number => {
 		if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
-			return 0
+			return 0;
 		}
-		return value
+		return value;
 	}
+
 
 	const calculateGPA = (marksData: MarkItem[]): number => {
 		if (marksData.length === 0) return 0
@@ -618,7 +630,8 @@ const AcademicAnalytics: React.FC = () => {
 					<View style={styles.chartContainer}>
 						<Text style={styles.chartTitle}>GPA Trend</Text>
 						<Text style={styles.chartSubtitle}>Your academic performance over time</Text>
-						<GPAChart />
+						<GPAChart userId={auth?.user?.userId || ""} />
+
 						<Text style={styles.chartTitle}>Grade Distribution</Text>
 						<Text style={styles.chartSubtitle}>Current semester grade breakdown</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
@@ -646,7 +659,7 @@ const AcademicAnalytics: React.FC = () => {
 							<ProgressChart
 								data={{
 									...attendanceData,
-									data: ensureSafeData(attendanceData.data),
+									data: ensureSafeData(attendanceData.data)
 								}}
 								width={Math.max(getChartWidth(), 500)}
 								height={300}
@@ -713,10 +726,10 @@ const AcademicAnalytics: React.FC = () => {
 							<BarChart
 								data={{
 									...subjectPerformanceData,
-									datasets: subjectPerformanceData.datasets.map((dataset) => ({
+									datasets: subjectPerformanceData.datasets.map(dataset => ({
 										...dataset,
-										data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1),
-									})),
+										data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1)
+									}))
 								}}
 								width={Math.max(getChartWidth(), 300)}
 								height={220}
@@ -728,6 +741,7 @@ const AcademicAnalytics: React.FC = () => {
 								}}
 								style={styles.chart}
 							/>
+
 						</ScrollView>
 
 						<View style={styles.marksDetails}>
