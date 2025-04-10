@@ -17,7 +17,14 @@ const {
 router.get("/", verifyToken, getAllCourses);
 router.get("/:id", verifyToken, getCourseById);
 router.get("/professor/:professorId", verifyToken, getCoursesByProfessor);
-router.get("/student/:studentId", verifyToken, getCoursesByStudent);
+
+router.get("/student/:studentId", verifyToken, (req, res, next) => {
+  if (req.user.id !== req.params.studentId) {
+    return res.status(403).json({ message: "Access Denied" });
+  }
+  next();
+}, getCoursesByStudent);
+
 
 // for admin only
 router.post("/", verifyToken, authorizeRoles(["admin"]), createCourse);

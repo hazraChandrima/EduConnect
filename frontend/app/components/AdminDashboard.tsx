@@ -27,6 +27,7 @@ import CoursesList from "./admin/CoursesList";
 import CourseDetail from "./admin/CourseDetail";
 import SettingsTab from "./admin/SettingsTab";
 import { UserData, Course } from "@/types/types";
+import { useToken } from "../hooks/useToken";
 
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL;
@@ -55,7 +56,9 @@ export default function AdminDashboard({ userId }: { userId: string }) {
 
     const authContext = useContext(AuthContext);
     const router = useRouter();
-    const token = localStorage.getItem("token");
+
+
+    const { token } = useToken();
 
     const displayName = userData?.name || "Admin";
     const firstName = displayName.split(" ")[0];
@@ -70,7 +73,6 @@ export default function AdminDashboard({ userId }: { userId: string }) {
 
 
 
-    // Fetch all data on component mount
     useEffect(() => {
         const checkAuthAndFetchData = async (): Promise<void> => {
             try {
@@ -181,7 +183,7 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         };
 
         checkAuthAndFetchData();
-    }, [authContext, router, userId]);
+    }, [authContext, router, userId, token]);
 
 
 

@@ -88,18 +88,57 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = { ...req.body };
+        let updates = {};
 
-        if (updates.password) {
+        // Handle regular field updates
+        if (req.body.name) updates.name = req.body.name;
+        if (req.body.email) updates.email = req.body.email;
+        if (req.body.department) updates.department = req.body.department;
+        if (req.body.program) updates.program = req.body.program;
+        if (req.body.year) updates.year = req.body.year;
+        if (req.body.role) updates.role = req.body.role;
+        if (req.body.isVerified !== undefined) updates.isVerified = req.body.isVerified;
+        if (req.body.isSuspended !== undefined) updates.isSuspended = req.body.isSuspended;
+        if (req.body.suspendedUntil) updates.suspendedUntil = req.body.suspendedUntil;
+
+        if (req.body.password) {
             const salt = await bcrypt.genSalt(10);
-            updates.password = await bcrypt.hash(updates.password, salt);
+            updates.password = await bcrypt.hash(req.body.password, salt);
         }
 
-        const user = await User.findByIdAndUpdate(
-            id,
-            updates,
-            { new: true }
-        ).select("-password"); // still exclude password from response
+        if (req.body.gpa) {
+            // If adding a new GPA entry
+            if (typeof req.body.gpa === 'object' && req.body.gpa.value) {
+                const gpaEntry = {
+                    value: req.body.gpa.value,
+                    date: req.body.gpa.date || new Date()
+                };
+
+                updates = {
+                    ...updates,
+                    $push: { gpa: gpaEntry }
+                };
+            }
+            // If replacing the entire GPA array
+            else if (Array.isArray(req.body.gpa)) {
+                updates.gpa = req.body.gpa;
+            }
+        }
+
+        let user;
+        if (updates.$push) {
+            user = await User.findByIdAndUpdate(
+                id,
+                updates,
+                { new: true }
+            ).select("-password");
+        } else {
+            user = await User.findByIdAndUpdate(
+                id,
+                { $set: updates },
+                { new: true }
+            ).select("-password");
+        }
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
