@@ -104,6 +104,7 @@ exports.updateUser = async (req, res) => {
         if (req.body.loginOTPExpires) updates.loginOTPExpires = req.body.loginOTPExpires;
         if (req.body.isSuspended !== undefined) updates.isSuspended = req.body.isSuspended;
         if (req.body.suspendedUntil) updates.suspendedUntil = req.body.suspendedUntil;
+        if (req.body.gpa !== undefined) updates.gpa = req.body.gpa;
 
         // Handle gradeCount updates
         if (req.body.gradeCount) {

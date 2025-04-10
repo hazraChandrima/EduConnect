@@ -58,41 +58,45 @@ exports.getAttendanceByCourseAndStudent = async (req, res) => {
 // record attendance
 exports.recordAttendance = async (req, res) => {
     try {
-        const { courseId, date, attendanceData } = req.body;
-        const professorId = req.user.id; 
+        const { courseId, studentId, date, status, recordedBy } = req.body;
+        const professorId = req.user?.id || recordedBy; 
+
+        if (!courseId || !studentId || !date || !status) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
 
         const course = await Course.findById(courseId);
         if (!course) {
             return res.status(404).json({ error: "Course not found" });
         }
 
-        if (course.professor.toString() !== professorId) {
+        if (req.user && course.professor.toString() !== professorId) {
             return res.status(403).json({ error: "You are not authorized to record attendance for this course" });
         }
 
-        const attendanceRecords = [];
-        for (const [studentId, status] of Object.entries(attendanceData)) {
-            const student = await User.findById(studentId);
-            if (!student || student.role !== "student") {
-                continue; // Skip invalid students
-            }
-            if (!course.students.includes(studentId)) {
-                continue; 
-            }
-
-            const attendanceRecord = await Attendance.findOneAndUpdate(
-                { courseId, studentId, date: new Date(date) },
-                {
-                    status,
-                    recordedBy: professorId
-                },
-                { upsert: true, new: true }
-            );
-
-            attendanceRecords.push(attendanceRecord);
+        const student = await User.findById(studentId);
+        if (!student || student.role !== "student") {
+            return res.status(400).json({ error: "Invalid student ID" });
         }
-        res.json({ message: "Attendance recorded successfully", attendanceRecords });
 
+        if (!course.students.includes(studentId)) {
+            return res.status(400).json({ error: "Student not enrolled in this course" });
+        }
+
+        // Create or update the attendance record
+        const attendanceRecord = await Attendance.findOneAndUpdate(
+            { courseId, studentId, date: new Date(date) },
+            {
+                status,
+                recordedBy: professorId
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({
+            message: "Attendance recorded successfully",
+            attendanceRecord
+        });
     } catch (error) {
         console.error("Error recording attendance:", error);
         res.status(500).json({ error: "Server error" });
