@@ -606,15 +606,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     try {
       if (Platform.OS === "web") {
-        localStorage.removeItem("token")
-        localStorage.removeItem("user")
-        localStorage.removeItem("userId")
-        localStorage.removeItem("studentDashboardUserData")
+        localStorage.clear()
+        console.log('Stroage cleared on logout');
+
       } else {
-        await AsyncStorage.removeItem("token")
-        await AsyncStorage.removeItem("user")
-        await AsyncStorage.removeItem("userId")
-        await AsyncStorage.removeItem("studentDashboardUserData")
+        await AsyncStorage.clear();
+        console.log('Storage cleared on logout');
       }
 
       axios.defaults.headers.common["Authorization"] = ""

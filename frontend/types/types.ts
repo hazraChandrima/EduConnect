@@ -10,6 +10,7 @@ export interface UserData {
 }
 
 export interface Course {
+    enrolledStudents: any;
     _id: string;
     title: string;
     code: string;

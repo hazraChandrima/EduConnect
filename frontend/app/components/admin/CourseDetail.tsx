@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -8,6 +8,9 @@ import {
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import styles from "../../styles/AdminDashboard.style";
 import { UserData, Course } from "@/types/types";
+import { APP_CONFIG } from "@/app-config";
+
+const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
 
 interface CourseDetailProps {
@@ -23,6 +26,29 @@ export default function CourseDetail({
     onDelete,
     onStudentSelect
 }: CourseDetailProps) {
+
+    const [studentsData, setStudentsData] = useState<UserData[]>([]);
+
+    useEffect(() => {
+        const fetchStudentDetails = async () => {
+            if (!course.students || !course.students.length) return;
+
+            try {
+                // Fetch each student's details
+                const studentsDetails = await Promise.all(
+                    course.students.map(studentId =>
+                        fetch(`${API_BASE_URL}/api/user/${studentId}`).then(res => res.json())
+                    )
+                );
+                setStudentsData(studentsDetails);
+            } catch (error) {
+                console.error("Error fetching student details:", error);
+            }
+        };
+
+        fetchStudentDetails();
+    }, [course.students]);
+
     return (
         <View style={styles.courseDetailContainer}>
             <TouchableOpacity style={styles.backButton} onPress={onBack}>
@@ -59,8 +85,8 @@ export default function CourseDetail({
 
             <Text style={styles.sectionTitle}>Enrolled Students</Text>
             <FlatList
-                data={course.students}
-                keyExtractor={(item) => item._id}
+                data={studentsData}
+                keyExtractor={(item) => item._id.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={styles.studentItem}
@@ -70,8 +96,8 @@ export default function CourseDetail({
                             <Ionicons name="person" size={24} color="white" />
                         </View>
                         <View style={styles.studentInfo}>
-                            <Text style={styles.studentName}>{item.name}</Text>
-                            <Text style={styles.studentEmail}>{item.email}</Text>
+                            <Text style={styles.studentName}>{item.name || "Unknown"}</Text>
+                            <Text style={styles.studentEmail}>{item.email || "No email"}</Text>
                         </View>
                         <Ionicons name="chevron-forward" size={24} color="#ccc" />
                     </TouchableOpacity>

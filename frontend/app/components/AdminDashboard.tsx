@@ -55,17 +55,20 @@ export default function AdminDashboard({ userId }: { userId: string }) {
 
     const authContext = useContext(AuthContext);
     const router = useRouter();
+    const token = localStorage.getItem("token");
 
     const displayName = userData?.name || "Admin";
     const firstName = displayName.split(" ")[0];
 
-    // Monitor network status
+
     useEffect(() => {
         const unsubscribe = NetInfo.addEventListener((state) => {
             setIsOffline(!state.isConnected);
         });
         return () => unsubscribe();
     }, []);
+
+
 
     // Fetch all data on component mount
     useEffect(() => {
@@ -77,6 +80,10 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                     console.log("No authenticated user, redirecting to login");
                     router.replace("/login");
                     return;
+                }
+
+                if (!token) {
+                    throw new Error("No authentication token found");
                 }
 
                 if (authContext.user.role !== "admin") {
@@ -94,16 +101,34 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                 setUserData(userData);
                 await AsyncStorage.setItem("adminDashboardUserData", JSON.stringify(userData));
 
+
                 // Fetch all professors
-                const professorsResponse = await fetch(`${API_BASE_URL}/api/user/role/professor`);
+                const professorsResponse = await fetch(`${API_BASE_URL}/api/user/role/professor`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+
                 if (professorsResponse.ok) {
                     const professorsData = await professorsResponse.json();
                     setProfessors(professorsData);
+                    console.log(professors)
                     await AsyncStorage.setItem("adminDashboardProfessors", JSON.stringify(professorsData));
                 }
 
                 // Fetch all students
-                const studentsResponse = await fetch(`${API_BASE_URL}/api/user/role/student`);
+                const studentsResponse = await fetch(`${API_BASE_URL}/api/user/role/student`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+
                 if (studentsResponse.ok) {
                     const studentsData = await studentsResponse.json();
                     setStudents(studentsData);
@@ -111,7 +136,14 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                 }
 
                 // Fetch all courses
-                const coursesResponse = await fetch(`${API_BASE_URL}/api/courses`);
+                const coursesResponse = await fetch(`${API_BASE_URL}/api/courses`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
                 if (coursesResponse.ok) {
                     const coursesData = await coursesResponse.json();
                     setCourses(coursesData);
@@ -151,6 +183,8 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         checkAuthAndFetchData();
     }, [authContext, router, userId]);
 
+
+
     const handleLogout = async () => {
         try {
             await authContext?.logout?.();
@@ -160,6 +194,8 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         }
     };
 
+
+
     const handleUserAdded = (newUser: UserData) => {
         if (newUser.role === "professor") {
             setProfessors([...professors, newUser]);
@@ -168,15 +204,21 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         }
     };
 
+
+
     const handleCourseAdded = (newCourse: Course) => {
         setCourses([...courses, newCourse]);
     };
+
+
 
     const handleDeleteConfirmation = (item: UserData | Course, type: "professor" | "student" | "course") => {
         setItemToDelete(item);
         setDeleteType(type);
         setIsConfirmDeleteModalVisible(true);
     };
+
+
 
     const handleDelete = async () => {
         if (!itemToDelete || !deleteType) return;
@@ -307,6 +349,8 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         };
     };
 
+
+
     const getDepartmentDistributionData = () => {
         const departmentCounts: { [key: string]: number } = {};
 
@@ -332,7 +376,7 @@ export default function AdminDashboard({ userId }: { userId: string }) {
     };
 
 
-    
+
 
     const getSystemUsageData = () => {
         // This would typically come from analytics data
@@ -348,16 +392,20 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         };
     };
 
+
+
     const getDepartmentDistributionChartData = () => {
         const { labels, data, colors } = getDepartmentDistributionData();
         return labels.map((label, index) => ({
             name: label,
-            population: data[index] * 100,
+            population: parseFloat((data[index] * 100).toFixed(2)),
             color: colors[index],
             legendFontColor: "#7F7F7F",
             legendFontSize: 12,
         }));
     };
+
+    
 
     if (isLoading) {
         return (
@@ -497,7 +545,9 @@ export default function AdminDashboard({ userId }: { userId: string }) {
         </>
     );
 
-    // Render users tab content
+
+
+
     const renderUsersTab = () => (
         <>
             <View style={styles.tabHeader}>
@@ -521,6 +571,7 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                     </TouchableOpacity>
                 ) : null}
             </View>
+
 
             <View style={styles.tabsContainer}>
                 <TouchableOpacity
@@ -635,8 +686,97 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                 </>
             ) : (
                 <>
-                    {/* Students tab content - similar structure to professors */}
-                    {/* ... */}
+                    {selectedStudent ? (
+                        <View style={styles.userDetailContainer}>
+                            <TouchableOpacity style={styles.backButton} onPress={() => setSelectedStudent(null)}>
+                                <Ionicons name="arrow-back" size={24} color="#4169E1" />
+                                <Text style={styles.backButtonText}>Back to Students</Text>
+                            </TouchableOpacity>
+
+                            <View style={styles.userProfile}>
+                                <View style={styles.userProfileAvatar}>
+                                    <FontAwesome5 name="user-graduate" size={40} color="white" />
+                                </View>
+                                <Text style={styles.userProfileName}>{selectedStudent.name}</Text>
+                                <Text style={styles.userProfileId}>ID: {selectedStudent._id}</Text>
+                                <Text style={styles.userProfileEmail}>{selectedStudent.email}</Text>
+                            </View>
+
+                            <View style={styles.userInfoSection}>
+                                <View style={styles.userInfoItem}>
+                                    <Text style={styles.userInfoLabel}>Program:</Text>
+                                    <Text style={styles.userInfoValue}>{selectedStudent.program || "Not specified"}</Text>
+                                </View>
+                                <View style={styles.userInfoItem}>
+                                    <Text style={styles.userInfoLabel}>Join Date:</Text>
+                                    <Text style={styles.userInfoValue}>
+                                        {selectedStudent.joinDate
+                                            ? new Date(selectedStudent.joinDate).toLocaleDateString()
+                                            : "Not specified"}
+                                    </Text>
+                                </View>
+                                <View style={styles.userInfoItem}>
+                                    <Text style={styles.userInfoLabel}>Enrolled Courses:</Text>
+                                    <View style={styles.courseTagsContainer}>
+                                        {courses
+                                            .filter(course => course.enrolledStudents?.some((s: { _id: string; }) => s._id === selectedStudent._id))
+                                            .map(course => (
+                                                <View key={course._id} style={styles.courseTag}>
+                                                    <Text style={styles.courseTagText}>{course.title}</Text>
+                                                </View>
+                                            ))}
+                                    </View>
+                                </View>
+                            </View>
+
+                            <View style={styles.userActions}>
+                                <TouchableOpacity style={styles.editButton}>
+                                    <Feather name="edit" size={20} color="white" />
+                                    <Text style={styles.editButtonText}>Edit Profile</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.deleteButton}
+                                    onPress={() => handleDeleteConfirmation(selectedStudent, "student")}
+                                >
+                                    <Feather name="trash-2" size={20} color="white" />
+                                    <Text style={styles.deleteButtonText}>Delete User</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                    ) : (
+                        <FlatList
+                            data={filteredStudents}
+                            keyExtractor={(item) => item._id}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity style={styles.userItem} onPress={() => setSelectedStudent(item)}>
+                                    <View style={styles.userAvatar}>
+                                        <FontAwesome5 name="user-graduate" size={24} color="white" />
+                                    </View>
+                                    <View style={styles.userInfo}>
+                                        <Text style={styles.userName}>{item.name}</Text>
+                                        <Text style={styles.userEmail}>{item.email}</Text>
+                                        <Text style={styles.userDepartment}>{item.program || "No program"}</Text>
+                                    </View>
+                                    <View style={styles.userActions}>
+                                        <TouchableOpacity
+                                            style={styles.userActionButton}
+                                            onPress={() => handleDeleteConfirmation(item, "student")}
+                                        >
+                                            <Feather name="trash-2" size={20} color="#FF4081" />
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.userActionButton}>
+                                            <Feather name="edit" size={20} color="#4169E1" />
+                                        </TouchableOpacity>
+                                    </View>
+                                </TouchableOpacity>
+                            )}
+                            ListEmptyComponent={
+                                <View style={styles.emptyListContainer}>
+                                    <Text style={styles.emptyListText}>No students found</Text>
+                                </View>
+                            }
+                        />
+                    )}
                 </>
             )}
         </>
@@ -697,6 +837,7 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                 {activeTab === "settings" && renderSettingsTab()}
             </ScrollView>
 
+
             {/* Bottom Navigation */}
             <View style={styles.bottomNav}>
                 <TouchableOpacity style={styles.navItem} onPress={() => setActiveTab("dashboard")}>
@@ -730,6 +871,7 @@ export default function AdminDashboard({ userId }: { userId: string }) {
                     <Text style={[styles.navText, activeTab === "settings" && styles.activeNavText]}>Settings</Text>
                 </TouchableOpacity>
             </View>
+
 
             {/* Modals */}
             <Modal
