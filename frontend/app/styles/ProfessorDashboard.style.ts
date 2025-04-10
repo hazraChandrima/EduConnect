@@ -1,4 +1,6 @@
-import { StyleSheet } from "react-native"
+import { Dimensions, StyleSheet } from "react-native"
+const { width } = Dimensions.get('window');
+
 
 const styles = StyleSheet.create({
     container: {
@@ -926,6 +928,444 @@ const styles = StyleSheet.create({
     excusedOption: {
         backgroundColor: "#FFC107",
         borderColor: "#FFC107",
+    },
+    tabContent: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: '#f9f9f9',
+    },
+    // Attendance Course Section
+    attendanceCourseSection: {
+        marginBottom: 16,
+        borderRadius: 8,
+        backgroundColor: 'white',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        overflow: 'hidden',
+    },
+    // Attendance Date Card
+    attendanceDateCard: {
+        padding: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e0e0e0',
+    },
+    attendanceDateHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 10,
+    },
+    attendanceDateText: {
+        fontSize: 15,
+        fontWeight: '600',
+        marginLeft: 8,
+        color: '#333333',
+    },
+    attendanceCountText: {
+        fontSize: 14,
+        color: '#666666',
+        marginLeft: 'auto',
+    },
+
+    // Attendance Students List
+    attendanceStudentsList: {
+        marginTop: 8,
+    },
+    attendanceStudentItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    attendanceStatusBadge: {
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 12,
+    },
+    presentBadge: {
+        backgroundColor: '#e6f7ee',
+    },
+    absentBadge: {
+        backgroundColor: '#ffebee',
+    },
+    excusedBadge: {
+        backgroundColor: '#fff8e1',
+    },
+    unknownBadge: {
+        backgroundColor: '#f0f0f0',
+    },
+    attendanceStatusText: {
+        fontSize: 12,
+        fontWeight: '500',
+    },
+
+    // View More Button
+    viewMoreButton: {
+        alignItems: 'center',
+        paddingVertical: 10,
+        marginTop: 8,
+    },
+    viewMoreText: {
+        color: '#4252e5',
+        fontSize: 14,
+    },
+
+    // Take Attendance Button
+    takeAttendanceButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#4252e5',
+        paddingVertical: 12,
+        borderBottomLeftRadius: 8,
+        borderBottomRightRadius: 8,
+    },
+    takeAttendanceButtonText: {
+        color: 'white',
+        fontWeight: '600',
+        marginLeft: 8,
+    },
+
+    // Empty State
+    emptyState: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: 30,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        marginVertical: 16,
+    },
+    emptyStateTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333333',
+        marginTop: 16,
+        marginBottom: 8,
+    },
+    emptyStateMessage: {
+        fontSize: 14,
+        color: '#666666',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    emptyStateButton: {
+        backgroundColor: '#4252e5',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 20,
+    },
+    emptyStateButtonText: {
+        color: 'white',
+        fontWeight: '600',
+    },
+
+    // Grading Assignment Card
+    gradingAssignmentCard: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        padding: 16,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    gradingAssignmentHeader: {
+        flexDirection: 'row',
+        marginBottom: 12,
+    },
+    submissionsCountText: {
+        fontSize: 14,
+        color: '#666666',
+        marginBottom: 12,
+    },
+
+    // Submissions List
+    submissionsList: {
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
+        paddingTop: 12,
+    },
+    submissionItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    submissionStudent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    submissionStudentName: {
+        marginLeft: 10,
+        fontSize: 14,
+        color: '#333333',
+    },
+    submissionInfo: {
+        alignItems: 'flex-end',
+    },
+    submissionDate: {
+        fontSize: 12,
+        color: '#666666',
+        marginBottom: 4,
+    },
+
+    // Grade Reports
+    gradeReportsContainer: {
+        marginBottom: 16,
+    },
+    gradeReportCard: {
+        width: width / 2.5,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        marginRight: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
+        overflow: 'hidden',
+    },
+    gradeReportHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 12,
+    },
+    gradeReportTitle: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginLeft: 8,
+    },
+    gradeReportBody: {
+        alignItems: 'center',
+        padding: 16,
+    },
+    gradeReportAvg: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#333333',
+    },
+    gradeReportLabel: {
+        fontSize: 12,
+        color: '#666666',
+        marginTop: 4,
+    },
+    gradeReportStudents: {
+        fontSize: 12,
+        color: '#999999',
+        marginTop: 8,
+    },
+
+    // Student Management
+    searchInput: {
+        backgroundColor: 'white',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderRadius: 8,
+        marginBottom: 16,
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    studentCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 8,
+        marginBottom: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    studentCardHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    studentCardInfo: {
+        marginLeft: 12,
+    },
+    studentCardName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333333',
+    },
+    studentCardEmail: {
+        fontSize: 14,
+        color: '#666666',
+    },
+    studentCardCourses: {
+        flexDirection: 'row',
+        marginRight: 12,
+    },
+    studentCourseBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        marginRight: 4,
+    },
+    studentCourseBadgeText: {
+        color: 'white',
+        fontSize: 12,
+        fontWeight: '500',
+    },
+    moreCoursesBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        backgroundColor: '#f0f0f0',
+    },
+    moreCoursesBadgeText: {
+        color: '#666666',
+        fontSize: 12,
+    },
+
+    // Student Profile
+    studentProfileContainer: {
+        flex: 1,
+    },
+    studentProfileHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        padding: 16,
+        borderRadius: 8,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    studentProfileInfo: {
+        marginLeft: 16,
+        flex: 1,
+    },
+    studentProfileProgram: {
+        fontSize: 14,
+        color: '#999999',
+        marginTop: 4,
+    },
+
+    // Student Stats
+    studentStatsContainer: {
+        flexDirection: 'row',
+        backgroundColor: 'white',
+        borderRadius: 8,
+        marginBottom: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    studentStat: {
+        flex: 1,
+        alignItems: 'center',
+        padding: 16,
+        borderRightWidth: 1,
+        borderRightColor: '#f0f0f0',
+    },
+    studentStatValue: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333333',
+    },
+    studentStatLabel: {
+        fontSize: 12,
+        color: '#666666',
+        marginTop: 4,
+    },
+
+    // Student Profile Tabs
+    studentTabsContainer: {
+        flexDirection: 'row',
+        marginBottom: 16,
+    },
+    studentTab: {
+        flex: 1,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    studentTabText: {
+        fontSize: 14,
+        color: '#999999',
+    },
+
+    // Grade Items
+    gradeItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        marginBottom: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 1,
+    },
+    gradeItemInfo: {
+        flex: 1,
+    },
+    gradeItemTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333333',
+        marginBottom: 4,
+    },
+    gradeItemType: {
+        fontSize: 14,
+        color: '#999999',
+        marginTop: 4,
+    },
+    gradeScore: {
+        alignItems: 'flex-end',
+    },
+    gradeScoreText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    gradeScoreA: {
+        color: '#4caf50',
+    },
+    gradeScoreB: {
+        color: '#8bc34a',
+    },
+    gradeScoreC: {
+        color: '#ffc107',
+    },
+    gradeScoreD: {
+        color: '#ff9800',
+    },
+    gradeScoreF: {
+        color: '#f44336',
+    },
+    gradePercentage: {
+        fontSize: 14,
+        color: '#666666',
+    },
+    emptyGrades: {
+        padding: 16,
+        backgroundColor: 'white',
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    emptyGradesText: {
+        color: '#999999',
+        fontSize: 14,
     },
 })
 

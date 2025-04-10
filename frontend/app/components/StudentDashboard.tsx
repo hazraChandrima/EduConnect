@@ -27,11 +27,13 @@ import {
 } from "@expo/vector-icons";
 import styles from "../styles/StudentDashboard.style";
 import { useRouter } from "expo-router";
-import AcademicAnalytics from "./AcademicAnalytics";
+import AcademicAnalytics from "./student/AcademicAnalytics";
 import { useWindowDimensions } from "react-native";
 import { AuthContext } from "../context/AuthContext";
 import * as DocumentPicker from 'expo-document-picker';
 import { APP_CONFIG } from "@/app-config";
+import { useToken } from "../hooks/useToken";
+
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
@@ -41,11 +43,20 @@ const useIsSmallDevice = () => {
     return width < 500;
 };
 
+
+interface GpaEntry {
+    value: number;
+    date: string;
+    _id: string;
+}
+
+
 interface UserData {
     _id: string;
     name: string;
     email: string;
     role: string;
+    gpa: GpaEntry[];
 }
 
 interface Course {
@@ -146,7 +157,9 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
     const [attendance, setAttendance] = useState<Attendance[]>([]);
     const [marks, setMarks] = useState<Mark[]>([]);
     const [remarks, setRemarks] = useState<ProfessorRemark[]>([]);
+    const [gpa, setGpa] = useState<GpaEntry[]>([])
 
+    const {token} = useToken();
     const displayName = userData?.name || "Student";
     const firstName = displayName.split(" ")[0];
 
@@ -159,7 +172,10 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
         return () => unsubscribe();
     }, []);
 
+
+
     useEffect(() => {
+        
         const checkAuthAndFetchData = async (): Promise<void> => {
             try {
                 setIsLoading(true);
@@ -182,8 +198,13 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
                 }
 
                 const userResponse = await fetch(
-                    `${API_BASE_URL}/api/user/${userId}`
-                );
+                    `${API_BASE_URL}/api/user/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
                 if (!userResponse.ok) {
                     throw new Error(`API request failed with status ${userResponse.status}`);
@@ -191,15 +212,26 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 const userData = await userResponse.json();
                 setUserData(userData);
+                setGpa(userData.gpa);
+                
                 await AsyncStorage.setItem(
                     "studentDashboardUserData",
                     JSON.stringify(userData)
                 );
 
+                console.log("user id:", userId);
+                console.log("token: ", token);
+
                 // Fetch courses
                 const coursesResponse = await fetch(
-                    `${API_BASE_URL}/api/courses/student/${userId}`
-                );
+                    `${API_BASE_URL}/api/courses/student/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
 
                 if (coursesResponse.ok) {
                     const coursesData = await coursesResponse.json();
@@ -212,8 +244,13 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 // Fetch assignments
                 const assignmentsResponse = await fetch(
-                    `${API_BASE_URL}/api/assignment/student/${userId}`
-                );
+                    `${API_BASE_URL}/api/assignment/student/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
                 if (assignmentsResponse.ok) {
                     const assignmentsData = await assignmentsResponse.json();
@@ -226,8 +263,13 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 // Fetch attendance
                 const attendanceResponse = await fetch(
-                    `${API_BASE_URL}/api/attendance/student/${userId}`
-                );
+                    `${API_BASE_URL}/api/attendance/student/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
                 if (attendanceResponse.ok) {
                     const attendanceData = await attendanceResponse.json();
@@ -240,8 +282,13 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 // Fetch marks
                 const marksResponse = await fetch(
-                    `${API_BASE_URL}/api/marks/student/${userId}`
-                );
+                    `${API_BASE_URL}/api/marks/student/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
                 if (marksResponse.ok) {
                     const marksData = await marksResponse.json();
@@ -254,8 +301,14 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 // Fetch remarks
                 const remarksResponse = await fetch(
-                    `${API_BASE_URL}/api/remarks/student/${userId}`
-                );
+                    `${API_BASE_URL}/api/remarks/student/${userId}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
 
                 if (remarksResponse.ok) {
                     const remarksData = await remarksResponse.json();
@@ -268,7 +321,13 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
 
                 // Fetch curriculum for all courses
                 const curriculumPromises = courses.map(course =>
-                    fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`)
+                    fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`, {
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                    })
                         .then(res => res.ok ? res.json() : [])
                 );
 
@@ -320,7 +379,8 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
         };
 
         checkAuthAndFetchData();
-    }, [auth, router, userId]);
+    }, [auth, router, userId, token]);
+
 
     const handleLogout = () => {
         if (auth?.logout) {
@@ -941,9 +1001,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
                     </View>
                     <View style={styles.statCard}>
                         <Text style={styles.statValue}>
-                            {marks.length > 0
-                                ? (marks.reduce((sum, mark) => sum + (mark.score / mark.maxScore), 0) / marks.length * 4).toFixed(1)
-                                : "N/A"}
+                            {gpa[gpa.length - 1].value}
                         </Text>
                         <Text style={styles.statLabel}>GPA</Text>
                     </View>
@@ -962,6 +1020,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
                     </View>
                 </View>
             </View>
+
 
             {/* Academic Analytics Section */}
             <View style={styles.sectionContainer}>

@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const bcrypt = require('bcryptjs');
 
 
 
@@ -55,10 +56,13 @@ exports.createUser = async (req, res) => {
             return res.status(400).json({ error: "User already exists" });
         }
 
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
         const user = new User({
             name,
             email,
-            password, // hash this password in production
+            password: hashedPassword, // Store the hashed password
             role,
             department,
             program,
@@ -66,7 +70,10 @@ exports.createUser = async (req, res) => {
         });
 
         await user.save();
-        res.status(201).json({ message: "User created successfully", user: { ...user.toObject(), password: undefined } });
+        res.status(201).json({
+            message: "User created successfully",
+            user: { ...user.toObject(), password: undefined }
+        });
     } catch (error) {
         console.error("Error creating user:", error);
         res.status(500).json({ error: "Server error" });
@@ -75,33 +82,54 @@ exports.createUser = async (req, res) => {
 
 
 
+
+
 // update user
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        const updates = { ...req.body };
+        const updates = {};
 
-        if (updates.password) {
-            const salt = await bcrypt.genSalt(10);
-            updates.password = await bcrypt.hash(updates.password, salt);
+        // Handle regular field updates
+        if (req.body.name) updates.name = req.body.name;
+        if (req.body.email) updates.email = req.body.email;
+        if (req.body.password) updates.password = req.body.password;
+        if (req.body.role) updates.role = req.body.role;
+        if (req.body.department) updates.department = req.body.department;
+        if (req.body.program) updates.program = req.body.program;
+        if (req.body.year) updates.year = req.body.year;
+        if (req.body.isVerified !== undefined) updates.isVerified = req.body.isVerified;
+        if (req.body.verificationCode) updates.verificationCode = req.body.verificationCode;
+        if (req.body.loginOTP) updates.loginOTP = req.body.loginOTP;
+        if (req.body.loginOTPExpires) updates.loginOTPExpires = req.body.loginOTPExpires;
+        if (req.body.isSuspended !== undefined) updates.isSuspended = req.body.isSuspended;
+        if (req.body.suspendedUntil) updates.suspendedUntil = req.body.suspendedUntil;
+        if (req.body.gpa !== undefined) updates.gpa = req.body.gpa;
+
+        // Handle gradeCount updates
+        if (req.body.gradeCount) {
+            updates.gradeCount = {
+                A: req.body.gradeCount.A ?? 0,
+                B: req.body.gradeCount.B ?? 0,
+                C: req.body.gradeCount.C ?? 0,
+                D: req.body.gradeCount.D ?? 0,
+                F: req.body.gradeCount.F ?? 0,
+            };
         }
 
-        const user = await User.findByIdAndUpdate(
-            id,
-            updates,
-            { new: true }
-        ).select("-password"); // still exclude password from response
+        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        res.json({ message: "User updated successfully", user });
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.error("Error updating user:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 

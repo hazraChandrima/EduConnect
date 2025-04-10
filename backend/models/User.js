@@ -33,9 +33,22 @@ const UserSchema = new Schema({
 		type: Number,
 		default: 1,
 	},
-	gpa: {
-		type: Number,
-		default: 0.0,
+	gpa: [{
+		value: {
+			type: Number,
+			default: 0.0,
+		},
+		date: {
+			type: Date,
+			default: Date.now,
+		}
+	}],
+	gradeCount: {
+		A: { type: Number, default: 0 },
+		B: { type: Number, default: 0 },
+		C: { type: Number, default: 0 },
+		D: { type: Number, default: 0 },
+		F: { type: Number, default: 0 },
 	},
 	joinDate: {
 		type: Date,

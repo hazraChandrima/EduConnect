@@ -19,8 +19,14 @@ router.get("/role/:role", verifyToken, authorizeRoles(["admin"]), getUsersByRole
 router.post("/", verifyToken, authorizeRoles(["admin"]), createUser);
 router.delete("/:id", verifyToken, authorizeRoles(["admin"]), deleteUser);
 
+
 // for self or admin only
-router.put("/:id", verifyToken, updateUser);
+router.put("/:id", verifyToken, (req, res, next) => {
+    if (req.user.id !== req.params.id && req.user.role !== "admin") {
+        return res.status(403).json({ message: "Access Denied" });
+    }
+    next();
+}, updateUser);
 
 
 module.exports = router;

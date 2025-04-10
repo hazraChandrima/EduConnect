@@ -17,15 +17,20 @@ const {
 router.get("/", verifyToken, getAllCourses);
 router.get("/:id", verifyToken, getCourseById);
 router.get("/professor/:professorId", verifyToken, getCoursesByProfessor);
-router.get("/student/:studentId", verifyToken, getCoursesByStudent);
 
-// for professor or admin only
-router.post("/", verifyToken, authorizeRoles(["professor", "admin"]), createCourse);
-router.put("/:id", verifyToken, authorizeRoles(["professor", "admin"]), updateCourse);
-router.post("/enroll", verifyToken, authorizeRoles(["professor", "admin"]), addStudentToCourse);
-router.post("/unenroll", verifyToken, authorizeRoles(["professor", "admin"]), removeStudentFromCourse);
+router.get("/student/:studentId", verifyToken, (req, res, next) => {
+  if (req.user.id !== req.params.studentId) {
+    return res.status(403).json({ message: "Access Denied" });
+  }
+  next();
+}, getCoursesByStudent);
 
-//for admin only
+
+// for admin only
+router.post("/", verifyToken, authorizeRoles(["admin"]), createCourse);
+router.put("/:id", verifyToken, authorizeRoles(["admin"]), updateCourse);
+router.post("/enroll", verifyToken, authorizeRoles(["admin"]), addStudentToCourse);
+router.post("/unenroll", verifyToken, authorizeRoles(["admin"]), removeStudentFromCourse);
 router.delete("/:id", verifyToken, authorizeRoles(["admin"]), deleteCourse);
 
 

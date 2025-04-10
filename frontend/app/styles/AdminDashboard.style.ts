@@ -429,7 +429,6 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         marginLeft: 8,
     },
-    // Empty list
     emptyListContainer: {
         padding: 24,
         alignItems: "center",
@@ -438,7 +437,6 @@ const styles = StyleSheet.create({
         color: "#777",
         fontSize: 16,
     },
-    // Course items
     courseItem: {
         flexDirection: "row",
         backgroundColor: "white",
@@ -814,6 +812,15 @@ const styles = StyleSheet.create({
     studentEmail: {
         color: "#777",
         fontSize: 14,
+    },
+    textArea: {
+        height: 100,
+        textAlignVertical: 'top',
+        paddingTop: 10,
+        paddingBottom: 10,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
     },
 })
 
