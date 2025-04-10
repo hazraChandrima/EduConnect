@@ -18,7 +18,7 @@ import { AuthContext } from "../context/AuthContext";
 import styles from "../styles/ProfessorDashboard.style";
 import { useRouter } from "expo-router";
 import FileManagement from "./FileManagement";
-import QuizTab from "./QuizTab";
+import QuizTab from "./professor/QuizTab";
 import { useToken } from "../hooks/useToken";
 import { APP_CONFIG } from "@/app-config";
 import StudentsList from "./professor/StudentsList";

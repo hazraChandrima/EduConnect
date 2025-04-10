@@ -1,9 +1,8 @@
-import { Stack, Slot } from "expo-router";
+import { Stack } from "expo-router";
 
 export default function RoleLayout() {
     return (
-        <Stack screenOptions={{ headerShown: true }}>
-            <Stack.Screen name="index" options={{ title: "Role Home" }} />
+        <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="[userId]" options={{ title: "User Details" }} />
         </Stack>
     );

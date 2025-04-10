@@ -1,9 +1,14 @@
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native"
+const { height } = Dimensions.get("window");
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+  },
+  desktopContainer: {
+    height: height,
   },
   header: {
     flexDirection: "row",
@@ -15,6 +20,13 @@ const styles = StyleSheet.create({
     elevation: 4,
     zIndex: 2000, // Increase z-index for the entire header
   },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  menuButton: {
+    marginRight: 10,
+  },
   logo: {
     color: "white",
     fontSize: 20,
@@ -23,7 +35,7 @@ const styles = StyleSheet.create({
   profileContainer: {
     flexDirection: "row",
     alignItems: "center",
-    position: 'relative',
+    position: "relative",
     zIndex: 2000, // Increased z-index to ensure it's above other elements
   },
   profilePic: {
@@ -64,15 +76,16 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    flexWrap: "wrap",
   },
   statCard: {
-    width: 300,
     backgroundColor: "white",
     borderRadius: 10,
     padding: 20,
     flex: 0.48,
     alignItems: "center",
-    margin: 20,
+    margin: 5,
+    minWidth: 140,
   },
   statValue: {
     fontSize: 32,
@@ -230,17 +243,17 @@ const styles = StyleSheet.create({
     color: "#5c51f3",
   },
   profileButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   profileDropdown: {
-    position: 'absolute',
+    position: "absolute",
     top: 45, // Slightly increased to ensure it's below the profile pic
     right: 0,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 8,
     padding: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -248,15 +261,15 @@ const styles = StyleSheet.create({
     zIndex: 3000, // Increased z-index to be higher than any other element
   },
   profileMenuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 12,
   },
   profileMenuItemText: {
     marginLeft: 8,
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   // Course Modal Styles
   modalOverlay: {
@@ -936,6 +949,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 5,
   },
+
   attendanceOverviewLegend: {
     flex: 1,
     justifyContent: "center",
@@ -1012,7 +1026,231 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-});
 
+  // Desktop specific styles
+  desktopLayout: {
+    flexDirection: "row",
+    height: "100%",
+  },
+  sidebar: {
+    width: 240,
+    backgroundColor: "#4252e5",
+    height: "100%",
+    paddingTop: 20,
+    paddingHorizontal: 15,
+    zIndex: 1000,
+  },
+  mobileSidebar: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    height: "100%",
+    zIndex: 3000,
+  },
+  collapsedSidebar: {
+    width: 70,
+  },
+  sidebarHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 30,
+  },
+  sidebarLogo: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+  sidebarToggle: {
+    padding: 5,
+  },
+  sidebarContent: {
+    flex: 1,
+  },
+  sidebarItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    marginBottom: 5,
+    borderRadius: 8,
+  },
+  sidebarItemActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+  },
+  sidebarItemText: {
+    color: "white",
+    marginLeft: 12,
+    fontSize: 16,
+  },
+  sidebarItemTextActive: {
+    fontWeight: "bold",
+  },
+  sidebarFooter: {
+    marginBottom: 20,
+  },
+  sidebarLogout: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  sidebarLogoutText: {
+    color: "white",
+    marginLeft: 12,
+    fontSize: 16,
+  },
+  desktopMainContent: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  desktopHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    elevation: 2,
+    zIndex: 100,
+  },
+  desktopHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  desktopHeaderTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginLeft: 10,
+  },
+  desktopProfileButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  desktopProfilePic: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(92, 81, 243, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 8,
+  },
+  desktopProfileName: {
+    color: "#333",
+    fontWeight: "500",
+  },
+  desktopProfileDropdown: {
+    position: "absolute",
+    top: 45,
+    right: 0,
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 3000,
+  },
+  desktopScrollView: {
+    flex: 1,
+  },
+  desktopWelcomeBanner: {
+    borderRadius: 0,
+    paddingHorizontal: 30,
+    paddingVertical: 30,
+  },
+  desktopStatsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flexWrap: "nowrap",
+    marginTop: 10,
+  },
+  tabletStatsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  desktopStatCard: {
+    flex: 1,
+    margin: 10,
+    minWidth: 180,
+    maxWidth: 250,
+  },
+  desktopSectionContainer: {
+    marginVertical: 20,
+    paddingHorizontal: 30,
+  },
+  desktopCoursesGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  desktopCourseItem: {
+    width: "48%",
+    marginBottom: 15,
+  },
+  desktopAssignmentsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  desktopAssignmentItem: {
+    width: "48%",
+    marginBottom: 15,
+  },
+  desktopTabContent: {
+    padding: 30,
+  },
+  desktopCourseCard: {
+    width: "48%",
+    marginHorizontal: "1%",
+  },
+  desktopCoursesList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  desktopAssignmentFilters: {
+    marginBottom: 20,
+  },
+  desktopAssignmentCard: {
+    width: "48%",
+    marginHorizontal: "1%",
+  },
+  desktopAssignmentsList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  desktopAttendanceOverview: {
+    padding: 20,
+  },
+  desktopAttendanceGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  desktopAttendanceCourseItem: {
+    width: "48%",
+    marginBottom: 15,
+  },
+  desktopModalOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  desktopModalContainer: {
+    width: "60%",
+    maxWidth: 800,
+    maxHeight: "90%",
+  },
+})
 
 export default styles;

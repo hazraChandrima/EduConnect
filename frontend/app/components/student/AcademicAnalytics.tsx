@@ -11,7 +11,7 @@ import {
 	SafeAreaView,
 	ActivityIndicator,
 } from "react-native"
-import { LineChart, BarChart, PieChart, ProgressChart } from "react-native-chart-kit"
+import { BarChart, ProgressChart } from "react-native-chart-kit"
 import { Ionicons } from "@expo/vector-icons"
 import styles from "../../styles/AcademicAnalytics.style"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -24,23 +24,20 @@ import GradeDistributionChart from "./GradeDistributionChart"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
-
 const ensureSafeData = (data: number[]): number[] => {
-	return data.map(value => {
+	return data.map((value) => {
 		if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
-			return 0;
+			return 0
 		}
-		return value;
-	});
-};
+		return value
+	})
+}
 
-
-const ensureMinimumDataLength = (data: number[], minLength: number = 2): number[] => {
-	if (!data || data.length === 0) return new Array(minLength).fill(0);
-	if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])];
-	return data;
-};
-
+const ensureMinimumDataLength = (data: number[], minLength = 2): number[] => {
+	if (!data || data.length === 0) return new Array(minLength).fill(0)
+	if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])]
+	return data
+}
 
 type TabType = "performance" | "attendance" | "marks" | "curriculum"
 
@@ -111,7 +108,6 @@ interface Attendance {
 	courseCode?: string
 }
 
-
 const AcademicAnalytics: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<TabType>("performance")
 	const { width } = useWindowDimensions()
@@ -124,9 +120,13 @@ const AcademicAnalytics: React.FC = () => {
 	const [attendance, setAttendance] = useState<Attendance[]>([])
 	const [curriculum, setCurriculum] = useState<CurriculumItem[]>([])
 
-	const { token } = useToken();
+	const { token } = useToken()
 
 	const [gradeDistribution, setGradeDistribution] = useState<GradeDistributionItem[]>([])
+
+	// Responsive layout helpers
+	const isDesktop = width >= 1024
+	const isTablet = width >= 768 && width < 1024
 
 	// Attendance data
 	const [attendanceData, setAttendanceData] = useState<{
@@ -153,16 +153,13 @@ const AcademicAnalytics: React.FC = () => {
 		return () => unsubscribe()
 	}, [])
 
-
-
-
 	useEffect(() => {
-		let isMounted = true;
+		let isMounted = true
 
 		const fetchData = async () => {
 			if (!auth?.user?.userId) {
 				console.log("No user ID available")
-				setIsLoading(false);
+				setIsLoading(false)
 				return
 			}
 
@@ -175,7 +172,7 @@ const AcademicAnalytics: React.FC = () => {
 
 				try {
 					if (!token) {
-						throw new Error("No token available");
+						throw new Error("No token available")
 					}
 
 					const coursesResponse = await fetch(`${API_BASE_URL}/api/courses/student/${userId}`, {
@@ -184,7 +181,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					});
+					})
 
 					if (coursesResponse.ok) {
 						coursesData = await coursesResponse.json()
@@ -193,7 +190,6 @@ const AcademicAnalytics: React.FC = () => {
 						}
 						await AsyncStorage.setItem("academicAnalyticsCourses", JSON.stringify(coursesData))
 					}
-
 				} catch (error) {
 					console.error("Error fetching courses:", error)
 					try {
@@ -209,12 +205,11 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
-
 				// Fetch marks
 				let marksData: MarkItem[] = []
 				try {
 					if (!token) {
-						throw new Error("No token available");
+						throw new Error("No token available")
 					}
 
 					const marksResponse = await fetch(`${API_BASE_URL}/api/marks/student/${userId}`, {
@@ -223,7 +218,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					});
+					})
 
 					if (marksResponse.ok) {
 						marksData = await marksResponse.json()
@@ -244,7 +239,6 @@ const AcademicAnalytics: React.FC = () => {
 						await AsyncStorage.setItem("academicAnalyticsMarks", JSON.stringify(enrichedMarks))
 						processMarksData(enrichedMarks, coursesData)
 					}
-
 				} catch (error) {
 					console.error("Error fetching marks:", error)
 					try {
@@ -261,12 +255,11 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
-
 				// Fetch attendance
 				let attendanceData: Attendance[] = []
 				try {
 					if (!token) {
-						throw new Error("No token available");
+						throw new Error("No token available")
 					}
 
 					const attendanceResponse = await fetch(`${API_BASE_URL}/api/attendance/student/${userId}`, {
@@ -275,7 +268,7 @@ const AcademicAnalytics: React.FC = () => {
 							"Content-Type": "application/json",
 							Authorization: `Bearer ${token}`,
 						},
-					});
+					})
 
 					if (attendanceResponse.ok) {
 						attendanceData = await attendanceResponse.json()
@@ -295,7 +288,6 @@ const AcademicAnalytics: React.FC = () => {
 						await AsyncStorage.setItem("academicAnalyticsAttendance", JSON.stringify(enrichedAttendance))
 						processAttendanceData(enrichedAttendance, coursesData)
 					}
-
 				} catch (error) {
 					console.error("Error fetching attendance:", error)
 					try {
@@ -312,18 +304,18 @@ const AcademicAnalytics: React.FC = () => {
 					}
 				}
 
-
 				// Fetch curriculum
 				try {
 					if (coursesData.length > 0) {
-						const curriculumPromises = coursesData.map((course) =>
-							fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`, {
-								headers: {
-									Authorization: `Bearer ${token}`,
-								}
-							})
-								.then((res) => (res.ok ? res.json() : []))
-								.catch(() => []) // Return empty array for any failed requests
+						const curriculumPromises = coursesData.map(
+							(course) =>
+								fetch(`${API_BASE_URL}/api/curriculum/course/${course._id}`, {
+									headers: {
+										Authorization: `Bearer ${token}`,
+									},
+								})
+									.then((res) => (res.ok ? res.json() : []))
+									.catch(() => []), // Return empty array for any failed requests
 						)
 
 						const curriculumResults = await Promise.all(curriculumPromises)
@@ -365,19 +357,14 @@ const AcademicAnalytics: React.FC = () => {
 			}
 		}
 
-		fetchData();
+		fetchData()
 
 		return () => {
-			isMounted = false;
-		};
-	}, [auth, token, auth?.user?.userId]);
+			isMounted = false
+		}
+	}, [auth, token, auth?.user?.userId])
 
-
-
-
-
-	const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {		
-
+	const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {
 		// Process grade distribution
 		const gradeCount = {
 			A: 0,
@@ -400,7 +387,7 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure at least one grade exists to prevent empty charts
 		if (Object.values(gradeCount).reduce((a, b) => a + b, 0) === 0) {
-			gradeCount.A = 1; // Add a default grade if no grades exist
+			gradeCount.A = 1 // Add a default grade if no grades exist
 		}
 
 		setGradeDistribution([
@@ -468,8 +455,8 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure we have at least some data to display
 		if (courseLabels.length === 0) {
-			courseLabels.push("No Data");
-			courseScores.push(0);
+			courseLabels.push("No Data")
+			courseScores.push(0)
 		}
 
 		setSubjectPerformanceData({
@@ -477,7 +464,6 @@ const AcademicAnalytics: React.FC = () => {
 			datasets: [{ data: ensureSafeData(courseScores) }],
 		})
 	}
-
 
 	const processAttendanceData = (attendanceData: Attendance[], coursesData: Course[]) => {
 		const courseAttendance: { [key: string]: { present: number; total: number } } = {}
@@ -507,8 +493,8 @@ const AcademicAnalytics: React.FC = () => {
 
 		// Ensure we have at least some data to display
 		if (courseLabels.length === 0) {
-			courseLabels.push("No Data");
-			attendanceRates.push(0);
+			courseLabels.push("No Data")
+			attendanceRates.push(0)
 		}
 
 		setAttendanceData({
@@ -520,11 +506,10 @@ const AcademicAnalytics: React.FC = () => {
 	// Add this helper function
 	const isSafeNumber = (value: any): number => {
 		if (value === undefined || value === null || isNaN(value) || !isFinite(value)) {
-			return 0;
+			return 0
 		}
-		return value;
+		return value
 	}
-
 
 	const calculateGPA = (marksData: MarkItem[]): number => {
 		if (marksData.length === 0) return 0
@@ -586,7 +571,9 @@ const AcademicAnalytics: React.FC = () => {
 
 	// Responsive chart width calculation
 	const getChartWidth = (): number => {
-		return width
+		if (isDesktop) return Math.min(800, width - 100)
+		if (isTablet) return Math.min(600, width - 60)
+		return Math.max(width - 40, 300)
 	}
 
 	// Chart configuration
@@ -619,7 +606,7 @@ const AcademicAnalytics: React.FC = () => {
 		switch (activeTab) {
 			case "performance":
 				return (
-					<View style={styles.chartContainer}>
+					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
 						<Text style={styles.chartTitle}>GPA Trend</Text>
 						<Text style={styles.chartSubtitle}>Your academic performance over time</Text>
 						<GPAChart userId={auth?.user?.userId || ""} />
@@ -628,14 +615,14 @@ const AcademicAnalytics: React.FC = () => {
 				)
 			case "attendance":
 				return (
-					<View style={styles.chartContainer}>
+					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
 						<Text style={styles.chartTitle}>Attendance by Subject</Text>
 						<Text style={styles.chartSubtitle}>Your attendance percentage across courses</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
 							<ProgressChart
 								data={{
 									...attendanceData,
-									data: ensureSafeData(attendanceData.data)
+									data: ensureSafeData(attendanceData.data),
 								}}
 								width={Math.max(getChartWidth(), 500)}
 								height={300}
@@ -650,62 +637,66 @@ const AcademicAnalytics: React.FC = () => {
 							/>
 						</ScrollView>
 
-						<View style={styles.attendanceDetails}>
+						<View style={[styles.attendanceDetails, isDesktop && styles.desktopAttendanceDetails]}>
 							<Text style={styles.detailsTitle}>Attendance Details</Text>
 
-							{courses.map((course) => {
-								const attendancePercentage = calculateAttendancePercentage(course._id)
-								const courseAttendance = attendance.filter((a) => a.courseId === course._id)
-								const presentCount = courseAttendance.filter(
-									(a) => a.status === "present" || a.status === "excused",
-								).length
+							<View style={isDesktop ? styles.desktopAttendanceGrid : undefined}>
+								{courses.map((course) => {
+									const attendancePercentage = calculateAttendancePercentage(course._id)
+									const courseAttendance = attendance.filter((a) => a.courseId === course._id)
+									const presentCount = courseAttendance.filter(
+										(a) => a.status === "present" || a.status === "excused",
+									).length
 
-								return (
-									<View key={course._id} style={styles.attendanceItem}>
-										<View style={styles.attendanceItemHeader}>
-											<Text style={styles.attendanceItemTitle}>{course.code}</Text>
-											<Text style={[styles.attendanceItemValue, attendancePercentage < 75 ? { color: "#ff5252" } : {}]}>
-												{attendancePercentage}%
+									return (
+										<View key={course._id} style={[styles.attendanceItem, isDesktop && styles.desktopAttendanceItem]}>
+											<View style={styles.attendanceItemHeader}>
+												<Text style={styles.attendanceItemTitle}>{course.code}</Text>
+												<Text
+													style={[styles.attendanceItemValue, attendancePercentage < 75 ? { color: "#ff5252" } : {}]}
+												>
+													{attendancePercentage}%
+												</Text>
+											</View>
+											<Text style={styles.attendanceItemDetail}>
+												Attended {presentCount} of {courseAttendance.length} classes
 											</Text>
+											{attendancePercentage < 75 && (
+												<View style={styles.attendanceWarning}>
+													<Ionicons name="warning" size={16} color="#ff5252" />
+													<Text style={[styles.attendanceWarningText, { color: "#ff5252" }]}>
+														Below minimum requirement of 75%
+													</Text>
+												</View>
+											)}
+											{attendancePercentage >= 75 && attendancePercentage < 80 && (
+												<View style={styles.attendanceWarning}>
+													<Ionicons name="warning" size={16} color="#ffc107" />
+													<Text style={styles.attendanceWarningText}>
+														Only {attendancePercentage - 75}% above minimum requirement
+													</Text>
+												</View>
+											)}
 										</View>
-										<Text style={styles.attendanceItemDetail}>
-											Attended {presentCount} of {courseAttendance.length} classes
-										</Text>
-										{attendancePercentage < 75 && (
-											<View style={styles.attendanceWarning}>
-												<Ionicons name="warning" size={16} color="#ff5252" />
-												<Text style={[styles.attendanceWarningText, { color: "#ff5252" }]}>
-													Below minimum requirement of 75%
-												</Text>
-											</View>
-										)}
-										{attendancePercentage >= 75 && attendancePercentage < 80 && (
-											<View style={styles.attendanceWarning}>
-												<Ionicons name="warning" size={16} color="#ffc107" />
-												<Text style={styles.attendanceWarningText}>
-													Only {attendancePercentage - 75}% above minimum requirement
-												</Text>
-											</View>
-										)}
-									</View>
-								)
-							})}
+									)
+								})}
+							</View>
 						</View>
 					</View>
 				)
 			case "marks":
 				return (
-					<View style={styles.chartContainer}>
+					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
 						<Text style={styles.chartTitle}>Subject Performance</Text>
 						<Text style={styles.chartSubtitle}>Your marks across different subjects</Text>
 						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
 							<BarChart
 								data={{
 									...subjectPerformanceData,
-									datasets: subjectPerformanceData.datasets.map(dataset => ({
+									datasets: subjectPerformanceData.datasets.map((dataset) => ({
 										...dataset,
-										data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1)
-									}))
+										data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1),
+									})),
 								}}
 								width={Math.max(getChartWidth(), 300)}
 								height={220}
@@ -717,89 +708,94 @@ const AcademicAnalytics: React.FC = () => {
 								}}
 								style={styles.chart}
 							/>
-
 						</ScrollView>
 
-						<View style={styles.marksDetails}>
+						<View style={[styles.marksDetails, isDesktop && styles.desktopMarksDetails]}>
 							<Text style={styles.detailsTitle}>Detailed Marks</Text>
 
-							{marks.slice(0, 5).map((mark, index) => (
-								<View key={mark._id || index} style={styles.marksItem}>
-									<View style={styles.marksItemHeader}>
-										<View style={[styles.subjectTag, { backgroundColor: mark.color }]}>
-											<Text style={styles.subjectTagText}>{mark.courseCode}</Text>
+							<View style={isDesktop ? styles.desktopMarksGrid : undefined}>
+								{marks.slice(0, isDesktop ? 10 : 5).map((mark, index) => (
+									<View key={mark._id || index} style={[styles.marksItem, isDesktop && styles.desktopMarksItem]}>
+										<View style={styles.marksItemHeader}>
+											<View style={[styles.subjectTag, { backgroundColor: mark.color }]}>
+												<Text style={styles.subjectTagText}>{mark.courseCode}</Text>
+											</View>
+											<View style={styles.gradeContainer}>
+												<Text style={styles.marksValue}>{Math.round((mark.score / mark.maxScore) * 100)}%</Text>
+												<Text style={styles.gradeValue}>Grade: {getGradeFromScore(mark.score, mark.maxScore)}</Text>
+											</View>
 										</View>
-										<View style={styles.gradeContainer}>
-											<Text style={styles.marksValue}>{Math.round((mark.score / mark.maxScore) * 100)}%</Text>
-											<Text style={styles.gradeValue}>Grade: {getGradeFromScore(mark.score, mark.maxScore)}</Text>
+										<View style={styles.remarksContainer}>
+											<Text style={styles.remarksTitle}>{mark.title}</Text>
+											{mark.feedback ? (
+												<>
+													<Text style={styles.remarksTitle}>Professor Remarks:</Text>
+													<Text style={styles.remarksText}>{mark.feedback}</Text>
+												</>
+											) : (
+												<Text style={styles.remarksText}>
+													Score: {mark.score} out of {mark.maxScore}
+												</Text>
+											)}
 										</View>
 									</View>
-									<View style={styles.remarksContainer}>
-										<Text style={styles.remarksTitle}>{mark.title}</Text>
-										{mark.feedback ? (
-											<>
-												<Text style={styles.remarksTitle}>Professor Remarks:</Text>
-												<Text style={styles.remarksText}>{mark.feedback}</Text>
-											</>
-										) : (
-											<Text style={styles.remarksText}>
-												Score: {mark.score} out of {mark.maxScore}
-											</Text>
-										)}
-									</View>
-								</View>
-							))}
+								))}
+							</View>
 						</View>
 					</View>
 				)
 			case "curriculum":
 				return (
-					<View style={styles.chartContainer}>
+					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
 						<Text style={styles.chartTitle}>Curriculum Progress</Text>
 						<Text style={styles.chartSubtitle}>Your progress through course materials</Text>
 
-						{courses.map((course) => {
-							const courseCurriculum = curriculum.filter((c) => c.courseId === course._id)
+						<View style={isDesktop ? styles.desktopCurriculumGrid : undefined}>
+							{courses.map((course) => {
+								const courseCurriculum = curriculum.filter((c) => c.courseId === course._id)
 
-							return (
-								<View key={course._id} style={styles.curriculumItem}>
-									<View style={[styles.curriculumHeader, { backgroundColor: course.color + "20" }]}>
-										<Text style={[styles.curriculumTitle, { color: course.color }]}>
-											{course.code} - {course.title}
-										</Text>
-										<TouchableOpacity style={[styles.viewSyllabusButton, { backgroundColor: course.color }]}>
-											<Text style={styles.viewSyllabusText}>View Syllabus</Text>
-										</TouchableOpacity>
-									</View>
+								return (
+									<View key={course._id} style={[styles.curriculumItem, isDesktop && styles.desktopCurriculumItem]}>
+										<View style={[styles.curriculumHeader, { backgroundColor: course.color + "20" }]}>
+											<Text style={[styles.curriculumTitle, { color: course.color }]}>
+												{course.code} - {course.title}
+											</Text>
+											<TouchableOpacity style={[styles.viewSyllabusButton, { backgroundColor: course.color }]}>
+												<Text style={styles.viewSyllabusText}>View Syllabus</Text>
+											</TouchableOpacity>
+										</View>
 
-									<View style={styles.unitsContainer}>
-										{courseCurriculum.length > 0 ? (
-											courseCurriculum[0].units.map((unit, unitIndex) => (
-												<View key={unit._id || unitIndex} style={styles.unitItem}>
-													<View style={styles.unitHeader}>
-														<Text style={styles.unitTitle}>{unit.title}</Text>
-														<Text style={styles.unitProgress}>{calculateUnitProgress(course._id, unitIndex)}%</Text>
+										<View style={styles.unitsContainer}>
+											{courseCurriculum.length > 0 ? (
+												courseCurriculum[0].units.map((unit, unitIndex) => (
+													<View key={unit._id || unitIndex} style={styles.unitItem}>
+														<View style={styles.unitHeader}>
+															<Text style={styles.unitTitle}>{unit.title}</Text>
+															<Text style={styles.unitProgress}>{calculateUnitProgress(course._id, unitIndex)}%</Text>
+														</View>
+														<View style={styles.progressBarContainer}>
+															<View
+																style={[
+																	styles.progressBar,
+																	{
+																		width: `${calculateUnitProgress(course._id, unitIndex)}%`,
+																		backgroundColor: course.color,
+																	},
+																]}
+															/>
+														</View>
 													</View>
-													<View style={styles.progressBarContainer}>
-														<View
-															style={[
-																styles.progressBar,
-																{
-																	width: `${calculateUnitProgress(course._id, unitIndex)}%`,
-																	backgroundColor: course.color,
-																},
-															]}
-														/>
-													</View>
-												</View>
-											))
-										) : (
-											<Text style={{ padding: 10, color: "#666" }}>No curriculum data available for this course.</Text>
-										)}
+												))
+											) : (
+												<Text style={{ padding: 10, color: "#666" }}>
+													No curriculum data available for this course.
+												</Text>
+											)}
+										</View>
 									</View>
-								</View>
-							)
-						})}
+								)
+							})}
+						</View>
 					</View>
 				)
 			default:
@@ -843,30 +839,47 @@ const AcademicAnalytics: React.FC = () => {
 	]
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<SafeAreaView style={[styles.container, isDesktop && styles.desktopContainer]}>
 			{isOffline && (
 				<View style={{ backgroundColor: "orange", padding: 10, marginBottom: 10 }}>
 					<Text style={{ color: "white", textAlign: "center" }}>You are offline. Showing cached data.</Text>
 				</View>
 			)}
 
-			<View style={styles.tabContainer}>
+			<View style={[styles.tabContainer, isDesktop && styles.desktopTabContainer]}>
 				<ScrollView horizontal showsHorizontalScrollIndicator={true}>
 					{tabs.map((tab) => (
 						<TouchableOpacity
 							key={tab.id}
-							style={[styles.tab, activeTab === tab.id && styles.activeTab]}
+							style={[
+								styles.tab,
+								activeTab === tab.id && styles.activeTab,
+								isDesktop && styles.desktopTab,
+								isDesktop && activeTab === tab.id && styles.desktopActiveTab,
+							]}
 							onPress={() => setActiveTab(tab.id)}
 						>
-							<Ionicons name={tab.icon} size={20} color={activeTab === tab.id ? "#5c51f3" : "#777"} />
+							<Ionicons name={tab.icon} size={isDesktop ? 24 : 20} color={activeTab === tab.id ? "#5c51f3" : "#777"} />
 
-							<Text style={[styles.tabText, activeTab === tab.id && styles.activeTabText]}>{tab.label}</Text>
+							<Text
+								style={[
+									styles.tabText,
+									activeTab === tab.id && styles.activeTabText,
+									isDesktop && styles.desktopTabText,
+									isDesktop && activeTab === tab.id && styles.desktopActiveTabText,
+								]}
+							>
+								{tab.label}
+							</Text>
 						</TouchableOpacity>
 					))}
 				</ScrollView>
 			</View>
 
-			<ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1 }}>
+			<ScrollView
+				showsVerticalScrollIndicator={false}
+				contentContainerStyle={[{ flexGrow: 1 }, isDesktop && styles.desktopScrollContent]}
+			>
 				{renderTabContent()}
 			</ScrollView>
 		</SafeAreaView>

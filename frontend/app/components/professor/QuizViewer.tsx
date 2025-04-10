@@ -8,7 +8,7 @@ import {
     Alert,
 } from "react-native"
 import { MaterialIcons, AntDesign, Feather } from "@expo/vector-icons"
-import styles from "../styles/QuizViewer.style"
+import styles from "@/app/styles/QuizViewer.style"
 
 interface QuizQuestion {
     question: string
