@@ -43,6 +43,13 @@ const UserSchema = new Schema({
 			default: Date.now,
 		}
 	}],
+	gradeCount: {
+		A: { type: Number, default: 0 },
+		B: { type: Number, default: 0 },
+		C: { type: Number, default: 0 },
+		D: { type: Number, default: 0 },
+		F: { type: Number, default: 0 },
+	},
 	joinDate: {
 		type: Date,
 		default: Date.now,

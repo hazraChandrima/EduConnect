@@ -1,4 +1,3 @@
-// components/student/GpaChart.tsx - Updated version with userId prop
 "use client"
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';

@@ -38,6 +38,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     chartTitle: {
+        marginTop: 20,
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 4,

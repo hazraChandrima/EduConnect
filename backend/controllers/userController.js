@@ -88,68 +88,47 @@ exports.createUser = async (req, res) => {
 exports.updateUser = async (req, res) => {
     try {
         const { id } = req.params;
-        let updates = {};
+        const updates = {};
 
         // Handle regular field updates
         if (req.body.name) updates.name = req.body.name;
         if (req.body.email) updates.email = req.body.email;
+        if (req.body.password) updates.password = req.body.password;
+        if (req.body.role) updates.role = req.body.role;
         if (req.body.department) updates.department = req.body.department;
         if (req.body.program) updates.program = req.body.program;
         if (req.body.year) updates.year = req.body.year;
-        if (req.body.role) updates.role = req.body.role;
         if (req.body.isVerified !== undefined) updates.isVerified = req.body.isVerified;
+        if (req.body.verificationCode) updates.verificationCode = req.body.verificationCode;
+        if (req.body.loginOTP) updates.loginOTP = req.body.loginOTP;
+        if (req.body.loginOTPExpires) updates.loginOTPExpires = req.body.loginOTPExpires;
         if (req.body.isSuspended !== undefined) updates.isSuspended = req.body.isSuspended;
         if (req.body.suspendedUntil) updates.suspendedUntil = req.body.suspendedUntil;
 
-        if (req.body.password) {
-            const salt = await bcrypt.genSalt(10);
-            updates.password = await bcrypt.hash(req.body.password, salt);
+        // Handle gradeCount updates
+        if (req.body.gradeCount) {
+            updates.gradeCount = {
+                A: req.body.gradeCount.A ?? 0,
+                B: req.body.gradeCount.B ?? 0,
+                C: req.body.gradeCount.C ?? 0,
+                D: req.body.gradeCount.D ?? 0,
+                F: req.body.gradeCount.F ?? 0,
+            };
         }
 
-        if (req.body.gpa) {
-            // If adding a new GPA entry
-            if (typeof req.body.gpa === 'object' && req.body.gpa.value) {
-                const gpaEntry = {
-                    value: req.body.gpa.value,
-                    date: req.body.gpa.date || new Date()
-                };
+        const updatedUser = await User.findByIdAndUpdate(id, updates, { new: true });
 
-                updates = {
-                    ...updates,
-                    $push: { gpa: gpaEntry }
-                };
-            }
-            // If replacing the entire GPA array
-            else if (Array.isArray(req.body.gpa)) {
-                updates.gpa = req.body.gpa;
-            }
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
         }
 
-        let user;
-        if (updates.$push) {
-            user = await User.findByIdAndUpdate(
-                id,
-                updates,
-                { new: true }
-            ).select("-password");
-        } else {
-            user = await User.findByIdAndUpdate(
-                id,
-                { $set: updates },
-                { new: true }
-            ).select("-password");
-        }
-
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-
-        res.json({ message: "User updated successfully", user });
+        res.status(200).json(updatedUser);
     } catch (error) {
         console.error("Error updating user:", error);
-        res.status(500).json({ error: "Server error" });
+        res.status(500).json({ message: "Internal server error" });
     }
 };
+
 
 
 

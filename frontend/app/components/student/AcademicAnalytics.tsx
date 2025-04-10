@@ -20,6 +20,7 @@ import { AuthContext } from "../../context/AuthContext"
 import { APP_CONFIG } from "@/app-config"
 import { useToken } from "@/app/hooks/useToken"
 import GPAChart from "./GpaChart"
+import GradeDistributionChart from "./GradeDistributionChart"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
@@ -34,13 +35,11 @@ const ensureSafeData = (data: number[]): number[] => {
 };
 
 
-
 const ensureMinimumDataLength = (data: number[], minLength: number = 2): number[] => {
 	if (!data || data.length === 0) return new Array(minLength).fill(0);
 	if (data.length === 1) return [...data, ...new Array(minLength - 1).fill(data[0])];
 	return data;
 };
-
 
 
 type TabType = "performance" | "attendance" | "marks" | "curriculum"
@@ -111,6 +110,7 @@ interface Attendance {
 	courseName?: string
 	courseCode?: string
 }
+
 
 const AcademicAnalytics: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<TabType>("performance")
@@ -376,15 +376,7 @@ const AcademicAnalytics: React.FC = () => {
 
 
 
-	const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {
-		// Process GPA trend (mock data for now as we don't have historical GPA)
-		const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-		const currentMonth = new Date().getMonth()
-		const lastEightMonths = Array.from({ length: 8 }, (_, i) => {
-			const monthIndex = (currentMonth - 7 + i + 12) % 12
-			return months[monthIndex]
-		})
-		
+	const processMarksData = (marksData: MarkItem[], coursesData: Course[]) => {		
 
 		// Process grade distribution
 		const gradeCount = {
@@ -631,23 +623,7 @@ const AcademicAnalytics: React.FC = () => {
 						<Text style={styles.chartTitle}>GPA Trend</Text>
 						<Text style={styles.chartSubtitle}>Your academic performance over time</Text>
 						<GPAChart userId={auth?.user?.userId || ""} />
-
-						<Text style={styles.chartTitle}>Grade Distribution</Text>
-						<Text style={styles.chartSubtitle}>Current semester grade breakdown</Text>
-						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-							<PieChart
-								data={gradeDistribution}
-								width={Math.max(getChartWidth(), 300)}
-								height={220}
-								chartConfig={chartConfig}
-								accessor={"population"}
-								backgroundColor={"transparent"}
-								paddingLeft={"15"}
-								center={[10, 0]}
-								absolute
-								style={styles.chart}
-							/>
-						</ScrollView>
+						<GradeDistributionChart userId={auth?.user?.userId || ""} />
 					</View>
 				)
 			case "attendance":
