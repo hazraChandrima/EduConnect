@@ -8,7 +8,6 @@ import { useToken } from '@/app/hooks/useToken';
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL;
 
-
 interface GpaEntry {
     value: number;
     date: string;
@@ -74,19 +73,23 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
         return data;
     };
 
+    // Determine if we're on mobile or desktop
+    const isDesktop = Dimensions.get('window').width >= 768;
+
     const getChartWidth = (): number => {
         const screenWidth = Dimensions.get('window').width;
         const dataPointCount = gpaData.labels.length;
-        const minWidthPerDataPoint = 80; // Reduced from 120 to make it smaller on mobile
+        const minWidthPerDataPoint = 80;
 
-        // For smaller screens, use a more compact layout
-        if (screenWidth < 768) {
-            return Math.min(screenWidth - 40, dataPointCount * minWidthPerDataPoint);
+        // Fixed width for desktop
+        if (isDesktop) {
+            return 800; // Fixed width for desktop
         }
 
-        // For larger screens, maintain the original calculation
-        return dataPointCount * minWidthPerDataPoint;
+        // For mobile, ensure it's scrollable if needed
+        return Math.max(screenWidth - 40, dataPointCount * minWidthPerDataPoint);
     };
+    
 
     const getLatestGpaValue = (): number => {
         if (!userData?.gpa || userData.gpa.length === 0) return 0;
@@ -230,7 +233,7 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
     }
 
     // Calculate the required chart width
-    const chartWidth = Math.max(getChartWidth(), 300);
+    const chartWidth = getChartWidth();
     const screenWidth = Dimensions.get('window').width;
 
     return (
@@ -239,32 +242,30 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
             {userData ? (
                 <>
                     <ScrollView
-                        horizontal
+                        horizontal={!isDesktop} // Only enable horizontal scrolling on mobile
                         showsHorizontalScrollIndicator={true}
-                        contentContainerStyle={{
-                            paddingRight: 16,
-                            // Make the content fit the screen on small devices
-                            width: chartWidth > screenWidth ? undefined : screenWidth - 40
-                        }}
+                        contentContainerStyle={[
+                            styles.scrollViewContent,
+                            isDesktop && styles.desktopScrollViewContent
+                        ]}
                     >
-                        <View>
-                            <LineChart
-                                data={{
-                                    ...gpaData,
-                                    datasets: gpaData.datasets.map(dataset => ({
-                                        ...dataset,
-                                        data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
-                                    }))
-                                }}
-                                width={chartWidth}
-                                height={220}
-                                chartConfig={{
-                                    ...chartConfig,
-                                    // Adjust font size for smaller screens
-                                    // labelFontSize: screenWidth < 768 ? 10 : 12
-                                }}
-                                style={styles.chart}
-                            />
+                        <View style={styles.chartContainer}>
+                            <View style={isDesktop && styles.chartWrapper}>
+                                <LineChart
+                                    data={{
+                                        ...gpaData,
+                                        datasets: gpaData.datasets.map(dataset => ({
+                                            ...dataset,
+                                            data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
+                                        }))
+                                    }}
+                                    width={chartWidth}
+                                    height={220}
+                                    chartConfig={chartConfig}
+                                    style={styles.chart}
+                                />
+                            </View>
+
                         </View>
                     </ScrollView>
 
@@ -295,18 +296,38 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
     );
 };
 
-
-
 const styles = StyleSheet.create({
     container: {
         marginVertical: 10,
-        margin: 'auto',
+        marginHorizontal: 'auto',
+        width: '100%',
+        maxWidth: 850, // Max container width for desktop
+        alignSelf: 'center', // Center the entire component
+        padding: 16,
     },
     header: {
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 15,
         color: '#333',
+        textAlign: 'center',
+    },
+    chartContainer: {
+        alignItems: 'center', // Center the chart container
+        justifyContent: 'center',
+        width: '100%',
+    },
+    chartWrapper: {
+        alignItems: 'center', // Center the chart on desktop
+    },
+    scrollViewContent: {
+        paddingRight: 16,
+        minWidth: '100%',
+    },
+    desktopScrollViewContent: {
+        alignItems: 'center', // Center content on desktop
+        justifyContent: 'center',
+        width: '100%',
     },
     chart: {
         marginVertical: 8,
@@ -338,6 +359,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
         elevation: 2,
+        maxWidth: 800, // Match the chart width
+        width: '100%',
+        alignSelf: 'center', // Center the stats container
     },
     statsText: {
         fontSize: 14,
@@ -348,6 +372,5 @@ const styles = StyleSheet.create({
         color: '#5C51F3',
     },
 });
-
 
 export default GPAChart;

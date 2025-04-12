@@ -79,13 +79,20 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   statCard: {
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    flex: 0.48,
-    alignItems: "center",
-    margin: 5,
-    minWidth: 140,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8,
+    marginVertical: 8,
+    width: 150, // Increased from what appears to be around 120px
+    height: 120,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   statValue: {
     fontSize: 32,
@@ -1078,19 +1085,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
   },
   desktopStatsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    flexWrap: "nowrap",
-    gap: 15,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    maxWidth: 900, // Larger max width for desktop
+    alignSelf: 'center',
   },
   tabletStatsContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    maxWidth: 800, // Control the max width of the container
+    alignSelf: 'center',
   },
   desktopStatCard: {
-    flex: 1,
-    margin: 0,
+    width: 180, // Wider cards for desktop view
+    height: 140, // Slightly taller for better proportions
+    marginHorizontal: 12,
   },
   desktopScrollView: {
     padding: 20,
@@ -1116,11 +1126,13 @@ const styles = StyleSheet.create({
   },
   desktopAssignmentCard: {
     // width: "48%",
-    marginHorizontal: "1%",
+    width: 380,
+    margin: 10,
   },
   desktopAssignmentsList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
   desktopAttendanceOverview: {
     padding: 20,
@@ -1170,7 +1182,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 280,
-    backgroundColor: "#2c3e50",
+    backgroundColor: "#0b1d40",
     zIndex: 1000,
     // transition: "width 0.3s ease",
   },
