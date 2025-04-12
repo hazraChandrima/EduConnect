@@ -1614,6 +1614,100 @@ const styles = StyleSheet.create({
         marginTop: 4,
         color: "#333",
     },
+    studentSubmissionsContainer: {
+        marginTop: 8,
+    },
+    studentSubmissionItem: {
+        backgroundColor: "#f9f9f9",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 12,
+    },
+    studentSubmissionHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    studentSubmissionTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#333",
+    },
+    submissionStatusBadge: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 4,
+    },
+    gradedBadge: {
+        backgroundColor: "#d8f5e5",
+    },
+    pendingBadge: {
+        backgroundColor: "#e0eaff",
+    },
+    submissionStatusText: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#333",
+    },
+    studentSubmissionDetails: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+    studentSubmissionDate: {
+        fontSize: 13,
+        color: "#777",
+    },
+    studentSubmissionGrade: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    studentSubmissionGradeLabel: {
+        fontSize: 13,
+        color: "#555",
+        marginRight: 4,
+    },
+    studentSubmissionGradeValue: {
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#22a67c",
+    },
+    gradeSubmissionButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#5c51f3",
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 6,
+    },
+    gradeSubmissionButtonText: {
+        color: "white",
+        marginLeft: 6,
+        fontWeight: "600",
+        fontSize: 13,
+    },
+    emptySubmissions: {
+        padding: 16,
+        alignItems: "center",
+    },
+    emptySubmissionsText: {
+        color: "#666",
+        fontSize: 14,
+    },
+    viewAllButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 8,
+    },
+    viewAllButtonText: {
+        color: "#4252e5",
+        fontSize: 14,
+        fontWeight: "500",
+        marginRight: 4,
+    },
+
 })
 
 export default styles

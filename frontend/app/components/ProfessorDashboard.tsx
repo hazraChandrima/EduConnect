@@ -13,6 +13,7 @@ import {
     ActivityIndicator,
     Alert,
     useWindowDimensions,
+    Linking,
 } from "react-native"
 import { Ionicons, FontAwesome, MaterialIcons, AntDesign, Feather } from "@expo/vector-icons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -20,16 +21,15 @@ import NetInfo from "@react-native-community/netinfo"
 import { AuthContext } from "../context/AuthContext"
 import styles from "../styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
-import FileManagement from "./professor/FileManagement"
 import QuizTab from "./professor/quiz/QuizTab"
 import { useToken } from "../hooks/useToken"
 import { APP_CONFIG } from "@/app-config"
 import StudentsList from "./professor/StudentsList"
 import { AttendanceChart, GradeDistributionChart, AssignmentCompletionChart } from "./professor/ChartComponents"
-import CourseList from "./professor/CourseList"
 import AssignmentList from "./professor/assignment/AssignmentList"
 import AssignmentModal from "./professor/assignment/AssignmentModal"
 import AttendanceManagement from "./professor/attendance/AttendanceManagement"
+import AssignmentSubmissionsView from "./professor/assignment/AssignmentSubmissionsView"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
@@ -82,11 +82,12 @@ interface AssignmentSubmission {
         name: string
         email: string
     }
-    grade?: number
-    feedback?: string
+    grade: number | null
+    feedback: string
     status: "submitted" | "graded"
     createdAt: string
 }
+
 
 interface Attendance {
     _id: string
@@ -121,7 +122,6 @@ interface AttendanceStatus {
     [key: string]: "present" | "absent" | "excused"
 }
 
-
 export default function ProfessorDashboard({ userId }: { userId: string }) {
     const [activeTab, setActiveTab] = useState("home")
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
@@ -143,6 +143,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
     const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().split("T")[0])
     const [attendanceStatus, setAttendanceStatus] = useState<AttendanceStatus>({})
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
+    const [isSubmissionsViewVisible, setIsSubmissionsViewVisible] = useState(false)
 
     const [userData, setUserData] = useState<UserData | null>(null)
     const [courses, setCourses] = useState<Course[]>([])
@@ -598,6 +599,32 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
         })
     }
 
+    // Get student submissions for a specific assignment
+    const getStudentSubmissionsForAssignment = (studentId: string, assignmentId: string) => {
+        return submissions.filter(
+            (submission) => submission.uploader._id === studentId && submission.assignmentId === assignmentId,
+        )
+    }
+
+    // Get all submissions for a student
+    const getStudentSubmissions = (studentId: string) => {
+        return submissions.filter((submission) => submission.uploader._id === studentId)
+    }
+
+    // Handle opening the submissions view for an assignment
+    const handleViewAssignmentSubmissions = (assignment: Assignment) => {
+        setSelectedAssignment(assignment)
+        setIsSubmissionsViewVisible(true)
+    }
+
+    // Handle submission graded callback from AssignmentSubmissionsView
+    const handleSubmissionGraded = (updatedSubmission: AssignmentSubmission) => {
+        // Update the submissions list with the newly graded submission
+        const updatedSubmissions = submissions.map((sub) => (sub._id === updatedSubmission._id ? updatedSubmission : sub))
+        setSubmissions(updatedSubmissions)
+        AsyncStorage.setItem("professorDashboardSubmissions", JSON.stringify(updatedSubmissions))
+    }
+
     if (isLoading) {
         return (
             <SafeAreaView style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
@@ -681,16 +708,6 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    style={[styles.sidebarItem, activeTab === "files" && styles.sidebarItemActive]}
-                    onPress={() => setActiveTab("files")}
-                >
-                    <MaterialIcons name="folder" size={24} color={activeTab === "files" ? "#5c51f3" : "#777"} />
-                    {!isSidebarCollapsed && (
-                        <Text style={[styles.sidebarItemText, activeTab === "files" && styles.sidebarItemTextActive]}>Files</Text>
-                    )}
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     style={[styles.sidebarItem, activeTab === "quizzes" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("quizzes")}
                 >
@@ -764,55 +781,22 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                 </View>
             </View>
 
-            {/* Content Grid for Desktop */}
-            {isDesktop ? (
-                <View style={styles.desktopContentGrid}>
-                    <View style={styles.desktopContentColumn}>
-                        <CourseList
-                            courses={courses}
-                            onCourseSelect={(course) => {
-                                setSelectedCourse(course)
-                                setActiveTab("courses")
-                            }}
-                        />
-                    </View>
-                    <View style={styles.desktopContentColumn}>
-                        <AssignmentList
-                            pendingAssignments={getPendingAssignments()}
-                            submissions={submissions}
-                            onGradeAssignment={(assignment, submission) => {
-                                setSelectedAssignment(assignment)
-                                setSelectedSubmission(submission)
-                                setIsGradingModalVisible(true)
-                            }}
-                            onCreateAssignment={() => setIsAssignmentModalVisible(true)}
-                        />
-                    </View>
-                </View>
-            ) : (
-                <>
-                    {/* Courses Section */}
-                    <CourseList
-                        courses={courses}
-                        onCourseSelect={(course) => {
-                            setSelectedCourse(course)
-                            setActiveTab("courses")
-                        }}
-                    />
-
-                    {/* Pending Assignments Section */}
-                    <AssignmentList
-                        pendingAssignments={getPendingAssignments()}
-                        submissions={submissions}
-                        onGradeAssignment={(assignment, submission) => {
-                            setSelectedAssignment(assignment)
-                            setSelectedSubmission(submission)
-                            setIsGradingModalVisible(true)
-                        }}
-                        onCreateAssignment={() => setIsAssignmentModalVisible(true)}
-                    />
-                </>
-            )}
+            {/* Pending Assignments Section */}
+            <View style={[styles.sectionContainer, isDesktop && styles.desktopSectionContainer]}>
+                <AssignmentList
+                    pendingAssignments={getPendingAssignments()}
+                    submissions={submissions}
+                    onGradeAssignment={(assignment, submission) => {
+                        setSelectedAssignment(assignment)
+                        setSelectedSubmission(submission)
+                        setIsGradingModalVisible(true)
+                    }}
+                    onCreateAssignment={() => setIsAssignmentModalVisible(true)}
+                    title="Assignments Needing Grading"
+                    userId={userId}
+                    role="professor"
+                />
+            </View>
         </>
     )
 
@@ -1018,6 +1002,14 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                                             </TouchableOpacity>
                                         ))}
                                     </View>
+
+                                    <TouchableOpacity
+                                        style={styles.viewAllButton}
+                                        onPress={() => handleViewAssignmentSubmissions(assignment)}
+                                    >
+                                        <Text style={styles.viewAllButtonText}>View All Submissions</Text>
+                                        <MaterialIcons name="chevron-right" size={18} color="#4252e5" />
+                                    </TouchableOpacity>
                                 </View>
                             )
                         })}
@@ -1190,6 +1182,67 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                                 </View>
                             )}
                         </View>
+
+                        {/* Student Submissions Section */}
+                        <Text style={styles.sectionTitle}>Recent Submissions</Text>
+                        <View style={styles.studentSubmissionsContainer}>
+                            {getStudentSubmissions(selectedStudent._id).length > 0 ? (
+                                getStudentSubmissions(selectedStudent._id)
+                                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                                    .slice(0, 5)
+                                    .map((submission) => {
+                                        const assignment = assignments.find((a) => a._id === submission.assignmentId)
+                                        if (!assignment) return null
+
+                                        return (
+                                            <View key={submission._id} style={styles.studentSubmissionItem}>
+                                                <View style={styles.studentSubmissionHeader}>
+                                                    <Text style={styles.studentSubmissionTitle}>{assignment.title}</Text>
+                                                    <View
+                                                        style={[
+                                                            styles.submissionStatusBadge,
+                                                            submission.status === "graded" ? styles.gradedBadge : styles.pendingBadge,
+                                                        ]}
+                                                    >
+                                                        <Text style={styles.submissionStatusText}>
+                                                            {submission.status === "graded" ? "Graded" : "Pending"}
+                                                        </Text>
+                                                    </View>
+                                                </View>
+
+                                                <View style={styles.studentSubmissionDetails}>
+                                                    <Text style={styles.studentSubmissionDate}>
+                                                        Submitted: {new Date(submission.createdAt).toLocaleDateString()}
+                                                    </Text>
+
+                                                    {submission.status === "graded" ? (
+                                                        <View style={styles.studentSubmissionGrade}>
+                                                            <Text style={styles.studentSubmissionGradeLabel}>Grade:</Text>
+                                                            <Text style={styles.studentSubmissionGradeValue}>{submission.grade}/100</Text>
+                                                        </View>
+                                                    ) : (
+                                                        <TouchableOpacity
+                                                            style={styles.gradeSubmissionButton}
+                                                            onPress={() => {
+                                                                setSelectedAssignment(assignment)
+                                                                setSelectedSubmission(submission)
+                                                                setIsGradingModalVisible(true)
+                                                            }}
+                                                        >
+                                                            <MaterialIcons name="grading" size={16} color="white" />
+                                                            <Text style={styles.gradeSubmissionButtonText}>Grade</Text>
+                                                        </TouchableOpacity>
+                                                    )}
+                                                </View>
+                                            </View>
+                                        )
+                                    })
+                            ) : (
+                                <View style={styles.emptySubmissions}>
+                                    <Text style={styles.emptySubmissionsText}>No submissions from this student yet.</Text>
+                                </View>
+                            )}
+                        </View>
                     </View>
                 ) : (
                     <>
@@ -1327,18 +1380,29 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
 
                 {/* Main Content */}
                 <View style={[styles.mainContent, isDesktop && styles.desktopMainContent]}>
-                    <ScrollView
-                        style={styles.scrollView}
-                        contentContainerStyle={isDesktop ? styles.desktopScrollViewContent : null}
-                    >
-                        {activeTab === "home" && renderHomeTab()}
-                        {activeTab === "courses" && renderCoursesTab()}
-                        {activeTab === "attendance" && renderAttendanceTab()}
-                        {activeTab === "grading" && renderGradingTab()}
-                        {activeTab === "students" && renderStudentsTab()}
-                        {activeTab === "files" && <FileManagement />}
-                        {activeTab === "quizzes" && <QuizTab />}
-                    </ScrollView>
+                    {isSubmissionsViewVisible ? (
+                        <AssignmentSubmissionsView
+                            selectedAssignment={selectedAssignment}
+                            onClose={() => setIsSubmissionsViewVisible(false)}
+                            token={token}
+                            onGradeSubmitted={handleSubmissionGraded}
+                            courses={courses}
+                            marks={marks}
+                            setMarks={setMarks}
+                        />
+                    ) : (
+                        <ScrollView
+                            style={styles.scrollView}
+                            contentContainerStyle={isDesktop ? styles.desktopScrollViewContent : null}
+                        >
+                            {activeTab === "home" && renderHomeTab()}
+                            {activeTab === "courses" && renderCoursesTab()}
+                            {activeTab === "attendance" && renderAttendanceTab()}
+                            {activeTab === "grading" && renderGradingTab()}
+                            {activeTab === "students" && renderStudentsTab()}
+                            {activeTab === "quizzes" && <QuizTab />}
+                        </ScrollView>
+                    )}
                 </View>
             </View>
 
@@ -1403,7 +1467,15 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
 
                                     <Text style={styles.gradingStudentName}>Student: {selectedSubmission.uploader.name}</Text>
 
-                                    <TouchableOpacity style={styles.viewSubmissionButton}>
+                                    <TouchableOpacity
+                                        style={styles.viewSubmissionButton}
+                                        onPress={() => {
+                                            Linking.openURL(selectedSubmission.downloadUrl).catch((err) => {
+                                                console.error("Error opening URL:", err)
+                                                Alert.alert("Error", "Could not open the submission file")
+                                            })
+                                        }}
+                                    >
                                         <Feather name="download" size={20} color="white" />
                                         <Text style={styles.viewSubmissionButtonText}>View Submission</Text>
                                     </TouchableOpacity>
@@ -1440,7 +1512,6 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     </View>
                 </View>
             </Modal>
-
         </SafeAreaView>
     )
 }
