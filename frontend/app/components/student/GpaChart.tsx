@@ -77,8 +77,15 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
     const getChartWidth = (): number => {
         const screenWidth = Dimensions.get('window').width;
         const dataPointCount = gpaData.labels.length;
-        const minWidthPerDataPoint = 80;
-        return Math.max(screenWidth, dataPointCount * minWidthPerDataPoint);
+        const minWidthPerDataPoint = 80; // Reduced from 120 to make it smaller on mobile
+
+        // For smaller screens, use a more compact layout
+        if (screenWidth < 768) {
+            return Math.min(screenWidth - 40, dataPointCount * minWidthPerDataPoint);
+        }
+
+        // For larger screens, maintain the original calculation
+        return dataPointCount * minWidthPerDataPoint;
     };
 
     const getLatestGpaValue = (): number => {
@@ -222,25 +229,43 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
         );
     }
 
+    // Calculate the required chart width
+    const chartWidth = Math.max(getChartWidth(), 300);
+    const screenWidth = Dimensions.get('window').width;
+
     return (
         <View style={styles.container}>
             <Text style={styles.header}>GPA Trend Over Past 6 Months</Text>
             {userData ? (
                 <>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-                        <LineChart
-                            data={{
-                                ...gpaData,
-                                datasets: gpaData.datasets.map(dataset => ({
-                                    ...dataset,
-                                    data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
-                                }))
-                            }}
-                            width={Math.max(getChartWidth(), 300)}
-                            height={220}
-                            chartConfig={chartConfig}
-                            style={styles.chart}
-                        />
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={true}
+                        contentContainerStyle={{
+                            paddingRight: 16,
+                            // Make the content fit the screen on small devices
+                            width: chartWidth > screenWidth ? undefined : screenWidth - 40
+                        }}
+                    >
+                        <View>
+                            <LineChart
+                                data={{
+                                    ...gpaData,
+                                    datasets: gpaData.datasets.map(dataset => ({
+                                        ...dataset,
+                                        data: ensureMinimumDataLength(ensureSafeData(dataset.data), 2)
+                                    }))
+                                }}
+                                width={chartWidth}
+                                height={220}
+                                chartConfig={{
+                                    ...chartConfig,
+                                    // Adjust font size for smaller screens
+                                    // labelFontSize: screenWidth < 768 ? 10 : 12
+                                }}
+                                style={styles.chart}
+                            />
+                        </View>
                     </ScrollView>
 
                     <View style={styles.statsContainer}>
@@ -275,6 +300,7 @@ const GPAChart: React.FC<GPAChartProps> = ({ userId }) => {
 const styles = StyleSheet.create({
     container: {
         marginVertical: 10,
+        margin: 'auto',
     },
     header: {
         fontSize: 18,

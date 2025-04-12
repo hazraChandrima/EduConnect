@@ -31,7 +31,7 @@ export default function Index() {
     if (isAppMounted && !isLoading) {
       if (user) {
         console.log(`User detected (${user.role}), redirecting...`);
-        router.replace('/studentDashboard');
+        router.replace(`/${user.role}/${user.userId}`);
       } else {
         console.log("No user, redirecting to login...");
         router.replace('/login');

@@ -70,6 +70,8 @@ const CustomAlert: React.FC<CustomAlertProps> = ({
     );
 };
 
+
+
 const styles = StyleSheet.create({
     centeredView: {
         flex: 1,

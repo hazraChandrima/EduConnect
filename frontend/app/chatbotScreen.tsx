@@ -23,7 +23,8 @@ import styles from "./styles/Chabot.style"
 import { AuthContext } from "./context/AuthContext"
 import { APP_CONFIG } from "@/app-config"
 
-const API_CHATBOT_URL = APP_CONFIG.API_CHATBOT_URL;
+const LOCAL_CHATBOT_URL = APP_CONFIG.LOCAL_CHATBOT_URL;
+const DEPLOYED_CHATBOT_URL = APP_CONFIG.DEPLOYED_CHATBOT_URL;
 
 interface ScrollableChipsProps {
     suggestions: string[]
@@ -130,14 +131,14 @@ const ChatbotScreen = () => {
 
 
     
-    const fetchBotResponse = async (query: string): Promise<string> => {
+    const fetchBotResponse = async (email:string, query: string): Promise<string> => {
         try {
-            const response = await fetch(`${API_CHATBOT_URL}/ask`, {
+            const response = await fetch(`${DEPLOYED_CHATBOT_URL}/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ query }),
+                body: JSON.stringify({ email, query }),
             });
 
             if (!response.ok) {
@@ -180,8 +181,8 @@ const ChatbotScreen = () => {
         }, 300)
 
         try {
-            // Fetch bot response
-            const botResponseText = await fetchBotResponse(inputText)
+            const userEmail = auth?.user?.email
+            const botResponseText = await fetchBotResponse(userEmail as string, inputText)
 
             // Remove typing indicator and add actual response
             setTimeout(() => {

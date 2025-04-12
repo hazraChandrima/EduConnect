@@ -1,9 +1,24 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, useWindowDimensions } from "react-native"
+
+const { width } = useWindowDimensions()
+    const isMobile = width < 768
+    const isTablet = width >= 768 && width < 1024
+    const isDesktop = width >= 1024
+
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#f5f5f5",
+    },
+    appContainer: {
+        flex: 1,
+        flexDirection: "row",
+    },
+    mainContent: {
+        flex: 1,
+        backgroundColor: "#f5f5f5",
+        // transition: "margin-left 0.3s ease",
     },
     header: {
         flexDirection: "row",
@@ -37,15 +52,15 @@ const styles = StyleSheet.create({
     },
     scrollView: {
         flex: 1,
-        zIndex: 1
+        zIndex: 1,
     },
     dashboardHeader: {
         backgroundColor: "#40BFFF",
         padding: 20,
         borderRadius: 8,
         margin: 16,
-        position: 'relative',
-        zIndex: 1
+        position: "relative",
+        zIndex: 1,
     },
     dashboardTitle: {
         fontSize: 24,
@@ -62,6 +77,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         marginTop: 16,
+        flexWrap: "wrap",
     },
     statCard: {
         backgroundColor: "white",
@@ -70,6 +86,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         width: "30%",
         elevation: 2,
+        marginBottom: 10,
+        minWidth: 100,
     },
     statNumber: {
         fontSize: 24,
@@ -736,6 +754,7 @@ const styles = StyleSheet.create({
         padding: 16,
         marginBottom: 16,
         elevation: 2,
+        width: "100%",
     },
     chartTitle: {
         fontSize: 16,
@@ -750,21 +769,21 @@ const styles = StyleSheet.create({
     profileContainer: {
         flexDirection: "row",
         alignItems: "center",
-        position: 'relative',
+        position: "relative",
         zIndex: 1000,
     },
     profileButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
     },
     profileDropdown: {
-        position: 'absolute',
+        position: "absolute",
         top: 45,
         right: 0,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         padding: 8,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -772,15 +791,15 @@ const styles = StyleSheet.create({
         zIndex: 3000,
     },
     profileMenuItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         paddingVertical: 8,
         paddingHorizontal: 12,
     },
     profileMenuItemText: {
         marginLeft: 8,
         fontSize: 16,
-        color: '#333',
+        color: "#333",
     },
     studentItem: {
         flexDirection: "row",
@@ -815,13 +834,115 @@ const styles = StyleSheet.create({
     },
     textArea: {
         height: 100,
-        textAlignVertical: 'top',
+        textAlignVertical: "top",
         paddingTop: 10,
         paddingBottom: 10,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: "#ddd",
         borderRadius: 8,
+    },
+    // Sidebar styles
+    sidebar: {
+        width: 240,
+        backgroundColor: "#2c3e50",
+        height: "100%",
+        position: "fixed",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        zIndex: 1000,
+        // transition: "width 0.3s ease",
+    },
+    sidebarCollapsed: {
+        width: 60,
+    },
+    sidebarHeader: {
+        height: 60,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    },
+    sidebarTitle: {
+        color: "white",
+        fontSize: 18,
+        fontWeight: "bold",
+    },
+    sidebarToggle: {
+        width: 28,
+        height: 28,
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: 4,
+    },
+    sidebarContent: {
+        flex: 1,
+        paddingTop: 16,
+    },
+    sidebarFooter: {
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: "rgba(255, 255, 255, 0.1)",
+    },
+    sidebarItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        marginBottom: 4,
+        borderLeftWidth: 3,
+        borderLeftColor: "transparent",
+    },
+    sidebarItemActive: {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderLeftColor: "#4169E1",
+    },
+    sidebarItemText: {
+        color: "white",
+        marginLeft: 12,
+        fontSize: 16,
+    },
+    sidebarItemTextActive: {
+        fontWeight: "bold",
+    },
+    // Analytics section styles
+    analyticsContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        gap: 16,
+        padding: 16,
+    },
+    chartContainer: {
+        width: "100%",
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+        gap: 16,
+    },
+    // chartWrapper: {
+    //     width: "100%",
+    //     "@media (min-width: 768px)": {
+    //         width: "calc(50% - 8px)",
+    //     },
+    //     "@media (min-width: 1024px)": {
+    //         width: "calc(33.333% - 11px)",
+    //     },
+    // },
+    cardStyle : {
+        width:  "50%",
+        backgroundColor: "white",
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 20,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
 })
 
-export default styles;
+export default styles

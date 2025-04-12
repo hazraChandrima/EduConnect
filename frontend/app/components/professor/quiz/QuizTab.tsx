@@ -10,7 +10,7 @@ import {
 import { MaterialIcons, AntDesign } from "@expo/vector-icons"
 import QuizGenerator from "./QuizGenerator"
 import QuizViewer from "./QuizViewer"
-import styles from "../styles/QuizTab.style"
+import styles from "@/app/styles/QuizTab.style"
 
 interface QuizQuestion {
     question: string

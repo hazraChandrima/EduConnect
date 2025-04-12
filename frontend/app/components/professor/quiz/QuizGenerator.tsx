@@ -5,7 +5,7 @@ import { useState } from "react"
 import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, Alert, Platform } from "react-native"
 import { MaterialIcons, AntDesign } from "@expo/vector-icons"
 import * as DocumentPicker from "expo-document-picker"
-import styles from "../styles/QuizGenerator.style"
+import styles from "@/app/styles/QuizGenerator.style"
 import { APP_CONFIG } from "@/app-config"
 
 const API_PDF_QUIZ_URL = APP_CONFIG.API_PDF_QUIZ_URL

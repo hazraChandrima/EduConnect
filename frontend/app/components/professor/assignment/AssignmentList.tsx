@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import styles from "../../styles/ProfessorDashboard.style";
+import styles from "@/app/styles/ProfessorDashboard.style";
 
 interface AssignmentListProps {
     pendingAssignments: any[];
