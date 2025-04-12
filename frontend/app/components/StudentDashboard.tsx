@@ -17,6 +17,7 @@ import {
   TextInput,
   FlatList,
   Alert,
+  Dimensions,
 } from "react-native"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { Ionicons, FontAwesome, MaterialIcons, AntDesign, Feather } from "@expo/vector-icons"
@@ -38,6 +39,8 @@ const useIsSmallDevice = () => {
   const { width } = useWindowDimensions()
   return width < 768 // Increased breakpoint for better tablet/desktop detection
 }
+
+const screenWidth = Dimensions.get('window').width;
 
 interface GpaEntry {
   value: number
@@ -556,7 +559,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
           style={[styles.sidebarItem, activeTab === "home" && styles.sidebarItemActive]}
           onPress={() => setActiveTab("home")}
         >
-          <Ionicons name="home" size={24} color={activeTab === "home" ? "#5c51f3" : "#777"} />
+            <Ionicons name="home" size={24} color={activeTab === "home" ? "#a9a4ff" : "#b2bfd9"} />
           {!isSidebarCollapsed && (
             <Text style={[styles.sidebarItemText, activeTab === "home" && styles.sidebarItemTextActive]}>Home</Text>
           )}
@@ -566,7 +569,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
           style={[styles.sidebarItem, activeTab === "courses" && styles.sidebarItemActive]}
           onPress={() => setActiveTab("courses")}
         >
-          <MaterialIcons name="menu-book" size={24} color={activeTab === "courses" ? "#5c51f3" : "#777"} />
+            <MaterialIcons name="menu-book" size={24} color={activeTab === "courses" ? "#a9a4ff" : "#b2bfd9"} />
           {!isSidebarCollapsed && (
             <Text style={[styles.sidebarItemText, activeTab === "courses" && styles.sidebarItemTextActive]}>
               Courses
@@ -578,7 +581,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
           style={[styles.sidebarItem, activeTab === "assignments" && styles.sidebarItemActive]}
           onPress={() => setActiveTab("assignments")}
         >
-          <MaterialIcons name="assignment" size={24} color={activeTab === "assignments" ? "#5c51f3" : "#777"} />
+            <MaterialIcons name="assignment" size={24} color={activeTab === "assignments" ? "#a9a4ff" : "#b2bfd9"} />
           {!isSidebarCollapsed && (
             <Text style={[styles.sidebarItemText, activeTab === "assignments" && styles.sidebarItemTextActive]}>
               Assignments
@@ -590,7 +593,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
           style={[styles.sidebarItem, activeTab === "attendance" && styles.sidebarItemActive]}
           onPress={() => setActiveTab("attendance")}
         >
-          <MaterialIcons name="date-range" size={24} color={activeTab === "attendance" ? "#5c51f3" : "#777"} />
+            <MaterialIcons name="date-range" size={24} color={activeTab === "attendance" ? "#a9a4ff" : "#b2bfd9"} />
           {!isSidebarCollapsed && (
             <Text style={[styles.sidebarItemText, activeTab === "attendance" && styles.sidebarItemTextActive]}>
               Attendance
@@ -600,7 +603,7 @@ export default function StudentDashboard({ userId }: { userId: string }): React.
       </View>
 
       <TouchableOpacity style={styles.sidebarLogout} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={24} color="#777" />
+          <Ionicons name="log-out-outline" size={24} color="#b2bfd9" />
         {!isSidebarCollapsed && <Text style={styles.sidebarLogoutText}>Logout</Text>}
       </TouchableOpacity>
     </View >
@@ -891,21 +894,37 @@ const renderHomeTab = () => (
               : styles.tabletStatsContainer,
         ]}
       >
-        <View style={[styles.statCard, isDesktop && styles.desktopStatCard]}>
+        <View style={[
+          styles.statCard,
+          isDesktop && styles.desktopStatCard,
+          !isDesktop && { width: screenWidth * 0.4 } // 40% of screen width for mobile
+        ]}>
           <Text style={styles.statValue}>{calculateOverallAttendancePercentage()}%</Text>
           <Text style={styles.statLabel}>Attendance</Text>
         </View>
-        <View style={[styles.statCard, isDesktop && styles.desktopStatCard]}>
+        <View style={[
+          styles.statCard,
+          isDesktop && styles.desktopStatCard,
+          !isDesktop && { width: screenWidth * 0.4 } // 40% of screen width for mobile
+        ]}>
           <Text style={styles.statValue}>{gpa.length > 0 ? gpa[gpa.length - 1].value : 0}</Text>
           <Text style={styles.statLabel}>GPA</Text>
         </View>
-        <View style={[styles.statCard, isDesktop && styles.desktopStatCard]}>
+        <View style={[
+          styles.statCard,
+          isDesktop && styles.desktopStatCard,
+          !isDesktop && { width: screenWidth * 0.4 } // 40% of screen width for mobile
+        ]}>
           <Text style={styles.statValue}>
             {Math.round(courses.reduce((sum, course) => sum + course.progress, 0) / (courses.length || 1))}%
           </Text>
           <Text style={styles.statLabel}>Semester Completed</Text>
         </View>
-        <View style={[styles.statCard, isDesktop && styles.desktopStatCard]}>
+        <View style={[
+          styles.statCard,
+          isDesktop && styles.desktopStatCard,
+          !isDesktop && { width: screenWidth * 0.4 } // 40% of screen width for mobile
+        ]}>
           <Text style={styles.statValue}>{courses.length}</Text>
           <Text style={styles.statLabel}>Courses</Text>
         </View>

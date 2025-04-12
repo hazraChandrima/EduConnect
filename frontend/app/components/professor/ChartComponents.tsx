@@ -1,10 +1,18 @@
 import React from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, useWindowDimensions } from "react-native";
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
-import { Dimensions } from "react-native";
 import styles from "../../styles/ProfessorDashboard.style";
 
-const screenWidth = Dimensions.get("window").width;
+// Helper function to calculate chart width based on screen size
+const getChartWidth = () => {
+    const { width } = useWindowDimensions();
+    // For desktop (larger screens), make charts more compact
+    if (width > 768) {
+        return Math.min(600, width - 40); // Max width of 600px on desktop
+    }
+    // For mobile, use full width minus padding
+    return width - 40;
+};
 
 const ensureSafeData = (data: number[]): number[] => {
     return data.map(value => {
@@ -26,8 +34,9 @@ interface AttendanceChartProps {
     calculateCourseAttendance: (courseId: string) => number;
 }
 
-
 export const AttendanceChart: React.FC<AttendanceChartProps> = ({ courses, calculateCourseAttendance }) => {
+    const chartWidth = getChartWidth();
+
     const getAttendanceChartData = () => {
         const labels = courses.map(course => course.code);
         const data = courses.map(course => calculateCourseAttendance(course._id));
@@ -51,7 +60,7 @@ export const AttendanceChart: React.FC<AttendanceChartProps> = ({ courses, calcu
                 <Text style={styles.chartTitle}>Attendance by Course</Text>
                 <LineChart
                     data={getAttendanceChartData()}
-                    width={screenWidth - 40}
+                    width={chartWidth}
                     height={220}
                     chartConfig={{
                         backgroundColor: "#ffffff",
@@ -82,6 +91,8 @@ interface GradeDistributionProps {
 }
 
 export const GradeDistributionChart: React.FC<GradeDistributionProps> = ({ marks }) => {
+    const chartWidth = getChartWidth();
+
     const getGradeDistributionData = () => {
         // Count grades in ranges: A (90-100), B (80-89), C (70-79), D (60-69), F (0-59)
         const gradeCounts = { A: 0, B: 0, C: 0, D: 0, F: 0 };
@@ -129,7 +140,7 @@ export const GradeDistributionChart: React.FC<GradeDistributionProps> = ({ marks
                         legendFontColor: "#7F7F7F",
                         legendFontSize: 12,
                     }))}
-                    width={screenWidth - 40}
+                    width={chartWidth}
                     height={220}
                     chartConfig={{
                         backgroundColor: "#ffffff",
@@ -158,6 +169,8 @@ export const AssignmentCompletionChart: React.FC<AssignmentCompletionProps> = ({
     assignments,
     submissions
 }) => {
+    const chartWidth = getChartWidth();
+
     const getAssignmentCompletionData = () => {
         const labels = courses.map(course => course.code);
         const data = courses.map(course => {
@@ -192,7 +205,7 @@ export const AssignmentCompletionChart: React.FC<AssignmentCompletionProps> = ({
                 <Text style={styles.chartTitle}>Assignment Completion Rate (%)</Text>
                 <BarChart
                     data={getAssignmentCompletionData()}
-                    width={screenWidth - 40}
+                    width={chartWidth}
                     height={220}
                     yAxisLabel=""
                     yAxisSuffix="%"

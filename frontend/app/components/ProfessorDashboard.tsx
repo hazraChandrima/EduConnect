@@ -152,6 +152,8 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
     const [submissions, setSubmissions] = useState<AssignmentSubmission[]>([])
     const [attendanceRecords, setAttendanceRecords] = useState<Attendance[]>([])
     const [marks, setMarks] = useState<Mark[]>([])
+    const [studentEmail, setStudentEmail] = useState("")
+
 
     const [isLoading, setIsLoading] = useState<boolean>(true)
     const [isOffline, setIsOffline] = useState(false)
@@ -364,6 +366,36 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
 
         checkAuthAndFetchData()
     }, [authContext, router, userId, token])
+
+    const handleGrantAccess = async () => {
+        if (!studentEmail) return alert("Enter student email");
+
+        try {
+            setIsLoading(true);
+            const response = await fetch(`${API_BASE_URL}/api/user/grant-access`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    professorEmail: authContext?.user?.email,
+                    studentEmail: studentEmail,
+                    grant: true,
+                }),
+            });
+
+            if (!response.ok) throw new Error("Access grant failed");
+
+            alert("Access granted!");
+            setStudentEmail("");
+        }
+        catch (err) {
+            console.error(err);
+            alert("Failed to grant access.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleLogout = async () => {
         try {
@@ -651,7 +683,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     style={[styles.sidebarItem, activeTab === "home" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("home")}
                 >
-                    <Ionicons name="home" size={24} color={activeTab === "home" ? "#5c51f3" : "#777"} />
+                    <Ionicons name="home" size={24} color={activeTab === "home" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "home" && styles.sidebarItemTextActive]}>
                             Dashboard
@@ -663,7 +695,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     style={[styles.sidebarItem, activeTab === "courses" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("courses")}
                 >
-                    <MaterialIcons name="library-books" size={24} color={activeTab === "courses" ? "#5c51f3" : "#777"} />
+                    <MaterialIcons name="library-books" size={24} color={activeTab === "courses" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "courses" && styles.sidebarItemTextActive]}>
                             Courses
@@ -675,7 +707,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     style={[styles.sidebarItem, activeTab === "attendance" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("attendance")}
                 >
-                    <MaterialIcons name="date-range" size={24} color={activeTab === "attendance" ? "#5c51f3" : "#777"} />
+                    <MaterialIcons name="date-range" size={24} color={activeTab === "attendance" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "attendance" && styles.sidebarItemTextActive]}>
                             Attendance
@@ -687,7 +719,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     style={[styles.sidebarItem, activeTab === "grading" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("grading")}
                 >
-                    <MaterialIcons name="grading" size={24} color={activeTab === "grading" ? "#5c51f3" : "#777"} />
+                    <MaterialIcons name="grading" size={24} color={activeTab === "grading" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "grading" && styles.sidebarItemTextActive]}>
                             Grading
@@ -695,23 +727,23 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     )}
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[styles.sidebarItem, activeTab === "students" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("students")}
                 >
-                    <Ionicons name="people" size={24} color={activeTab === "students" ? "#5c51f3" : "#777"} />
+                    <Ionicons name="people" size={24} color={activeTab === "students" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "students" && styles.sidebarItemTextActive]}>
                             Students
                         </Text>
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity
                     style={[styles.sidebarItem, activeTab === "quizzes" && styles.sidebarItemActive]}
                     onPress={() => setActiveTab("quizzes")}
                 >
-                    <MaterialIcons name="quiz" size={24} color={activeTab === "quizzes" ? "#5c51f3" : "#777"} />
+                    <MaterialIcons name="quiz" size={24} color={activeTab === "quizzes" ? "#a9a4ff" : "#b2bfd9"} />
                     {!isSidebarCollapsed && (
                         <Text style={[styles.sidebarItemText, activeTab === "quizzes" && styles.sidebarItemTextActive]}>
                             Quizzes
@@ -759,6 +791,26 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     </View>
                 </View>
             </View>
+{/* 
+            <View style={styles.sectionContainer}>
+                <Text style={styles.sectionTitle}>Grant Attendance Access</Text>
+
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        style={styles.textInput}
+                        placeholder="Enter student email"
+                        value={studentEmail}
+                        onChangeText={setStudentEmail}
+                        placeholderTextColor="#999"
+                    />
+                    <TouchableOpacity
+                        style={styles.grantButton}
+                        onPress={handleGrantAccess}
+                    >
+                        <Text style={styles.grantButtonText}>Grant</Text>
+                    </TouchableOpacity>
+                </View>
+            </View> */}
 
             {/* Charts Section */}
             <View style={[styles.sectionContainer, isDesktop && styles.desktopSectionContainer]}>
@@ -1058,251 +1110,6 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
         </>
     )
 
-    const renderStudentsTab = () => (
-        <>
-            <View style={styles.tabHeader}>
-                <Text style={styles.tabTitle}>Student Management</Text>
-            </View>
-            <View style={[styles.tabContent, isDesktop && styles.desktopTabContent]}>
-                {selectedStudent ? (
-                    <View style={styles.studentProfileContainer}>
-                        <TouchableOpacity style={styles.backButton} onPress={() => setSelectedStudent(null)}>
-                            <Ionicons name="arrow-back" size={24} color="#4252e5" />
-                            <Text style={styles.backButtonText}>Back to Students</Text>
-                        </TouchableOpacity>
-
-                        <View style={[styles.studentProfileHeader, isDesktop && styles.desktopStudentProfileHeader]}>
-                            <View style={styles.studentProfileAvatar}>
-                                <Ionicons name="person" size={40} color="white" />
-                            </View>
-                            <View style={styles.studentProfileInfo}>
-                                <Text style={styles.studentProfileName}>{selectedStudent.name}</Text>
-                                <Text style={styles.studentProfileEmail}>{selectedStudent.email}</Text>
-                                <Text style={styles.studentProfileProgram}>
-                                    {selectedStudent.program || "Program not specified"} • Year {selectedStudent.year || "Unknown"}
-                                </Text>
-                            </View>
-                        </View>
-
-                        <View style={[styles.studentStatsContainer, isDesktop && styles.desktopStudentStatsContainer]}>
-                            <View style={styles.studentStat}>
-                                <Text style={styles.studentStatValue}>
-                                    {(() => {
-                                        const studentAttendance = attendanceRecords.filter(
-                                            (record) => record.studentId === selectedStudent._id,
-                                        )
-                                        if (studentAttendance.length === 0) return "N/A"
-                                        const presentCount = studentAttendance.filter(
-                                            (record) => record.status === "present" || record.status === "excused",
-                                        ).length
-                                        return `${Math.round((presentCount / studentAttendance.length) * 100)}%`
-                                    })()}
-                                </Text>
-                                <Text style={styles.studentStatLabel}>Attendance</Text>
-                            </View>
-                            <View style={styles.studentStat}>
-                                <Text style={styles.studentStatValue}>
-                                    {(() => {
-                                        const studentMarks = marks.filter((mark) => mark.studentId === selectedStudent._id)
-                                        if (studentMarks.length === 0) return "N/A"
-                                        const totalPercentage = studentMarks.reduce(
-                                            (sum, mark) => sum + (mark.score / mark.maxScore) * 100,
-                                            0,
-                                        )
-                                        return `${Math.round(totalPercentage / studentMarks.length)}%`
-                                    })()}
-                                </Text>
-                                <Text style={styles.studentStatLabel}>Average Grade</Text>
-                            </View>
-                            <View style={styles.studentStat}>
-                                <Text style={styles.studentStatValue}>
-                                    {submissions.filter((sub) => sub.uploader._id === selectedStudent._id).length}
-                                </Text>
-                                <Text style={styles.studentStatLabel}>Submissions</Text>
-                            </View>
-                        </View>
-
-                        <View style={styles.studentTabsContainer}>
-                            <TouchableOpacity style={[styles.studentTab, { borderBottomWidth: 2, borderBottomColor: "#4252e5" }]}>
-                                <Text style={[styles.studentTabText, { color: "#4252e5" }]}>Grades</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.studentTab}>
-                                <Text style={styles.studentTabText}>Attendance</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.studentTab}>
-                                <Text style={styles.studentTabText}>Submissions</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={styles.sectionTitle}>Assignment Grades</Text>
-
-                        <View style={isDesktop ? styles.desktopGradesGrid : null}>
-                            {marks.filter((mark) => mark.studentId === selectedStudent._id).length > 0 ? (
-                                marks
-                                    .filter((mark) => mark.studentId === selectedStudent._id)
-                                    .map((mark) => {
-                                        const course = courses.find((c) => c._id === mark.courseId)
-
-                                        return (
-                                            <View key={mark._id} style={[styles.gradeItem, isDesktop && styles.desktopGradeItem]}>
-                                                <View style={styles.gradeItemInfo}>
-                                                    <Text style={styles.gradeItemTitle}>{mark.title}</Text>
-                                                    <View style={[styles.courseTag, { backgroundColor: course?.color || "#5c51f3" }]}>
-                                                        <Text style={styles.courseTagText}>{course?.code || "Unknown"}</Text>
-                                                    </View>
-                                                    <Text style={styles.gradeItemType}>
-                                                        {mark.type.charAt(0).toUpperCase() + mark.type.slice(1)}
-                                                    </Text>
-                                                </View>
-                                                <View style={styles.gradeScore}>
-                                                    <Text
-                                                        style={[
-                                                            styles.gradeScoreText,
-                                                            mark.score / mark.maxScore >= 0.9
-                                                                ? styles.gradeScoreA
-                                                                : mark.score / mark.maxScore >= 0.8
-                                                                    ? styles.gradeScoreB
-                                                                    : mark.score / mark.maxScore >= 0.7
-                                                                        ? styles.gradeScoreC
-                                                                        : mark.score / mark.maxScore >= 0.6
-                                                                            ? styles.gradeScoreD
-                                                                            : styles.gradeScoreF,
-                                                        ]}
-                                                    >
-                                                        {mark.score}/{mark.maxScore}
-                                                    </Text>
-                                                    <Text style={styles.gradePercentage}>{Math.round((mark.score / mark.maxScore) * 100)}%</Text>
-                                                </View>
-                                            </View>
-                                        )
-                                    })
-                            ) : (
-                                <View style={styles.emptyGrades}>
-                                    <Text style={styles.emptyGradesText}>No grades recorded for this student yet.</Text>
-                                </View>
-                            )}
-                        </View>
-
-                        {/* Student Submissions Section */}
-                        <Text style={styles.sectionTitle}>Recent Submissions</Text>
-                        <View style={styles.studentSubmissionsContainer}>
-                            {getStudentSubmissions(selectedStudent._id).length > 0 ? (
-                                getStudentSubmissions(selectedStudent._id)
-                                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                                    .slice(0, 5)
-                                    .map((submission) => {
-                                        const assignment = assignments.find((a) => a._id === submission.assignmentId)
-                                        if (!assignment) return null
-
-                                        return (
-                                            <View key={submission._id} style={styles.studentSubmissionItem}>
-                                                <View style={styles.studentSubmissionHeader}>
-                                                    <Text style={styles.studentSubmissionTitle}>{assignment.title}</Text>
-                                                    <View
-                                                        style={[
-                                                            styles.submissionStatusBadge,
-                                                            submission.status === "graded" ? styles.gradedBadge : styles.pendingBadge,
-                                                        ]}
-                                                    >
-                                                        <Text style={styles.submissionStatusText}>
-                                                            {submission.status === "graded" ? "Graded" : "Pending"}
-                                                        </Text>
-                                                    </View>
-                                                </View>
-
-                                                <View style={styles.studentSubmissionDetails}>
-                                                    <Text style={styles.studentSubmissionDate}>
-                                                        Submitted: {new Date(submission.createdAt).toLocaleDateString()}
-                                                    </Text>
-
-                                                    {submission.status === "graded" ? (
-                                                        <View style={styles.studentSubmissionGrade}>
-                                                            <Text style={styles.studentSubmissionGradeLabel}>Grade:</Text>
-                                                            <Text style={styles.studentSubmissionGradeValue}>{submission.grade}/100</Text>
-                                                        </View>
-                                                    ) : (
-                                                        <TouchableOpacity
-                                                            style={styles.gradeSubmissionButton}
-                                                            onPress={() => {
-                                                                setSelectedAssignment(assignment)
-                                                                setSelectedSubmission(submission)
-                                                                setIsGradingModalVisible(true)
-                                                            }}
-                                                        >
-                                                            <MaterialIcons name="grading" size={16} color="white" />
-                                                            <Text style={styles.gradeSubmissionButtonText}>Grade</Text>
-                                                        </TouchableOpacity>
-                                                    )}
-                                                </View>
-                                            </View>
-                                        )
-                                    })
-                            ) : (
-                                <View style={styles.emptySubmissions}>
-                                    <Text style={styles.emptySubmissionsText}>No submissions from this student yet.</Text>
-                                </View>
-                            )}
-                        </View>
-                    </View>
-                ) : (
-                    <>
-                        <View style={styles.studentFilters}>
-                            <TouchableOpacity style={[styles.filterButton, styles.activeFilter]}>
-                                <Text style={styles.activeFilterText}>All Students</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.filterButton}>
-                                <Text style={styles.filterText}>By Course</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.filterButton}>
-                                <Text style={styles.filterText}>By Program</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <TextInput style={styles.searchInput} placeholder="Search students by name or email" />
-
-                        <View style={isDesktop ? styles.desktopStudentsGrid : null}>
-                            {students.map((student) => (
-                                <TouchableOpacity
-                                    key={student._id}
-                                    style={[styles.studentCard, isDesktop && styles.desktopStudentCard]}
-                                    onPress={() => setSelectedStudent(student)}
-                                >
-                                    <View style={styles.studentCardHeader}>
-                                        <View style={styles.studentAvatar}>
-                                            <Ionicons name="person" size={24} color="white" />
-                                        </View>
-                                        <View style={styles.studentCardInfo}>
-                                            <Text style={styles.studentCardName}>{student.name}</Text>
-                                            <Text style={styles.studentCardEmail}>{student.email}</Text>
-                                        </View>
-                                    </View>
-                                    <View style={styles.studentCardCourses}>
-                                        {courses
-                                            .filter((course) => course.students.some((s) => s._id === student._id))
-                                            .slice(0, 3)
-                                            .map((course) => (
-                                                <View key={course._id} style={[styles.studentCourseBadge, { backgroundColor: course.color }]}>
-                                                    <Text style={styles.studentCourseBadgeText}>{course.code}</Text>
-                                                </View>
-                                            ))}
-                                        {courses.filter((course) => course.students.some((s) => s._id === student._id)).length > 3 && (
-                                            <View style={styles.moreCoursesBadge}>
-                                                <Text style={styles.moreCoursesBadgeText}>
-                                                    +{courses.filter((course) => course.students.some((s) => s._id === student._id)).length - 3}
-                                                </Text>
-                                            </View>
-                                        )}
-                                    </View>
-                                    <Ionicons name="chevron-forward" size={24} color="#ccc" />
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </>
-                )}
-            </View>
-        </>
-    )
-
     return (
         <SafeAreaView style={styles.container}>
             {isOffline && (
@@ -1333,9 +1140,7 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                                         ? "Attendance"
                                         : activeTab === "grading"
                                             ? "Grading"
-                                            : activeTab === "students"
-                                                ? "Students"
-                                                : activeTab === "files"
+                                            : activeTab === "files"
                                                     ? "Files"
                                                     : activeTab === "quizzes"
                                                         ? "Quizzes"
@@ -1399,7 +1204,6 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                             {activeTab === "courses" && renderCoursesTab()}
                             {activeTab === "attendance" && renderAttendanceTab()}
                             {activeTab === "grading" && renderGradingTab()}
-                            {activeTab === "students" && renderStudentsTab()}
                             {activeTab === "quizzes" && <QuizTab />}
                         </ScrollView>
                     )}
