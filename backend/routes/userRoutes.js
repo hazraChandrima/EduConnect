@@ -7,11 +7,13 @@ const {
     getUsersByRole,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    grantTemporaryAccess,
 } = require("../controllers/userController");
 
 
 router.get("/:id", getUserById);
+router.post("/grant-access", grantTemporaryAccess);
 
 //for admin only
 router.get("/", verifyToken, authorizeRoles(["admin"]), getAllUsers);

@@ -47,6 +47,8 @@ connectDB().then(() => {
     app.use("/api/marks", markRoutes);
     app.use("/api/curriculum", curriculumRoutes);
     app.use("/api/remarks", remarkRoutes);
+    require("./cronJobs");
+
 
     console.log("All routes registered successfully!");
 

@@ -211,6 +211,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         paddingVertical: 5,
         borderRadius: 5,
+        marginHorizontal: 10,
     },
     courseTagText: {
         color: "white",
@@ -374,7 +375,7 @@ const styles = StyleSheet.create({
         overflow: "hidden",
     },
     desktopCourseCard: {
-        marginHorizontal: 0,
+        marginHorizontal: 10,
         flex: 1,
         minWidth: 300,
         maxWidth: 400,
@@ -835,7 +836,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#f9f9f9",
         borderRadius: 5,
         padding: 12,
-        marginBottom: 15,
+        marginBottom: 8,
         borderWidth: 1,
         borderColor: "#eee",
     },
@@ -1485,7 +1486,7 @@ const styles = StyleSheet.create({
     desktopChartsGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "space-between",
+        justifyContent: "center",
     },
     desktopChartItem: {
         width: "100%",
@@ -1506,6 +1507,7 @@ const styles = StyleSheet.create({
         margin: -8, // Negative margin to offset the padding of child elements
     },
     desktopAttendanceGrid: {
+        padding: 10,
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "flex-start",
@@ -1543,7 +1545,7 @@ const styles = StyleSheet.create({
         top: 0,
         bottom: 0,
         width: 280,
-        backgroundColor: "#2c3e50",
+        backgroundColor: "#0b1d40",
         zIndex: 1000,
         // transition: "width 0.3s ease",
     },
@@ -1708,6 +1710,163 @@ const styles = StyleSheet.create({
         marginRight: 4,
     },
 
+    inputContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        width: '100%',
+    },
+    grantButton: {
+        backgroundColor: '#4CAF50', // Green color for "grant" action
+        borderRadius: 6,
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: 32,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+        elevation: 3,
+        marginHorizontal: 8,
+    },
+
+    grantButtonText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 16,
+        letterSpacing: 0.5,
+    },
+    accessTimerContainer: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#fff0f5",
+        paddingHorizontal: 10,
+        paddingVertical: 6,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "#ffcce0",
+    },
+    accessTimerText: {
+        fontSize: 12,
+        color: "#ff5694",
+        marginLeft: 4,
+        fontWeight: "500",
+    },
+
+    // Filters section
+    filtersScrollView: {
+        marginBottom: 10,
+    },
+    attendanceStatsContainer: {
+        marginBottom: 20,
+    },
+    attendanceStatsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+    },
+    attendanceStatCard: {
+        width: "48%",
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 10,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 3,
+        elevation: 2,
+    },
+    statusBadgeText: {
+        fontWeight: "500",
+        fontSize: 14,
+    },
+    // Loading
+    loadingContainer: {
+        padding: 20,
+        alignItems: "center",
+    },
+    loadingText: {
+        marginTop: 10,
+        color: "#666",
+    },
+    desktopAttendanceRecord: {
+        width: "48%",
+    },
+    attendanceRecordStudentName: {
+        fontSize: 14,
+        color: "#333",
+        marginLeft: 6,
+    },
+    modalDescription: {
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 20,
+    },
+    searchAndFilters: {
+        marginBottom: 16,
+    },
+    attendanceRecordsHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 16,
+    },
+    recordsCount: {
+        fontSize: 14,
+        color: "#666",
+    },
+    deleteButton: {
+        marginLeft: 8,
+        padding: 4,
+    },
+    attendanceRecordActions: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    bulkActionContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 16,
+        gap: 12,
+    },
+    bulkActionButton: {
+        flex: 1,
+        backgroundColor: "#f0f4ff",
+        paddingVertical: 8,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignItems: "center",
+    },
+    bulkActionText: {
+        color: "#4252e5",
+        fontSize: 14,
+        fontWeight: "500",
+    },
+    disabledButton: {
+        opacity: 0.5,
+    },
+    accessButtonsContainer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 12,
+    },
+    revokeButton: {
+        flex: 1,
+        flexDirection: "row",
+        backgroundColor: "#e53e3e",
+        paddingVertical: 12,
+        borderRadius: 6,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    revokeButtonText: {
+        color: "white",
+        fontSize: 14,
+        fontWeight: "600",
+        marginLeft: 8,
+    },
 })
 
 export default styles
