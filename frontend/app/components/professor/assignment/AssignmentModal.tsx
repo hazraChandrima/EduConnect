@@ -9,7 +9,7 @@ import {
     ActivityIndicator
 } from "react-native";
 import { AntDesign } from "@expo/vector-icons";
-import styles from "../../styles/ProfessorDashboard.style";
+import styles from "../../../styles/ProfessorDashboard.style";
 
 interface AssignmentModalProps {
     visible: boolean;

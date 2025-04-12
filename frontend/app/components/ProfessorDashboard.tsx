@@ -21,14 +21,15 @@ import { AuthContext } from "../context/AuthContext"
 import styles from "../styles/ProfessorDashboard.style"
 import { useRouter } from "expo-router"
 import FileManagement from "./professor/FileManagement"
-import QuizTab from "./professor/QuizTab"
+import QuizTab from "./professor/quiz/QuizTab"
 import { useToken } from "../hooks/useToken"
 import { APP_CONFIG } from "@/app-config"
 import StudentsList from "./professor/StudentsList"
 import { AttendanceChart, GradeDistributionChart, AssignmentCompletionChart } from "./professor/ChartComponents"
 import CourseList from "./professor/CourseList"
-import AssignmentList from "./professor/AssignmentList"
-import AssignmentModal from "./professor/AssignmentModal"
+import AssignmentList from "./professor/assignment/AssignmentList"
+import AssignmentModal from "./professor/assignment/AssignmentModal"
+import AttendanceManagement from "./professor/attendance/AttendanceManagement"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
@@ -930,140 +931,11 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
 
     const renderAttendanceTab = () => (
         <>
-            <View style={styles.tabHeader}>
-                <Text style={styles.tabTitle}>Attendance Management</Text>
-            </View>
-            <View style={[styles.tabContent, isDesktop && styles.desktopTabContent]}>
-                <View style={styles.attendanceFilters}>
-                    <TouchableOpacity style={[styles.filterButton, styles.activeFilter]}>
-                        <Text style={styles.activeFilterText}>All Courses</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterButton}>
-                        <Text style={styles.filterText}>By Date</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.filterButton}>
-                        <Text style={styles.filterText}>By Student</Text>
-                    </TouchableOpacity>
-                </View>
-
-                <Text style={styles.sectionTitle}>Recent Attendance Records</Text>
-
-                {attendanceRecords.length > 0 ? (
-                    <View style={isDesktop ? styles.desktopAttendanceGrid : null}>
-                        {courses.map((course) => {
-                            const courseAttendanceRecords = attendanceRecords.filter((record) => record.courseId === course._id)
-
-                            if (courseAttendanceRecords.length === 0) return null
-
-                            // Group by date
-                            const attendanceByDate: Record<string, Attendance[]> = {}
-                            courseAttendanceRecords.forEach((record) => {
-                                const date = record.date.split("T")[0]
-                                if (!attendanceByDate[date]) {
-                                    attendanceByDate[date] = []
-                                }
-                                attendanceByDate[date].push(record)
-                            })
-
-                            return (
-                                <View
-                                    key={course._id}
-                                    style={[styles.attendanceCourseSection, isDesktop && styles.desktopAttendanceCourseSection]}
-                                >
-                                    <View style={[styles.courseHeader, { backgroundColor: course.color }]}>
-                                        <FontAwesome name={course.icon as any} size={24} color="white" />
-                                        <View style={styles.courseHeaderInfo}>
-                                            <Text style={styles.courseHeaderTitle}>{course.title}</Text>
-                                            <Text style={styles.courseHeaderCode}>{course.code}</Text>
-                                        </View>
-                                    </View>
-
-                                    {Object.keys(attendanceByDate).map((date) => (
-                                        <View key={date} style={styles.attendanceDateCard}>
-                                            <View style={styles.attendanceDateHeader}>
-                                                <MaterialIcons name="date-range" size={20} color="#4252e5" />
-                                                <Text style={styles.attendanceDateText}>{date}</Text>
-                                                <Text style={styles.attendanceCountText}>
-                                                    {attendanceByDate[date].filter((r) => r.status === "present").length} /{" "}
-                                                    {course.students.length} present
-                                                </Text>
-                                            </View>
-
-                                            <View style={styles.attendanceStudentsList}>
-                                                {course.students.slice(0, 3).map((student) => {
-                                                    const record = attendanceByDate[date].find((r) => r.studentId === student._id)
-                                                    const status = record ? record.status : "unknown"
-
-                                                    return (
-                                                        <View key={student._id} style={styles.attendanceStudentItem}>
-                                                            <View style={styles.studentAvatar}>
-                                                                <Ionicons name="person" size={16} color="white" />
-                                                            </View>
-                                                            <Text style={styles.attendanceStudentName}>{student.name}</Text>
-                                                            <View
-                                                                style={[
-                                                                    styles.attendanceStatusBadge,
-                                                                    status === "present"
-                                                                        ? styles.presentBadge
-                                                                        : status === "excused"
-                                                                            ? styles.excusedBadge
-                                                                            : status === "absent"
-                                                                                ? styles.absentBadge
-                                                                                : styles.unknownBadge,
-                                                                ]}
-                                                            >
-                                                                <Text style={styles.attendanceStatusText}>
-                                                                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                                                                </Text>
-                                                            </View>
-                                                        </View>
-                                                    )
-                                                })}
-
-                                                {course.students.length > 3 && (
-                                                    <TouchableOpacity style={styles.viewMoreButton}>
-                                                        <Text style={styles.viewMoreText}>View {course.students.length - 3} more students</Text>
-                                                    </TouchableOpacity>
-                                                )}
-                                            </View>
-                                        </View>
-                                    ))}
-
-                                    <TouchableOpacity
-                                        style={styles.takeAttendanceButton}
-                                        onPress={() => {
-                                            setSelectedCourse(course)
-                                            setIsAttendanceModalVisible(true)
-                                        }}
-                                    >
-                                        <MaterialIcons name="date-range" size={20} color="white" />
-                                        <Text style={styles.takeAttendanceButtonText}>Take Attendance</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )
-                        })}
-                    </View>
-                ) : (
-                    <View style={styles.emptyState}>
-                        <MaterialIcons name="date-range" size={48} color="#ccc" />
-                        <Text style={styles.emptyStateTitle}>No Attendance Records</Text>
-                        <Text style={styles.emptyStateMessage}>
-                            You haven't recorded any attendance yet. Start by selecting a course and taking attendance.
-                        </Text>
-                        <TouchableOpacity
-                            style={styles.emptyStateButton}
-                            onPress={() => {
-                                if (courses.length > 0) {
-                                    setSelectedCourse(courses[0])
-                                    setIsAttendanceModalVisible(true)
-                                }
-                            }}
-                        >
-                            <Text style={styles.emptyStateButtonText}>Take Attendance</Text>
-                        </TouchableOpacity>
-                    </View>
-                )}
-            </View>
+            <AttendanceManagement
+                courses={courses}
+                isDesktop={isDesktop}
+                onError={(message) => Alert.alert("Error", message)}
+            />
         </>
     )
 
@@ -1568,121 +1440,6 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                 </View>
             </Modal>
 
-            {/* Attendance Modal */}
-            <Modal
-                visible={isAttendanceModalVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setIsAttendanceModalVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContainer, isDesktop && styles.desktopModalContainer]}>
-                        <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Take Attendance</Text>
-                            <TouchableOpacity onPress={() => setIsAttendanceModalVisible(false)}>
-                                <AntDesign name="close" size={24} color="#333" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <ScrollView style={styles.modalContent}>
-                            <Text style={styles.inputLabel}>Date</Text>
-                            <TextInput
-                                style={styles.textInput}
-                                placeholder="YYYY-MM-DD"
-                                value={attendanceDate}
-                                onChangeText={setAttendanceDate}
-                            />
-
-                            <Text style={styles.inputLabel}>Course</Text>
-                            <View style={styles.pickerContainer}>
-                                {courses.map((course) => (
-                                    <TouchableOpacity
-                                        key={course._id}
-                                        style={[styles.courseOption, selectedCourse?._id === course._id && styles.selectedCourseOption]}
-                                        onPress={() => setSelectedCourse(course)}
-                                    >
-                                        <Text
-                                            style={[
-                                                styles.courseOptionText,
-                                                selectedCourse?._id === course._id && styles.selectedCourseOptionText,
-                                            ]}
-                                        >
-                                            {course.title}
-                                        </Text>
-                                    </TouchableOpacity>
-                                ))}
-                            </View>
-
-                            {selectedCourse && (
-                                <>
-                                    <Text style={styles.inputLabel}>Students</Text>
-                                    <View style={styles.attendanceList}>
-                                        {selectedCourse.students.map((student) => (
-                                            <View key={student._id} style={styles.attendanceListItem}>
-                                                <View style={styles.attendanceStudentInfo}>
-                                                    <View style={styles.studentAvatar}>
-                                                        <Ionicons name="person" size={20} color="white" />
-                                                    </View>
-                                                    <Text style={styles.attendanceStudentName}>{student.name}</Text>
-                                                </View>
-                                                <View style={styles.attendanceOptions}>
-                                                    <TouchableOpacity
-                                                        style={[
-                                                            styles.attendanceOption,
-                                                            attendanceStatus[student._id] === "present" && styles.presentOption,
-                                                        ]}
-                                                        onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "present" })}
-                                                    >
-                                                        <Feather
-                                                            name="check"
-                                                            size={20}
-                                                            color={attendanceStatus[student._id] === "present" ? "white" : "#4252e5"}
-                                                        />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        style={[
-                                                            styles.attendanceOption,
-                                                            attendanceStatus[student._id] === "excused" && styles.excusedOption,
-                                                        ]}
-                                                        onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "excused" })}
-                                                    >
-                                                        <Feather
-                                                            name="alert-circle"
-                                                            size={20}
-                                                            color={attendanceStatus[student._id] === "excused" ? "white" : "#FFC107"}
-                                                        />
-                                                    </TouchableOpacity>
-                                                    <TouchableOpacity
-                                                        style={[
-                                                            styles.attendanceOption,
-                                                            attendanceStatus[student._id] === "absent" && styles.absentOption,
-                                                        ]}
-                                                        onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "absent" })}
-                                                    >
-                                                        <Feather
-                                                            name="x"
-                                                            size={20}
-                                                            color={attendanceStatus[student._id] === "absent" ? "white" : "#ff5694"}
-                                                        />
-                                                    </TouchableOpacity>
-                                                </View>
-                                            </View>
-                                        ))}
-                                    </View>
-                                </>
-                            )}
-
-                            <TouchableOpacity style={styles.submitButton} onPress={handleSaveAttendance} disabled={isLoading}>
-                                {isLoading ? (
-                                    <ActivityIndicator color="white" />
-                                ) : (
-                                    <Text style={styles.submitButtonText}>Save Attendance</Text>
-                                )}
-                            </TouchableOpacity>
-                        </ScrollView>
-                    </View>
-                </View>
-            </Modal>
         </SafeAreaView>
     )
 }

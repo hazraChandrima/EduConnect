@@ -1609,6 +1609,11 @@ const styles = StyleSheet.create({
         marginLeft: 15,
         fontSize: 16,
     },
+    attendanceOptionLabel: {
+        fontSize: 12,
+        marginTop: 4,
+        color: "#333",
+    },
 })
 
 export default styles
