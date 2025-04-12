@@ -20,12 +20,13 @@ import styles from "../../../styles/ProfessorDashboard.style"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
+// Using same Course interface with Student objects
 interface Course {
     _id: string
     code: string
     title: string
     department: string
-    students: Student[]
+    students: Student[]  // An array of Student objects
     color: string
     icon: string
     credits: number
@@ -37,6 +38,22 @@ interface Student {
     email: string
     program?: string
     year?: number
+}
+
+interface User {
+    _id: string
+    name: string
+    email: string
+    role: string
+    department: string
+    program: string
+    year: number
+    gpa: Array<{ value: number, date: string, _id: string }>
+    isVerified: boolean
+    isSuspended: boolean
+    suspendedUntil: string | null
+    joinDate: string
+    createdAt: string
 }
 
 interface Attendance {
@@ -76,6 +93,8 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
     const [filterType, setFilterType] = useState<"all" | "date" | "student">("all")
     const [filterDate, setFilterDate] = useState<string>("")
     const [filterStudent, setFilterStudent] = useState<string>("")
+    const [studentsCache, setStudentsCache] = useState<{ [key: string]: Student }>({})
+    const [loadingStudents, setLoadingStudents] = useState(false)
     const { token } = useToken()
 
     // Fetch attendance records on component mount
@@ -83,18 +102,59 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
         fetchAttendanceRecords()
     }, [token])
 
-    // Modify the fetchAttendanceRecords function to ensure student data is populated
-    const fetchAttendanceRecords = async () => {
-        setIsLoading(true)
+    // Initialize student cache from courses when they are provided
+    useEffect(() => {
+        // Update student cache with all students from all courses
+        const newCache = { ...studentsCache };
+        courses.forEach(course => {
+            course.students.forEach(student => {
+                newCache[student._id] = student;
+            });
+        });
+        setStudentsCache(newCache);
+    }, [courses]);
+
+
+    const enrichCourseWithStudentDetails = async (course: Course): Promise<Course> => {
+        // Make a deep copy of the course
+        const enrichedCourse = { ...course };
+
+        // Check if students is an array of strings (IDs)
+        if (course.students.length > 0 && typeof course.students[0] === 'string') {
+            // Create a new array for the student objects
+            const studentObjects: Student[] = [];
+
+            // Fetch details for each student ID
+            for (const studentId of course.students) {
+                // Explicitly cast to string to ensure we're working with IDs
+                const id = studentId as unknown as string;
+                const studentDetails = await fetchStudentById(id);
+                if (studentDetails) {
+                    studentObjects.push(studentDetails);
+                }
+            }
+
+            // Replace the IDs with the actual student objects
+            enrichedCourse.students = studentObjects;
+        }
+
+        return enrichedCourse;
+    }
+
+
+    // Fetch student details by ID (now primarily used for legacy data)
+    const fetchStudentById = async (studentId: string): Promise<Student | null> => {
         try {
             if (!token) {
                 throw new Error("No authentication token found")
             }
 
-            console.log("token", token)
+            // Check cache first
+            if (studentsCache[studentId]) {
+                return studentsCache[studentId]
+            }
 
-            // Fetch courses with full student data first
-            const coursesResponse = await fetch(`${API_BASE_URL}/api/courses`, {
+            const response = await fetch(`${API_BASE_URL}/api/user/${studentId}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -102,13 +162,44 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                 },
             })
 
-            const coursesWithStudents = await coursesResponse.json()
+            if (!response.ok) {
+                throw new Error(`Failed to fetch student with ID ${studentId}`)
+            }
 
-            // Update courses state if needed (this might be handled elsewhere)
-            // setCourses(coursesWithStudents);
+            const userData: User = await response.json()
 
-            // Fetch attendance for all courses taught by this professor
-            const attendancePromises = coursesWithStudents.map((course: { _id: any }) =>
+            // Convert to Student format
+            const student: Student = {
+                _id: userData._id,
+                name: userData.name,
+                email: userData.email,
+                program: userData.program,
+                year: userData.year
+            }
+
+            // Update cache with this student
+            setStudentsCache(prev => ({
+                ...prev,
+                [studentId]: student
+            }))
+
+            return student
+        } catch (error) {
+            console.error(`Error fetching student ${studentId}:`, error)
+            return null
+        }
+    }
+
+    // Fetch attendance records
+    const fetchAttendanceRecords = async () => {
+        setIsLoading(true)
+        try {
+            if (!token) {
+                throw new Error("No authentication token found")
+            }
+
+            // Fetch attendance for all courses
+            const attendancePromises = courses.map(course =>
                 fetch(`${API_BASE_URL}/api/attendance/course/${course._id}`, {
                     method: "GET",
                     headers: {
@@ -116,27 +207,32 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                         Authorization: `Bearer ${token}`,
                     },
                 })
-                    .then((res) => (res.ok ? res.json() : []))
-                    .catch(() => []),
+                    .then(res => res.ok ? res.json() : [])
+                    .catch(() => [])
             )
 
             const attendanceResults = await Promise.all(attendancePromises)
+            const allAttendance = attendanceResults.flat()
 
-            // Add student information to attendance records
-            const allAttendance = attendanceResults.flat().map((record) => {
-                // Find the student in the course
-                const course = coursesWithStudents.find((c: { _id: any }) => c._id === record.courseId)
-                if (course) {
-                    const student = course.students.find((s: { _id: any }) => s._id === record.studentId)
-                    if (student) {
-                        return { ...record, student }
-                    }
+            // Start loading students for all attendance records
+            const uniqueStudentIds = new Set<string>()
+
+            allAttendance.forEach(record => {
+                if (typeof record.studentId === 'string') {
+                    uniqueStudentIds.add(record.studentId)
                 }
-                return record
             })
 
+            // Pre-fetch all unique students that aren't in the cache
+            if (uniqueStudentIds.size > 0) {
+                const studentPromises = Array.from(uniqueStudentIds)
+                    .filter(id => !studentsCache[id])
+                    .map(id => fetchStudentById(id))
+
+                await Promise.all(studentPromises)
+            }
+
             setAttendanceRecords(allAttendance)
-            console.log(attendanceRecords);
             await AsyncStorage.setItem("professorDashboardAttendance", JSON.stringify(allAttendance))
 
         } catch (error) {
@@ -151,6 +247,33 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
             }
         } finally {
             setIsLoading(false)
+        }
+    }
+
+    // Update the cache with students from the course
+    const preloadStudentsForCourse = async (course: Course) => {
+        setLoadingStudents(true);
+        try {
+            // Transform the course to include full student objects
+            const enrichedCourse = await enrichCourseWithStudentDetails(course);
+
+            // Update the selected course with enriched data
+            setSelectedCourse(enrichedCourse);
+
+            // Also update the cache with all students
+            const newCache = { ...studentsCache };
+            enrichedCourse.students.forEach(student => {
+                if (typeof student === 'object' && student._id) {
+                    newCache[student._id] = student;
+                }
+            });
+            setStudentsCache(newCache);
+
+        } catch (error) {
+            console.error("Error preloading students:", error);
+            onError("Failed to load student details");
+        } finally {
+            setLoadingStudents(false);
         }
     }
 
@@ -210,6 +333,15 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
         }
     }
 
+    // Get student info from cache or attendance record
+    const getStudentInfo = (studentId: string | { _id: string; name: string; email: string }) => {
+        if (typeof studentId === 'object') {
+            return studentId
+        }
+
+        return studentsCache[studentId] || { _id: studentId, name: "Loading...", email: "" }
+    }
+
     // Filter attendance records based on selected filter
     const getFilteredAttendanceRecords = () => {
         if (filterType === "all") {
@@ -218,9 +350,8 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
             return attendanceRecords.filter((record) => record.date.includes(filterDate))
         } else if (filterType === "student" && filterStudent) {
             return attendanceRecords.filter((record) => {
-                const student = courses.flatMap((course) => course.students).find((student) => student._id === record.studentId)
-
-                return student && student.name.toLowerCase().includes(filterStudent.toLowerCase())
+                const student = getStudentInfo(record.studentId)
+                return student.name.toLowerCase().includes(filterStudent.toLowerCase())
             })
         }
         return attendanceRecords
@@ -343,23 +474,17 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
 
                                             <View style={styles.attendanceStudentsList}>
                                                 {attendanceByDate[date].map((record) => {
-
-                                                    const student = record.student ||
-                                                        (typeof record.studentId === 'object' && record.studentId !== null ?
-                                                            record.studentId :
-                                                            course.students.find((s) => s._id === record.studentId));
-
-                                                    if (!student) return null;
+                                                    // Get student info from either the record or cache
+                                                    const student = record.student || getStudentInfo(record.studentId)
 
                                                     return (
-                                                        <View key={typeof record.studentId === 'object' ? record.studentId._id : record.studentId} style={styles.attendanceStudentItem}>
+                                                        <View key={typeof student === 'object' ? student._id : 'unknown'} style={styles.attendanceStudentItem}>
                                                             <View style={styles.studentAvatar}>
                                                                 <Ionicons name="person" size={16} color="white" />
                                                             </View>
                                                             <Text style={styles.attendanceStudentName}>
                                                                 {typeof student === 'object' && student.name ? student.name : "Unknown Student"}
                                                             </Text>
-                                                            {/* rest of your code */}
                                                             <View
                                                                 style={[
                                                                     styles.attendanceStatusBadge,
@@ -378,34 +503,6 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                                                             </View>
                                                         </View>
                                                     );
-
-                                                    // const student = record.student || course.students.find((s) => s._id === record.studentId)
-                                                    // if (!student) return null
-
-                                                    // return (
-                                                    //     <View key={record.studentId} style={styles.attendanceStudentItem}>
-                                                    //         <View style={styles.studentAvatar}>
-                                                    //             <Ionicons name="person" size={16} color="white" />
-                                                    //         </View>
-                                                    //         <Text style={styles.attendanceStudentName}>{student.name || "Unknown Student"}</Text>
-                                                    //         <View
-                                                    //             style={[
-                                                    //                 styles.attendanceStatusBadge,
-                                                    //                 record.status === "present"
-                                                    //                     ? styles.presentBadge
-                                                    //                     : record.status === "excused"
-                                                    //                         ? styles.excusedBadge
-                                                    //                         : record.status === "absent"
-                                                    //                             ? styles.absentBadge
-                                                    //                             : styles.unknownBadge,
-                                                    //             ]}
-                                                    //         >
-                                                    //             <Text style={styles.attendanceStatusText}>
-                                                    //                 {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                                                    //             </Text>
-                                                    //         </View>
-                                                    //     </View>
-                                                    // )
                                                 })}
 
                                                 {/* Show "View more" button if needed */}
@@ -422,11 +519,24 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
 
                                     <TouchableOpacity
                                         style={styles.takeAttendanceButton}
-                                        onPress={() => {
-                                            console.log("Opening modal with course:", course); // Log the course
-                                            console.log("Course students:", course.students); // Log the students
+                                        onPress={async () => {
+                                            console.log("Opening modal with course:", course);
+
+                                            // Set the loading state first
+                                            setLoadingStudents(true);
                                             setSelectedCourse(course);
                                             setIsAttendanceModalVisible(true);
+
+                                            try {
+                                                // Enrich the course with student details
+                                                const enrichedCourse = await enrichCourseWithStudentDetails(course);
+                                                setSelectedCourse(enrichedCourse);
+                                                console.log("Enriched course with student details:", enrichedCourse);
+                                            } catch (error) {
+                                                console.error("Failed to load student details:", error);
+                                            } finally {
+                                                setLoadingStudents(false);
+                                            }
                                         }}
                                     >
                                         <MaterialIcons name="date-range" size={20} color="white" />
@@ -443,22 +553,32 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                         <Text style={styles.emptyStateMessage}>
                             You haven't recorded any attendance yet. Start by selecting a course and taking attendance.
                         </Text>
-                        <TouchableOpacity
-                            style={styles.emptyStateButton}
-                            onPress={() => {
-                                if (courses.length > 0) {
-                                    setSelectedCourse(courses[0])
-                                    setIsAttendanceModalVisible(true)
-                                }
-                            }}
-                        >
-                            <Text style={styles.emptyStateButtonText}>Take Attendance</Text>
-                        </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.emptyStateButton}
+                                    onPress={async () => {
+                                        if (courses.length > 0) {
+                                            const course = courses[0];
+                                            setSelectedCourse(course);
+                                            setIsAttendanceModalVisible(true);
+                                            setLoadingStudents(true);
+
+                                            try {
+                                                // Enrich the course with student details
+                                                const enrichedCourse = await enrichCourseWithStudentDetails(course);
+                                                setSelectedCourse(enrichedCourse);
+                                            } catch (error) {
+                                                console.error("Failed to load student details:", error);
+                                            } finally {
+                                                setLoadingStudents(false);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <Text style={styles.emptyStateButtonText}>Take Attendance</Text>
+                                </TouchableOpacity>
                     </View>
                 )}
             </View>
-
-
 
             {/* Attendance Modal */}
             <Modal
@@ -493,7 +613,7 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                                         style={[styles.courseOption, selectedCourse?._id === course._id && styles.selectedCourseOption]}
                                         onPress={() => {
                                             setSelectedCourse(course);
-                                            console.log("Selected course students:", course.students);
+                                            preloadStudentsForCourse(course);
                                         }}
                                     >
                                         <Text
@@ -511,88 +631,78 @@ const AttendanceManagement = ({ courses, isDesktop, onError }: AttendanceManagem
                             {selectedCourse && (
                                 <>
                                     <Text style={styles.inputLabel}>Students</Text>
-                                    <View style={styles.attendanceList}>
-                                        {selectedCourse.students && selectedCourse.students.length > 0 ? (
-                                            selectedCourse.students.map((student) => {
-                                                // Find existing attendance for this student on this date
-                                                const existingAttendance = attendanceRecords.find(
-                                                    record =>
-                                                        record.courseId === selectedCourse._id &&
-                                                        (
-                                                            (typeof record.studentId === 'string' && record.studentId === student._id) ||
-                                                            (typeof record.studentId === 'object' && record.studentId._id === student._id)
-                                                        ) &&
-                                                        record.date.split('T')[0] === attendanceDate
-                                                );
-
-                                                // Use existing status if available, otherwise use the current status or default to undefined
-                                                const status = existingAttendance ? existingAttendance.status : attendanceStatus[student._id];
-
-                                                return (
-                                                    <View key={student._id} style={styles.attendanceListItem}>
-                                                        <View style={styles.attendanceStudentInfo}>
-                                                            <View style={styles.studentAvatar}>
-                                                                <Ionicons name="person" size={20} color="white" />
+                                    {loadingStudents ? (
+                                        <View style={{ padding: 20, alignItems: 'center' }}>
+                                            <ActivityIndicator size="small" color="#5c51f3" />
+                                            <Text style={{ marginTop: 10 }}>Loading students...</Text>
+                                        </View>
+                                    ) : (
+                                        <View style={styles.attendanceList}>
+                                            {selectedCourse.students.length > 0 ? (
+                                                selectedCourse.students.map((student) => {
+                                                    return (
+                                                        <View key={student._id} style={styles.attendanceListItem}>
+                                                            <View style={styles.attendanceStudentInfo}>
+                                                                <View style={styles.studentAvatar}>
+                                                                    <Ionicons name="person" size={20} color="white" />
+                                                                </View>
+                                                                <Text style={styles.attendanceStudentName}>
+                                                                    {student.name}
+                                                                </Text>
                                                             </View>
-                                                            <Text style={styles.attendanceStudentName}>
-                                                                {student.name || "Unknown"}
-                                                            </Text>
-                                                            <Text >
-                                                                {student.email || ""}
-                                                            </Text>
+                                                            <View style={styles.attendanceOptions}>
+                                                                <TouchableOpacity
+                                                                    style={[
+                                                                        styles.attendanceOption,
+                                                                        attendanceStatus[student._id] === "present" && styles.presentOption,
+                                                                    ]}
+                                                                    onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "present" })}
+                                                                >
+                                                                    <Feather
+                                                                        name="check"
+                                                                        size={20}
+                                                                        color={attendanceStatus[student._id] === "present" ? "white" : "#4252e5"}
+                                                                    />
+                                                                </TouchableOpacity>
+                                                                <TouchableOpacity
+                                                                    style={[
+                                                                        styles.attendanceOption,
+                                                                        attendanceStatus[student._id] === "excused" && styles.excusedOption,
+                                                                    ]}
+                                                                    onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "excused" })}
+                                                                >
+                                                                    <Feather
+                                                                        name="alert-circle"
+                                                                        size={20}
+                                                                        color={attendanceStatus[student._id] === "excused" ? "white" : "#FFC107"}
+                                                                    />
+                                                                </TouchableOpacity>
+                                                                <TouchableOpacity
+                                                                    style={[
+                                                                        styles.attendanceOption,
+                                                                        attendanceStatus[student._id] === "absent" && styles.absentOption,
+                                                                    ]}
+                                                                    onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "absent" })}
+                                                                >
+                                                                    <Feather
+                                                                        name="x"
+                                                                        size={20}
+                                                                        color={attendanceStatus[student._id] === "absent" ? "white" : "#ff5694"}
+                                                                    />
+                                                                </TouchableOpacity>
+                                                            </View>
                                                         </View>
-                                                        <View style={styles.attendanceOptions}>
-                                                            <TouchableOpacity
-                                                                style={[
-                                                                    styles.attendanceOption,
-                                                                    status === "present" && styles.presentOption,
-                                                                ]}
-                                                                onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "present" })}
-                                                            >
-                                                                <Feather
-                                                                    name="check"
-                                                                    size={20}
-                                                                    color={status === "present" ? "white" : "#4252e5"}
-                                                                />
-                                                            </TouchableOpacity>
-                                                            <TouchableOpacity
-                                                                style={[
-                                                                    styles.attendanceOption,
-                                                                    status === "excused" && styles.excusedOption,
-                                                                ]}
-                                                                onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "excused" })}
-                                                            >
-                                                                <Feather
-                                                                    name="alert-circle"
-                                                                    size={20}
-                                                                    color={status === "excused" ? "white" : "#FFC107"}
-                                                                />
-                                                            </TouchableOpacity>
-                                                            <TouchableOpacity
-                                                                style={[
-                                                                    styles.attendanceOption,
-                                                                    status === "absent" && styles.absentOption,
-                                                                ]}
-                                                                onPress={() => setAttendanceStatus({ ...attendanceStatus, [student._id]: "absent" })}
-                                                            >
-                                                                <Feather
-                                                                    name="x"
-                                                                    size={20}
-                                                                    color={status === "absent" ? "white" : "#ff5694"}
-                                                                />
-                                                            </TouchableOpacity>
-                                                        </View>
-                                                    </View>
-                                                );
-                                            })
-                                        ) : (
-                                            <Text style={styles.emptyStateMessage}>No students found in this course.</Text>
-                                        )}
-                                    </View>
+                                                    );
+                                                })
+                                            ) : (
+                                                <Text style={styles.emptyStateMessage}>No students found in this course</Text>
+                                            )}
+                                        </View>
+                                    )}
                                 </>
                             )}
 
-                            <TouchableOpacity style={styles.submitButton} onPress={handleSaveAttendance} disabled={isLoading}>
+                            <TouchableOpacity style={styles.submitButton} onPress={handleSaveAttendance} disabled={isLoading || loadingStudents}>
                                 {isLoading ? (
                                     <ActivityIndicator color="white" />
                                 ) : (

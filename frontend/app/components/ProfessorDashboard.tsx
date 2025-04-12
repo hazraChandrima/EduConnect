@@ -121,6 +121,7 @@ interface AttendanceStatus {
     [key: string]: "present" | "absent" | "excused"
 }
 
+
 export default function ProfessorDashboard({ userId }: { userId: string }) {
     const [activeTab, setActiveTab] = useState("home")
     const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
