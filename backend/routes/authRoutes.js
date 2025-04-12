@@ -2,7 +2,6 @@ const express = require('express');
 
 const { sendResetPasswordEmail } = require('../middleware/email');
 
-
 const router = express.Router();
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
@@ -16,14 +15,16 @@ const {
     requestLoginOTP, 
     verifyLoginOTP 
 } = require('../controllers/authController');
-
+const bruteForce = require('../middleware/bruteForce');
 
 router.post('/register', registerUser);
-router.post('/login', loginUser);
 router.post('/verifyEmail', verifyEmail);
 router.post('/updatePassword', updatePassword);
 router.post("/requestLoginOTP", requestLoginOTP)
-router.post("/verifyLoginOTP", verifyLoginOTP)
+router.post("/verifyLoginOTP" , verifyLoginOTP);
+router.post('/login', bruteForce ,loginUser);
+// router.post('/login',loginUser);
+
 
 
 // Send password reset link

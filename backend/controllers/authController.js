@@ -1,17 +1,15 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendVerificationCode, sendWelcomeEmail, sendAlertOnLogin } = require('../middleware/email');
 
+const sanitize = require('express-mongo-sanitize');
+const { sendVerificationCode, sendWelcomeEmail, sendAlertOnLogin } = require('../middleware/email');
 
 const generateToken = (id, role) => {
   return jwt.sign({ id, role }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
-
-
-// Register
-exports.registerUser = async (req, res) => {
+const registerUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
@@ -39,18 +37,17 @@ exports.registerUser = async (req, res) => {
       token,
       role: user.role
     });
-    
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
+const loginUser = async (req, res) => {
+  const { email, password, otpVerified } = req.body;
+  console.log("🧪 Raw email value received:", req.body.email);
 
-
-
-// Login
-exports.loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  // req.body.email = sanitize.sanitize(req.body.email);
 
   try {
     const user = await User.findOne({ email });
@@ -58,6 +55,10 @@ exports.loginUser = async (req, res) => {
 
     if (!user.isVerified) {
       return res.status(403).json({ message: "Email not verified. Please check your email." });
+    }
+
+    if (!otpVerified) {
+      return res.status(403).json({ message: "Email verification required" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -70,16 +71,15 @@ exports.loginUser = async (req, res) => {
       token,
       role: user.role
     });
+
+    sendAlertOnLogin(user.email, user.name);
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
-
-
-// Verify Email
-exports.verifyEmail = async (req, res) => {
+const verifyEmail = async (req, res) => {
   try {
     const { code } = req.body;
     const user = await User.findOne({ verificationCode: code });
@@ -100,11 +100,7 @@ exports.verifyEmail = async (req, res) => {
   }
 };
 
-
-
-
-// Update Password
-exports.updatePassword = async (req, res) => {
+const updatePassword = async (req, res) => {
   const { email, password } = req.body;
 
   try {
@@ -131,117 +127,78 @@ exports.updatePassword = async (req, res) => {
   }
 };
 
-
-
-
-// Generate and send login OTP
-exports.requestLoginOTP = async (req, res) => {
-  const { email } = req.body
+const requestLoginOTP = async (req, res) => {
+  const { email } = req.body;
 
   try {
     if (!email) {
-      return res.status(400).json({ success: false, message: "Email is required" })
+      return res.status(400).json({ success: false, message: "Email is required" });
     }
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" })
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     if (!user.isVerified) {
-      return res.status(403).json({ success: false, message: "Email not verified. Please verify your email first." })
+      return res.status(403).json({ success: false, message: "Email not verified. Please verify your email first." });
     }
 
-    const loginOTP = Math.floor(100000 + Math.random() * 900000).toString()
+    const loginOTP = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save the OTP to the user document with an expiry time (10 minutes)
-    user.loginOTP = loginOTP
-    user.loginOTPExpires = new Date(Date.now() + 10 * 60 * 1000) // 10 minutes
-    await user.save()
+    user.loginOTP = loginOTP;
+    user.loginOTPExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
 
-    sendVerificationCode(user.email, loginOTP)
+    sendVerificationCode(user.email, loginOTP);
 
     res.status(200).json({
       success: true,
-      message: "Verification code sent to your email",
-    })
+      message: "Verification code sent to your email"
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-
-
-
-// Verify login OTP
-exports.verifyLoginOTP = async (req, res) => {
-  const { email, code } = req.body
+const verifyLoginOTP = async (req, res) => {
+  const { email, code } = req.body;
 
   try {
     if (!email || !code) {
-      return res.status(400).json({ success: false, message: "Email and verification code are required" })
+      return res.status(400).json({ success: false, message: "Email and verification code are required" });
     }
 
     const user = await User.findOne({
       email,
       loginOTP: code,
-      loginOTPExpires: { $gt: Date.now() },
-    })
+      loginOTPExpires: { $gt: Date.now() }
+    });
 
     if (!user) {
-      return res.status(400).json({ success: false, message: "Invalid or expired verification code" })
+      return res.status(400).json({ success: false, message: "Invalid or expired verification code" });
     }
 
-    // Clear the OTP after successful verification
-    user.loginOTP = undefined
-    user.loginOTPExpires = undefined
-    await user.save()
+    user.loginOTP = undefined;
+    user.loginOTPExpires = undefined;
+    await user.save();
 
     res.status(200).json({
       success: true,
-      message: "OTP verified successfully",
-    })
+      message: "OTP verified successfully"
+    });
 
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    res.status(500).json({ error: error.message });
   }
-}
+};
 
-
-
-
-// Modify the existing loginUser function to support 2FA
-exports.loginUser = async (req, res) => {
-  const { email, password, otpVerified } = req.body
-
-  try {
-    const user = await User.findOne({ email })
-    if (!user) return res.status(400).json({ message: "User not found" })
-
-    if (!user.isVerified) {
-      return res.status(403).json({ message: "Email not verified. Please check your email." })
-    }
-
-    // Check if OTP was verified (required for 2FA login)
-    if (!otpVerified) {
-      return res.status(403).json({ message: "Email verification required" })
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password)
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" })
-
-    const token = generateToken(user._id, user.role)
-
-    res.json({
-      userId: user._id,
-      token,
-      role: user.role,
-    })
-
-    sendAlertOnLogin(user.email, user.name);
-
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
-}
-
+module.exports = {
+  registerUser,
+  loginUser,
+  verifyEmail,
+  updatePassword,
+  requestLoginOTP,
+  verifyLoginOTP
+};

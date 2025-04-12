@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
+const xss = require('xss');
 
 const UserSchema = new Schema({
   name: {
@@ -38,6 +39,17 @@ const UserSchema = new Schema({
     default: Date.now,
   },
 })
+
+
+// Pre-save hook to sanitize all string fields
+UserSchema.pre('save', function (next) {
+  for (let key in this._doc) {
+    if (typeof this[key] === 'string') {
+      this[key] = xss(this[key]);
+    }
+  }
+  next();
+});
 
 module.exports = mongoose.model("User", UserSchema)
 
