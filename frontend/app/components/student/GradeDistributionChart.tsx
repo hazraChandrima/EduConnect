@@ -250,6 +250,7 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
     chartContainer: {
+        margin: 'auto',
         backgroundColor: "white",
         borderRadius: 8,
         padding: 16,

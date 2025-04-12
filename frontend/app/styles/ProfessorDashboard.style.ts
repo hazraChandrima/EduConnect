@@ -1,6 +1,5 @@
 import { Dimensions, StyleSheet } from "react-native"
-const { width } = Dimensions.get('window');
-
+const { width } = Dimensions.get("window")
 
 const styles = StyleSheet.create({
     container: {
@@ -16,6 +15,21 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         elevation: 4,
         zIndex: 2000,
+    },
+    desktopHeader: {
+        paddingLeft: 280, // Space for sidebar
+        // transition: "padding-left 0.3s ease",
+    },
+    desktopHeaderWithCollapsedSidebar: {
+        paddingLeft: 80, // Space for collapsed sidebar
+    },
+    headerTitle: {
+        flex: 1,
+    },
+    headerTitleText: {
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
     },
     logo: {
         color: "white",
@@ -41,8 +55,28 @@ const styles = StyleSheet.create({
         color: "white",
         fontWeight: "500",
     },
+    contentContainer: {
+        flex: 1,
+        flexDirection: "row",
+    },
+    desktopContentContainer: {
+        paddingLeft: 280, // Space for sidebar
+        // transition: "padding-left 0.3s ease",
+    },
+    desktopContentContainerWithCollapsedSidebar: {
+        paddingLeft: 80, // Space for collapsed sidebar
+    },
+    mainContent: {
+        flex: 1,
+    },
+    desktopMainContent: {
+        padding: 20,
+    },
     scrollView: {
         flex: 1,
+    },
+    desktopScrollViewContent: {
+        paddingBottom: 40,
     },
     welcomeBanner: {
         backgroundColor: "#52c4eb",
@@ -50,6 +84,10 @@ const styles = StyleSheet.create({
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
         zIndex: 1,
+    },
+    desktopWelcomeBanner: {
+        borderRadius: 15,
+        marginBottom: 20,
     },
     welcomeTitle: {
         color: "white",
@@ -67,6 +105,10 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         justifyContent: "space-between",
     },
+    desktopStatsContainer: {
+        flexWrap: "nowrap",
+        gap: 15,
+    },
     statCard: {
         backgroundColor: "white",
         borderRadius: 10,
@@ -75,6 +117,11 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 10,
         elevation: 2,
+    },
+    desktopStatCard: {
+        width: "auto",
+        flex: 1,
+        marginBottom: 0,
     },
     statValue: {
         fontSize: 24,
@@ -89,6 +136,10 @@ const styles = StyleSheet.create({
     sectionContainer: {
         marginVertical: 15,
         paddingHorizontal: 15,
+    },
+    desktopSectionContainer: {
+        marginVertical: 20,
+        paddingHorizontal: 0,
     },
     sectionHeader: {
         flexDirection: "row",
@@ -273,6 +324,14 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#333",
     },
+    tabContent: {
+        flex: 1,
+        padding: 16,
+        backgroundColor: "#f9f9f9",
+    },
+    desktopTabContent: {
+        padding: 0,
+    },
     addButton: {
         backgroundColor: "#4252e5",
         width: 40,
@@ -314,6 +373,12 @@ const styles = StyleSheet.create({
         elevation: 2,
         overflow: "hidden",
     },
+    desktopCourseCard: {
+        marginHorizontal: 0,
+        flex: 1,
+        minWidth: 300,
+        maxWidth: 400,
+    },
     courseCardHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -348,6 +413,9 @@ const styles = StyleSheet.create({
     // Course detail
     courseDetailContainer: {
         padding: 15,
+    },
+    desktopCourseDetailContainer: {
+        padding: 0,
     },
     backButton: {
         flexDirection: "row",
@@ -384,6 +452,10 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginBottom: 20,
     },
+    desktopCourseStats: {
+        flexWrap: "nowrap",
+        gap: 15,
+    },
     courseStat: {
         backgroundColor: "white",
         borderRadius: 10,
@@ -407,6 +479,10 @@ const styles = StyleSheet.create({
         flexWrap: "wrap",
         justifyContent: "space-between",
         marginBottom: 20,
+    },
+    desktopCourseActions: {
+        flexWrap: "nowrap",
+        gap: 15,
     },
     courseAction: {
         backgroundColor: "white",
@@ -729,6 +805,10 @@ const styles = StyleSheet.create({
         maxHeight: "80%",
         elevation: 5,
     },
+    desktopModalContainer: {
+        width: "60%",
+        maxWidth: 800,
+    },
     modalHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -929,44 +1009,45 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFC107",
         borderColor: "#FFC107",
     },
-    tabContent: {
-        flex: 1,
-        padding: 16,
-        backgroundColor: '#f9f9f9',
-    },
     // Attendance Course Section
     attendanceCourseSection: {
         marginBottom: 16,
         borderRadius: 8,
-        backgroundColor: 'white',
-        shadowColor: '#000',
+        backgroundColor: "white",
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
-        overflow: 'hidden',
+        overflow: "hidden",
+    },
+    desktopAttendanceCourseSection: {
+        flex: 1,
+        minWidth: 300,
+        maxWidth: 500,
+        margin: 8,
     },
     // Attendance Date Card
     attendanceDateCard: {
         padding: 12,
         borderBottomWidth: 1,
-        borderBottomColor: '#e0e0e0',
+        borderBottomColor: "#e0e0e0",
     },
     attendanceDateHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         marginBottom: 10,
     },
     attendanceDateText: {
         fontSize: 15,
-        fontWeight: '600',
+        fontWeight: "600",
         marginLeft: 8,
-        color: '#333333',
+        color: "#333333",
     },
     attendanceCountText: {
         fontSize: 14,
-        color: '#666666',
-        marginLeft: 'auto',
+        color: "#666666",
+        marginLeft: "auto",
     },
 
     // Attendance Students List
@@ -974,145 +1055,152 @@ const styles = StyleSheet.create({
         marginTop: 8,
     },
     attendanceStudentItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: "#f0f0f0",
     },
     attendanceStatusBadge: {
         paddingVertical: 4,
         paddingHorizontal: 8,
         borderRadius: 12,
+        marginLeft: "auto",
     },
     presentBadge: {
-        backgroundColor: '#e6f7ee',
+        backgroundColor: "#e6f7ee",
     },
     absentBadge: {
-        backgroundColor: '#ffebee',
+        backgroundColor: "#ffebee",
     },
     excusedBadge: {
-        backgroundColor: '#fff8e1',
+        backgroundColor: "#fff8e1",
     },
     unknownBadge: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: "#f0f0f0",
     },
     attendanceStatusText: {
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: "500",
     },
 
     // View More Button
     viewMoreButton: {
-        alignItems: 'center',
+        alignItems: "center",
         paddingVertical: 10,
         marginTop: 8,
     },
     viewMoreText: {
-        color: '#4252e5',
+        color: "#4252e5",
         fontSize: 14,
     },
 
     // Take Attendance Button
     takeAttendanceButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: '#4252e5',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#4252e5",
         paddingVertical: 12,
         borderBottomLeftRadius: 8,
         borderBottomRightRadius: 8,
     },
     takeAttendanceButtonText: {
-        color: 'white',
-        fontWeight: '600',
+        color: "white",
+        fontWeight: "600",
         marginLeft: 8,
     },
 
     // Empty State
     emptyState: {
-        alignItems: 'center',
-        justifyContent: 'center',
+        alignItems: "center",
+        justifyContent: "center",
         padding: 30,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         marginVertical: 16,
     },
     emptyStateTitle: {
         fontSize: 18,
-        fontWeight: 'bold',
-        color: '#333333',
+        fontWeight: "bold",
+        color: "#333333",
         marginTop: 16,
         marginBottom: 8,
     },
     emptyStateMessage: {
         fontSize: 14,
-        color: '#666666',
-        textAlign: 'center',
+        color: "#666666",
+        textAlign: "center",
         marginBottom: 16,
     },
     emptyStateButton: {
-        backgroundColor: '#4252e5',
+        backgroundColor: "#4252e5",
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 20,
     },
     emptyStateButtonText: {
-        color: 'white',
-        fontWeight: '600',
+        color: "white",
+        fontWeight: "600",
     },
 
     // Grading Assignment Card
     gradingAssignmentCard: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         padding: 16,
         marginBottom: 16,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
     },
+    desktopGradingAssignmentCard: {
+        flex: 1,
+        minWidth: 300,
+        maxWidth: 500,
+        margin: 8,
+    },
     gradingAssignmentHeader: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginBottom: 12,
     },
     submissionsCountText: {
         fontSize: 14,
-        color: '#666666',
+        color: "#666666",
         marginBottom: 12,
     },
 
     // Submissions List
     submissionsList: {
         borderTopWidth: 1,
-        borderTopColor: '#f0f0f0',
+        borderTopColor: "#f0f0f0",
         paddingTop: 12,
     },
     submissionItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        borderBottomColor: "#f0f0f0",
     },
     submissionStudent: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
     },
     submissionStudentName: {
         marginLeft: 10,
         fontSize: 14,
-        color: '#333333',
+        color: "#333333",
     },
     submissionInfo: {
-        alignItems: 'flex-end',
+        alignItems: "flex-end",
     },
     submissionDate: {
         fontSize: 12,
-        color: '#666666',
+        color: "#666666",
         marginBottom: 4,
     },
 
@@ -1122,73 +1210,86 @@ const styles = StyleSheet.create({
     },
     gradeReportCard: {
         width: width / 2.5,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         marginRight: 12,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 3,
         elevation: 2,
-        overflow: 'hidden',
+        overflow: "hidden",
+    },
+    desktopGradeReportCard: {
+        width: "auto",
+        flex: 1,
+        minWidth: 200,
+        maxWidth: 300,
+        margin: 8,
     },
     gradeReportHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         padding: 12,
     },
     gradeReportTitle: {
-        color: 'white',
+        color: "white",
         fontSize: 16,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginLeft: 8,
     },
     gradeReportBody: {
-        alignItems: 'center',
+        alignItems: "center",
         padding: 16,
     },
     gradeReportAvg: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#333333',
+        fontWeight: "bold",
+        color: "#333333",
     },
     gradeReportLabel: {
         fontSize: 12,
-        color: '#666666',
+        color: "#666666",
         marginTop: 4,
     },
     gradeReportStudents: {
         fontSize: 12,
-        color: '#999999',
+        color: "#999999",
         marginTop: 8,
     },
 
     // Student Management
     searchInput: {
-        backgroundColor: 'white',
+        backgroundColor: "white",
         paddingHorizontal: 16,
         paddingVertical: 12,
         borderRadius: 8,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: '#e0e0e0',
+        borderColor: "#e0e0e0",
     },
     studentCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
         padding: 16,
         borderRadius: 8,
         marginBottom: 12,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2,
     },
+    desktopStudentCard: {
+        flex: 1,
+        minWidth: 300,
+        maxWidth: 500,
+        margin: 8,
+    },
     studentCardHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         flex: 1,
     },
     studentCardInfo: {
@@ -1196,15 +1297,15 @@ const styles = StyleSheet.create({
     },
     studentCardName: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#333333',
+        fontWeight: "600",
+        color: "#333333",
     },
     studentCardEmail: {
         fontSize: 14,
-        color: '#666666',
+        color: "#666666",
     },
     studentCardCourses: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginRight: 12,
     },
     studentCourseBadge: {
@@ -1214,18 +1315,18 @@ const styles = StyleSheet.create({
         marginRight: 4,
     },
     studentCourseBadgeText: {
-        color: 'white',
+        color: "white",
         fontSize: 12,
-        fontWeight: '500',
+        fontWeight: "500",
     },
     moreCoursesBadge: {
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 12,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: "#f0f0f0",
     },
     moreCoursesBadgeText: {
-        color: '#666666',
+        color: "#666666",
         fontSize: 12,
     },
 
@@ -1234,17 +1335,20 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     studentProfileHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: 'white',
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "white",
         padding: 16,
         borderRadius: 8,
         marginBottom: 16,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
+    },
+    desktopStudentProfileHeader: {
+        padding: 24,
     },
     studentProfileInfo: {
         marginLeft: 16,
@@ -1252,121 +1356,259 @@ const styles = StyleSheet.create({
     },
     studentProfileProgram: {
         fontSize: 14,
-        color: '#999999',
+        color: "#999999",
         marginTop: 4,
     },
 
     // Student Stats
     studentStatsContainer: {
-        flexDirection: 'row',
-        backgroundColor: 'white',
+        flexDirection: "row",
+        backgroundColor: "white",
         borderRadius: 8,
         marginBottom: 16,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
         elevation: 2,
     },
+    desktopStudentStatsContainer: {
+        padding: 8,
+    },
     studentStat: {
         flex: 1,
-        alignItems: 'center',
+        alignItems: "center",
         padding: 16,
         borderRightWidth: 1,
-        borderRightColor: '#f0f0f0',
+        borderRightColor: "#f0f0f0",
     },
     studentStatValue: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333333',
+        fontWeight: "bold",
+        color: "#333333",
     },
     studentStatLabel: {
         fontSize: 12,
-        color: '#666666',
+        color: "#666666",
         marginTop: 4,
     },
 
     // Student Profile Tabs
     studentTabsContainer: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginBottom: 16,
     },
     studentTab: {
         flex: 1,
         paddingVertical: 12,
-        alignItems: 'center',
+        alignItems: "center",
     },
     studentTabText: {
         fontSize: 14,
-        color: '#999999',
+        color: "#999999",
     },
 
     // Grade Items
     gradeItem: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
         paddingVertical: 12,
         paddingHorizontal: 16,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
         marginBottom: 8,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 2,
         elevation: 1,
+    },
+    desktopGradeItem: {
+        flex: 1,
+        minWidth: 300,
+        maxWidth: 500,
+        margin: 8,
     },
     gradeItemInfo: {
         flex: 1,
     },
     gradeItemTitle: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#333333',
+        fontWeight: "600",
+        color: "#333333",
         marginBottom: 4,
     },
     gradeItemType: {
         fontSize: 14,
-        color: '#999999',
+        color: "#999999",
         marginTop: 4,
     },
     gradeScore: {
-        alignItems: 'flex-end',
+        alignItems: "flex-end",
     },
     gradeScoreText: {
         fontSize: 18,
-        fontWeight: 'bold',
+        fontWeight: "bold",
     },
     gradeScoreA: {
-        color: '#4caf50',
+        color: "#4caf50",
     },
     gradeScoreB: {
-        color: '#8bc34a',
+        color: "#8bc34a",
     },
     gradeScoreC: {
-        color: '#ffc107',
+        color: "#ffc107",
     },
     gradeScoreD: {
-        color: '#ff9800',
+        color: "#ff9800",
     },
     gradeScoreF: {
-        color: '#f44336',
+        color: "#f44336",
     },
     gradePercentage: {
         fontSize: 14,
-        color: '#666666',
+        color: "#666666",
     },
     emptyGrades: {
         padding: 16,
-        backgroundColor: 'white',
+        backgroundColor: "white",
         borderRadius: 8,
-        alignItems: 'center',
+        alignItems: "center",
     },
     emptyGradesText: {
-        color: '#999999',
+        color: "#999999",
         fontSize: 14,
+    },
+
+    // Desktop specific styles
+    desktopChartsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+    },
+    desktopChartItem: {
+        width: "100%",
+        marginBottom: 20,
+    },
+    desktopContentGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "space-between",
+    },
+    desktopContentColumn: {
+        width: "49%",
+    },
+    desktopCoursesGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8, // Negative margin to offset the padding of child elements
+    },
+    desktopAttendanceGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8,
+    },
+    desktopGradingGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8,
+    },
+    desktopGradeReportsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8,
+    },
+    desktopStudentsGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8,
+    },
+    desktopGradesGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "flex-start",
+        margin: -8,
+    },
+
+    // Sidebar styles
+    sidebar: {
+        position: "absolute",
+        left: 0,
+        top: 0,
+        bottom: 0,
+        width: 280,
+        backgroundColor: "#2c3e50",
+        zIndex: 1000,
+        // transition: "width 0.3s ease",
+    },
+    collapsedSidebar: {
+        width: 80,
+    },
+    sidebarHeader: {
+        height: 60,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: "rgba(255,255,255,0.1)",
+    },
+    sidebarLogo: {
+        color: "white",
+        fontSize: 20,
+        fontWeight: "bold",
+    },
+    sidebarToggle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(255,255,255,0.1)",
+    },
+    sidebarContent: {
+        flex: 1,
+        paddingTop: 20,
+    },
+    sidebarItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 12,
+        paddingHorizontal: 20,
+        marginBottom: 5,
+    },
+    sidebarItemActive: {
+        backgroundColor: "rgba(255,255,255,0.1)",
+        borderLeftWidth: 4,
+        borderLeftColor: "#5c51f3",
+    },
+    sidebarItemText: {
+        color: "white",
+        marginLeft: 15,
+        fontSize: 16,
+    },
+    sidebarItemTextActive: {
+        fontWeight: "bold",
+    },
+    sidebarLogout: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 15,
+        paddingHorizontal: 20,
+        borderTopWidth: 1,
+        borderTopColor: "rgba(255,255,255,0.1)",
+    },
+    sidebarLogoutText: {
+        color: "white",
+        marginLeft: 15,
+        fontSize: 16,
     },
 })
 
-export default styles;
+export default styles

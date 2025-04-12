@@ -21,6 +21,7 @@ import { APP_CONFIG } from "@/app-config"
 import { useToken } from "@/app/hooks/useToken"
 import GPAChart from "./GpaChart"
 import GradeDistributionChart from "./GradeDistributionChart"
+import AttendanceChartView from "./AttendanceChart"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
@@ -108,7 +109,12 @@ interface Attendance {
 	courseCode?: string
 }
 
-const AcademicAnalytics: React.FC = () => {
+interface AcademicAnalyticsProps {
+	userId : string
+}
+
+
+const AcademicAnalytics: React.FC<AcademicAnalyticsProps> = ({userId}) => {
 	const [activeTab, setActiveTab] = useState<TabType>("performance")
 	const { width } = useWindowDimensions()
 	const auth = useContext(AuthContext)
@@ -615,74 +621,76 @@ const AcademicAnalytics: React.FC = () => {
 				)
 			case "attendance":
 				return (
-					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
-						<Text style={styles.chartTitle}>Attendance by Subject</Text>
-						<Text style={styles.chartSubtitle}>Your attendance percentage across courses</Text>
-						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-							<ProgressChart
-								data={{
-									...attendanceData,
-									data: ensureSafeData(attendanceData.data),
-								}}
-								width={Math.max(getChartWidth(), 500)}
-								height={300}
-								strokeWidth={16}
-								radius={24}
-								chartConfig={{
-									...chartConfig,
-									color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
-								}}
-								hideLegend={false}
-								style={styles.chart}
-							/>
-						</ScrollView>
+					// <View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
+					// 	<Text style={styles.chartTitle}>Attendance by Subject</Text>
+					// 	<Text style={styles.chartSubtitle}>Your attendance percentage across courses</Text>
+					// 	<ScrollView horizontal showsHorizontalScrollIndicator={true}>
+					// 		<ProgressChart
+					// 			data={{
+					// 				...attendanceData,
+					// 				data: ensureSafeData(attendanceData.data),
+					// 			}}
+					// 			width={Math.max(getChartWidth(), 500)}
+					// 			height={300}
+					// 			strokeWidth={16}
+					// 			radius={24}
+					// 			chartConfig={{
+					// 				...chartConfig,
+					// 				color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
+					// 			}}
+					// 			hideLegend={false}
+					// 			style={styles.chart}
+					// 		/>
+					// 	</ScrollView>
 
-						<View style={[styles.attendanceDetails, isDesktop && styles.desktopAttendanceDetails]}>
-							<Text style={styles.detailsTitle}>Attendance Details</Text>
+					// 	<View style={[styles.attendanceDetails, isDesktop && styles.desktopAttendanceDetails]}>
+					// 		<Text style={styles.detailsTitle}>Attendance Details</Text>
 
-							<View style={isDesktop ? styles.desktopAttendanceGrid : undefined}>
-								{courses.map((course) => {
-									const attendancePercentage = calculateAttendancePercentage(course._id)
-									const courseAttendance = attendance.filter((a) => a.courseId === course._id)
-									const presentCount = courseAttendance.filter(
-										(a) => a.status === "present" || a.status === "excused",
-									).length
+					// 		<View style={isDesktop ? styles.desktopAttendanceGrid : undefined}>
+					// 			{courses.map((course) => {
+					// 				const attendancePercentage = calculateAttendancePercentage(course._id)
+					// 				const courseAttendance = attendance.filter((a) => a.courseId === course._id)
+					// 				const presentCount = courseAttendance.filter(
+					// 					(a) => a.status === "present" || a.status === "excused",
+					// 				).length
 
-									return (
-										<View key={course._id} style={[styles.attendanceItem, isDesktop && styles.desktopAttendanceItem]}>
-											<View style={styles.attendanceItemHeader}>
-												<Text style={styles.attendanceItemTitle}>{course.code}</Text>
-												<Text
-													style={[styles.attendanceItemValue, attendancePercentage < 75 ? { color: "#ff5252" } : {}]}
-												>
-													{attendancePercentage}%
-												</Text>
-											</View>
-											<Text style={styles.attendanceItemDetail}>
-												Attended {presentCount} of {courseAttendance.length} classes
-											</Text>
-											{attendancePercentage < 75 && (
-												<View style={styles.attendanceWarning}>
-													<Ionicons name="warning" size={16} color="#ff5252" />
-													<Text style={[styles.attendanceWarningText, { color: "#ff5252" }]}>
-														Below minimum requirement of 75%
-													</Text>
-												</View>
-											)}
-											{attendancePercentage >= 75 && attendancePercentage < 80 && (
-												<View style={styles.attendanceWarning}>
-													<Ionicons name="warning" size={16} color="#ffc107" />
-													<Text style={styles.attendanceWarningText}>
-														Only {attendancePercentage - 75}% above minimum requirement
-													</Text>
-												</View>
-											)}
-										</View>
-									)
-								})}
-							</View>
-						</View>
-					</View>
+					// 				return (
+					// 					<View key={course._id} style={[styles.attendanceItem, isDesktop && styles.desktopAttendanceItem]}>
+					// 						<View style={styles.attendanceItemHeader}>
+					// 							<Text style={styles.attendanceItemTitle}>{course.code}</Text>
+					// 							<Text
+					// 								style={[styles.attendanceItemValue, attendancePercentage < 75 ? { color: "#ff5252" } : {}]}
+					// 							>
+					// 								{attendancePercentage}%
+					// 							</Text>
+					// 						</View>
+					// 						<Text style={styles.attendanceItemDetail}>
+					// 							Attended {presentCount} of {courseAttendance.length} classes
+					// 						</Text>
+					// 						{attendancePercentage < 75 && (
+					// 							<View style={styles.attendanceWarning}>
+					// 								<Ionicons name="warning" size={16} color="#ff5252" />
+					// 								<Text style={[styles.attendanceWarningText, { color: "#ff5252" }]}>
+					// 									Below minimum requirement of 75%
+					// 								</Text>
+					// 							</View>
+					// 						)}
+					// 						{attendancePercentage >= 75 && attendancePercentage < 80 && (
+					// 							<View style={styles.attendanceWarning}>
+					// 								<Ionicons name="warning" size={16} color="#ffc107" />
+					// 								<Text style={styles.attendanceWarningText}>
+					// 									Only {attendancePercentage - 75}% above minimum requirement
+					// 								</Text>
+					// 							</View>
+					// 						)}
+					// 					</View>
+					// 				)
+					// 			})}
+					// 		</View>
+					// 	</View>
+					// </View>
+					<AttendanceChartView userId={auth?.user?.userId || ""} isDesktop={isDesktop} />
+
 				)
 			case "marks":
 				return (
