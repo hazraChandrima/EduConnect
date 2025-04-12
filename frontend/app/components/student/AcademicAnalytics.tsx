@@ -11,7 +11,7 @@ import {
 	SafeAreaView,
 	ActivityIndicator,
 } from "react-native"
-import { BarChart, ProgressChart } from "react-native-chart-kit"
+import { BarChart } from "react-native-chart-kit"
 import { Ionicons } from "@expo/vector-icons"
 import styles from "../../styles/AcademicAnalytics.style"
 import AsyncStorage from "@react-native-async-storage/async-storage"
@@ -22,6 +22,7 @@ import { useToken } from "@/app/hooks/useToken"
 import GPAChart from "./GpaChart"
 import GradeDistributionChart from "./GradeDistributionChart"
 import AttendanceChartView from "./AttendanceChart"
+import MarksAnalyticsView from "./MarksChart"
 
 const API_BASE_URL = APP_CONFIG.API_BASE_URL
 
@@ -110,11 +111,10 @@ interface Attendance {
 }
 
 interface AcademicAnalyticsProps {
-	userId : string
+	userId: string
 }
 
-
-const AcademicAnalytics: React.FC<AcademicAnalyticsProps> = ({userId}) => {
+const AcademicAnalytics: React.FC<AcademicAnalyticsProps> = ({ userId }) => {
 	const [activeTab, setActiveTab] = useState<TabType>("performance")
 	const { width } = useWindowDimensions()
 	const auth = useContext(AuthContext)
@@ -620,137 +620,12 @@ const AcademicAnalytics: React.FC<AcademicAnalyticsProps> = ({userId}) => {
 					</View>
 				)
 			case "attendance":
-				return (
-					// <View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
-					// 	<Text style={styles.chartTitle}>Attendance by Subject</Text>
-					// 	<Text style={styles.chartSubtitle}>Your attendance percentage across courses</Text>
-					// 	<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-					// 		<ProgressChart
-					// 			data={{
-					// 				...attendanceData,
-					// 				data: ensureSafeData(attendanceData.data),
-					// 			}}
-					// 			width={Math.max(getChartWidth(), 500)}
-					// 			height={300}
-					// 			strokeWidth={16}
-					// 			radius={24}
-					// 			chartConfig={{
-					// 				...chartConfig,
-					// 				color: (opacity = 1) => `rgba(92, 81, 243, ${opacity})`,
-					// 			}}
-					// 			hideLegend={false}
-					// 			style={styles.chart}
-					// 		/>
-					// 	</ScrollView>
-
-					// 	<View style={[styles.attendanceDetails, isDesktop && styles.desktopAttendanceDetails]}>
-					// 		<Text style={styles.detailsTitle}>Attendance Details</Text>
-
-					// 		<View style={isDesktop ? styles.desktopAttendanceGrid : undefined}>
-					// 			{courses.map((course) => {
-					// 				const attendancePercentage = calculateAttendancePercentage(course._id)
-					// 				const courseAttendance = attendance.filter((a) => a.courseId === course._id)
-					// 				const presentCount = courseAttendance.filter(
-					// 					(a) => a.status === "present" || a.status === "excused",
-					// 				).length
-
-					// 				return (
-					// 					<View key={course._id} style={[styles.attendanceItem, isDesktop && styles.desktopAttendanceItem]}>
-					// 						<View style={styles.attendanceItemHeader}>
-					// 							<Text style={styles.attendanceItemTitle}>{course.code}</Text>
-					// 							<Text
-					// 								style={[styles.attendanceItemValue, attendancePercentage < 75 ? { color: "#ff5252" } : {}]}
-					// 							>
-					// 								{attendancePercentage}%
-					// 							</Text>
-					// 						</View>
-					// 						<Text style={styles.attendanceItemDetail}>
-					// 							Attended {presentCount} of {courseAttendance.length} classes
-					// 						</Text>
-					// 						{attendancePercentage < 75 && (
-					// 							<View style={styles.attendanceWarning}>
-					// 								<Ionicons name="warning" size={16} color="#ff5252" />
-					// 								<Text style={[styles.attendanceWarningText, { color: "#ff5252" }]}>
-					// 									Below minimum requirement of 75%
-					// 								</Text>
-					// 							</View>
-					// 						)}
-					// 						{attendancePercentage >= 75 && attendancePercentage < 80 && (
-					// 							<View style={styles.attendanceWarning}>
-					// 								<Ionicons name="warning" size={16} color="#ffc107" />
-					// 								<Text style={styles.attendanceWarningText}>
-					// 									Only {attendancePercentage - 75}% above minimum requirement
-					// 								</Text>
-					// 							</View>
-					// 						)}
-					// 					</View>
-					// 				)
-					// 			})}
-					// 		</View>
-					// 	</View>
-					// </View>
+				return (				
 					<AttendanceChartView userId={auth?.user?.userId || ""} isDesktop={isDesktop} />
-
 				)
 			case "marks":
 				return (
-					<View style={[styles.chartContainer, isDesktop && styles.desktopChartContainer]}>
-						<Text style={styles.chartTitle}>Subject Performance</Text>
-						<Text style={styles.chartSubtitle}>Your marks across different subjects</Text>
-						<ScrollView horizontal showsHorizontalScrollIndicator={true}>
-							<BarChart
-								data={{
-									...subjectPerformanceData,
-									datasets: subjectPerformanceData.datasets.map((dataset) => ({
-										...dataset,
-										data: ensureMinimumDataLength(ensureSafeData(dataset.data), 1),
-									})),
-								}}
-								width={Math.max(getChartWidth(), 300)}
-								height={220}
-								yAxisLabel=""
-								yAxisSuffix="%"
-								chartConfig={{
-									...chartConfig,
-									barPercentage: 1.0,
-								}}
-								style={styles.chart}
-							/>
-						</ScrollView>
-
-						<View style={[styles.marksDetails, isDesktop && styles.desktopMarksDetails]}>
-							<Text style={styles.detailsTitle}>Detailed Marks</Text>
-
-							<View style={isDesktop ? styles.desktopMarksGrid : undefined}>
-								{marks.slice(0, isDesktop ? 10 : 5).map((mark, index) => (
-									<View key={mark._id || index} style={[styles.marksItem, isDesktop && styles.desktopMarksItem]}>
-										<View style={styles.marksItemHeader}>
-											<View style={[styles.subjectTag, { backgroundColor: mark.color }]}>
-												<Text style={styles.subjectTagText}>{mark.courseCode}</Text>
-											</View>
-											<View style={styles.gradeContainer}>
-												<Text style={styles.marksValue}>{Math.round((mark.score / mark.maxScore) * 100)}%</Text>
-												<Text style={styles.gradeValue}>Grade: {getGradeFromScore(mark.score, mark.maxScore)}</Text>
-											</View>
-										</View>
-										<View style={styles.remarksContainer}>
-											<Text style={styles.remarksTitle}>{mark.title}</Text>
-											{mark.feedback ? (
-												<>
-													<Text style={styles.remarksTitle}>Professor Remarks:</Text>
-													<Text style={styles.remarksText}>{mark.feedback}</Text>
-												</>
-											) : (
-												<Text style={styles.remarksText}>
-													Score: {mark.score} out of {mark.maxScore}
-												</Text>
-											)}
-										</View>
-									</View>
-								))}
-							</View>
-						</View>
-					</View>
+					<MarksAnalyticsView userId={auth?.user?.userId || ""} isDesktop={isDesktop} />
 				)
 			case "curriculum":
 				return (
