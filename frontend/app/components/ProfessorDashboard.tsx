@@ -226,14 +226,26 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                     await AsyncStorage.setItem("professorDashboardCourses", JSON.stringify(coursesData))
 
                     // Get all students from these courses
-                    const allStudents: Student[] = []
-                    coursesData.forEach((course: Course) => {
-                        course.students.forEach((student) => {
-                            if (!allStudents.some((s) => s._id === student._id)) {
-                                allStudents.push(student)
+                    const allStudents: Student[] = [];
+                    for (const course of coursesData) {
+                        for (const student of course.students) {
+                            if (typeof student === "string") {
+                                // If it's a string, try to fetch the full student details
+                                const studentObj = await fetchStudentById(student);
+                                if (studentObj && !allStudents.some((s) => s._id === studentObj._id)) {
+                                    allStudents.push(studentObj);
+                                }
+                            } else {
+                                // student is already a full object
+                                if (!allStudents.some((s) => s._id === student._id)) {
+                                    allStudents.push(student);
+                                }
                             }
-                        })
-                    })
+                        }
+                    }
+                    setStudents(allStudents);
+
+
                     setStudents(allStudents)
                     await AsyncStorage.setItem("professorDashboardStudents", JSON.stringify(allStudents))
 
@@ -316,6 +328,24 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
                             .then((res) => (res.ok ? res.json() : []))
                             .catch(() => []),
                     )
+
+                    async function fetchStudentById(studentId: string): Promise<Student | null> {
+                        try {
+                            const res = await fetch(`${API_BASE_URL}/api/user/${studentId}`, {
+                                headers: { Authorization: `Bearer ${token}` }
+                            });
+                            if (res.ok) {
+                                return await res.json();
+                            } else {
+                                console.error(`Failed to fetch student ${studentId}`);
+                                return null;
+                            }
+                        } catch (error) {
+                            console.error(`Error fetching student ${studentId}:`, error);
+                            return null;
+                        }
+                    }
+
 
                     const marksResults = await Promise.all(marksPromises)
                     const allMarks = marksResults.flat()
@@ -970,9 +1000,11 @@ export default function ProfessorDashboard({ userId }: { userId: string }) {
         <>
             <AttendanceManagement
                 courses={courses}
+                students={students}  // Pass the full students array here
                 isDesktop={isDesktop}
                 onError={(message) => Alert.alert("Error", message)}
             />
+
         </>
     )
 

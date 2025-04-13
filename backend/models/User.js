@@ -79,6 +79,14 @@ const UserSchema = new Schema({
 		type: Date,
 		default: null,
 	},
+	hasAccess: {
+		type: Boolean,
+		default: false,
+	}, 
+	accessExpiresAt: {
+		type: Date,
+		default: null,
+	},
 });
 
 

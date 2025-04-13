@@ -170,7 +170,7 @@ exports.loginUser = async (req, res) => {
 			// Not first login, calculate risk score
 			const riskScore = await calculateRiskScore(contextData, userContext);
 			console.log("Risk score for login:", riskScore);
-			if (riskScore >= 20) {
+			if (riskScore >= 8) {
 				const suspensionTime = new Date();
 				suspensionTime.setHours(suspensionTime.getHours() + 24);
 				user.isSuspended = true;

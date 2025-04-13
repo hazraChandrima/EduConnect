@@ -5,6 +5,7 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="AttendanceAccessScreen" options={{ title: "AttendanceAccessScreen", headerShown: true }} />
         <Stack.Screen name="login" options={{ title: "Login", headerShown: true }} />
         <Stack.Screen name="forgotPassword" options={{ title: "Forgot Password", headerShown: true }} />
         <Stack.Screen name="resetPassword" options={{ title: "Reset Password", headerShown: true }} />
