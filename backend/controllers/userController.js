@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
+const AccessAudit = require("../models/AccessAudit"); // we'll create this next
+
 
 
 
@@ -89,22 +91,20 @@ exports.grantTemporaryAccess = async (req, res) => {
     try {
         const { studentEmail, professorEmail, grant } = req.body;
 
+        const emailToSearch = studentEmail.trim().toLowerCase();
+
         if (!studentEmail || !professorEmail) {
             return res.status(400).json({ message: "Missing email(s)" });
         }
 
         // Update hasAccess field
         const updatedUser = await User.findOneAndUpdate(
-            { email: studentEmail },
-            grant
-                ? {
-                        hasAccess: true,
-                        accessExpiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-                  }
-                : {
-                        hasAccess: false,
-                        accessExpiresAt: null,
-                  },
+            { email: emailToSearch },
+            {
+                hasAccess: true,
+                accessExpiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
+            },
+
             { new: true }
         );
         if (!updatedUser) {
@@ -118,6 +118,7 @@ exports.grantTemporaryAccess = async (req, res) => {
             action: grant ? "GRANTED" : "REVOKED",
             timestamp: new Date(),
         });
+        console.log("Updated user:", updatedUser);
 
         res.status(200).json({ message: `Access ${grant ? "granted" : "revoked"} successfully` });
     } catch (err) {
