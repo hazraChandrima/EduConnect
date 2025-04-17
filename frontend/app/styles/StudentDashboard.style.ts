@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#4252e5",
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
     paddingVertical: 10,
     elevation: 4,
     zIndex: 2000, // Increase z-index for the entire header
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginHorizontal: 8,
     marginVertical: 8,
-    width: 150, // Increased from what appears to be around 120px
+    width: 150,
     height: 120,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    zIndex: 3000, // Increased z-index to be higher than any other element
+    zIndex: 800, // Increased z-index to be higher than any other element
   },
   profileMenuItem: {
     flexDirection: "row",
@@ -1052,7 +1052,7 @@ const styles = StyleSheet.create({
     // transition: "padding-left 0.3s ease",
   },
   desktopHeaderWithCollapsedSidebar: {
-    paddingLeft: 80, // Space for collapsed sidebar
+    paddingLeft: 40, // Space for collapsed sidebar
   },
   headerTitle: {
     flex: 1,
@@ -1098,7 +1098,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   desktopStatCard: {
-    width: 180, // Wider cards for desktop view
+    width: 190, // Wider cards for desktop view
     height: 140, // Slightly taller for better proportions
     marginHorizontal: 12,
   },
@@ -1186,15 +1186,6 @@ const styles = StyleSheet.create({
     zIndex: 1000,
     // transition: "width 0.3s ease",
   },
-  mobileSidebar: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    height: "100%",
-    width: 280,
-    backgroundColor: "#2c3e50",
-    zIndex: 3000,
-  },
   collapsedSidebar: {
     width: 80,
   },
@@ -1260,6 +1251,78 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: 15,
     fontSize: 16,
+  },
+  currentSubmissionContainer: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+  },
+  currentSubmissionFile: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  currentSubmissionText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#333",
+  },
+  currentSubmissionActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 8,
+  },
+  viewFileButton: {
+    backgroundColor: "#4CAF50",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  viewFileButtonText: {
+    color: "white",
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+  resubmitButton: {
+    backgroundColor: "#FF9800",
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 4,
+  },
+  resubmitButtonText: {
+    color: "white",
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+
+  // Submission action buttons
+  submissionActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  cancelButton: {
+    backgroundColor: "#9e9e9e",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 4,
+    marginRight: 8,
+  },
+  cancelButtonText: {
+    color: "white",
+    fontWeight: "500",
+    fontSize: 16,
+  },
+  submitButtonDisabled: {
+    backgroundColor: "#9e9e9e",
+    opacity: 0.7,
   },
 })
 

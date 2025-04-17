@@ -69,6 +69,8 @@ const CourseAttendanceCard: React.FC<CourseAttendanceCardProps> = ({ userId, cou
     )
 }
 
+
+
 const styles = StyleSheet.create<Styles>({
     container: {
         backgroundColor: "#fff",

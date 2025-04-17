@@ -224,11 +224,6 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderRadius: 12,
         padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
         elevation: 2,
     },
     desktopContainer: {
