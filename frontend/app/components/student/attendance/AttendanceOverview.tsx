@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     desktopGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        margin: -6, // Offset the margin of the cards
+        margin: -6, 
     },
     loadingContainer: {
         flex: 1,
