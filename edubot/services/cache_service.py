@@ -24,7 +24,7 @@ cache = load_cache()
 
 
 
-# extract main topic from the cache
+# extract main topic from the query
 def extract_main_topic(query):
     topic = query.split("on ")[-1].strip().lower()
     if topic == query.lower():  # if "on" wasn't found
