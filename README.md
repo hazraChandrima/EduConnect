@@ -69,7 +69,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 ### AI Components
 
-- **OpenAI API + Database-Augmented LLM Architecture**: For creating a student-specific chatbot that directly queries academic records
+- **OpenAI API + Database-Augmented LLM with LangChain**: For creating a student-specific chatbot that directly queries academic records
 - **OpenAI API**: Powers the quiz generation feature, converting PDFs and text into educational quizzes
 
 ---
