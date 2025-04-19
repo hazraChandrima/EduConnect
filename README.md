@@ -272,12 +272,16 @@ EduConnect is a comprehensive college management system built with the MERN stac
 </div>
 
 
-The application follows a modular architecture:
 
-- Backend API service (Express.js)
-- Database-Augmented LLM chatbot service (Python/Flask)
-- Quiz generator service (Python/FastAPI)
-- Frontend web and mobile application (React Native)
+### 🧩 Monorepo Structure
+This repository follows a monorepo architecture — all four core modules of EduConnect are maintained within this single repository:
+
+- Backend API Service (/backend)
+- LLM Chatbot Service (/edubot)
+- Quiz Generator Service (/PDF-text_to_quiz)
+- Frontend Web & Mobile App (/frontend)
+
+📌 The Architecture diagram above visually highlights how these modules interact.
 
 
 <!--
