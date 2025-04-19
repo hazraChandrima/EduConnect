@@ -19,7 +19,7 @@ classify_prompt = PromptTemplate(
 Decide whether the following question is personal (i.e., it is asking about the student's own academic records like their marks, courses, attendance, CGPA, remarks, asssignments and assignment submissions).
 Every user is defined a role whether professor, student, admin this is also a personal query to ask about role 
 
-`users`: `_id`, `email`, `name`, `cg`, `role`, `hasAccess`  
+`users`: `_id`, `email`, `name`, `gpa`, `role`, `department`, `program`, `year` 
 `courses`: `_id`, `code`, `title`, `description`, `professor`, `students`, `department`, `credits`, `progress`
 `marks`: `_id`, `studentId`, `courseId`, `title`, `score`, `maxScore`, `type`, `feedback`, `createdAt` 
 `attendances`: `_id`, `studentId`, `courseId`, `date`, `status`  
@@ -53,7 +53,7 @@ Your job is to take a natural language question from a student and generate an a
 - `assignmentsubmissions`
 
 SCHEMA:
-`users`: `_id`, `email`, `name`, `cg`, `role`, `hasAccess`  
+`users`: `_id`, `email`, `name`, `gpa`, `role`, `department`, `program`, `year` 
 `courses`: `_id`, `code`, `title`, `description`, `professor`, `students`, `department`, `credits`, `progress`
 `marks`: `_id`, `studentId`, `courseId`, `title`, `score`, `maxScore`, `type`, `feedback`, `createdAt` 
 `attendances`: `_id`, `studentId`, `courseId`, `date`, `status`  
