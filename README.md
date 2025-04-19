@@ -183,7 +183,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
    pip install -r requirements.txt
    ```
 
-2. Set up environment variables:
+2. Set up environment variables by creating a `.env` file in the edubot/ directory:
    ```
    OPENAI_API_KEY=your_openai_api_key
    SERPAPI_API_KEY=your_serpapi_api_key
@@ -207,7 +207,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
    pip install -r requirements.txt
    ```
 
-2. Set up environment variables:
+2. Set up environment variables  by creating a `.env` file in the PDF-text_to_quiz/ directory:
    ```
    OPENAI_API_KEY=your_openai_api_key
    ```
@@ -283,6 +283,7 @@ This repository follows a monorepo architecture — all four core modules of Edu
 
 📌 The Architecture diagram above visually highlights how these modules interact.
 
+---
 
 <!--
 <br/>
