@@ -34,7 +34,7 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
 
 ### 📚 Student-Centric Learning Management
 - Comprehensive **Academic Dashboard** (Curriculum, Marks, Attendance)
-- AI-powered **chatbot** for doubt clearing
+- Database-Augmented LLM chatbot for **personalized** student assistance
 - AI-powered **quiz generation** from PDF or text prompt
 - **Seamless Offline Mode**
 
@@ -50,7 +50,7 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
 
 ## 💡 Our Solution
 
-EduConnect is a comprehensive college management system built with the MERN stack and React Native, providing a seamless experience across web and mobile platforms. The application integrates advanced AI features including a domain-specific chatbot and automated quiz generation from educational materials.
+EduConnect is a comprehensive college management system built with the MERN stack and React Native, providing a seamless experience across web and mobile platforms. The application integrates advanced AI features including a personalized chatbot for students and automated quiz generation from educational materials.
 
 ---
 
@@ -66,9 +66,10 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - **TypeScript**: Adds static typing to JavaScript, improving code quality and developer experience
 - **Expo**: Toolkit for React Native that simplifies mobile app development
 
+
 ### AI Components
 
-- **OpenAI API + LangChain & FAISS**: For creating a domain-specific chatbot limited to computer science topics
+- **OpenAI API + Database-Augmented LLM Architecture**: For creating a student-specific chatbot that directly queries academic records
 - **OpenAI API**: Powers the quiz generation feature, converting PDFs and text into educational quizzes
 
 ---
@@ -178,7 +179,7 @@ EduConnect is a comprehensive college management system built with the MERN stac
 
 1. Install Python dependencies:
    ```bash
-   cd eduConnect_chatbot/
+   cd edubot/
    pip install -r requirements.txt
    ```
 
@@ -186,12 +187,14 @@ EduConnect is a comprehensive college management system built with the MERN stac
    ```
    OPENAI_API_KEY=your_openai_api_key
    SERPAPI_API_KEY=your_serpapi_api_key
+   MONGODB_URI=your_mongodb_connection_string
    ```
 
 3. Run the chatbot API:
    ```bash
-   python api/app.py
+   python app.py
    ```
+
    The chatbot API will be available at http://127.0.0.1:5000/ask
 
 ---
@@ -244,10 +247,11 @@ EduConnect is a comprehensive college management system built with the MERN stac
 - Context-aware authentication analyzes user behavior patterns
 
 ### AI-Powered Chatbot
-- Built using LangChain and FAISS (Facebook AI Similarity Search) vector indexing, enabling efficient similarity search in vector space.
-- Implements a RAG (Retrieval-Augmented Generation) architecture for accurate responses
-- Optimized for academic queries and student support
-- Retrieves information from verified computer science resources before generating responses, otherwise Google/Wikipedia search 
+- Implements a Database-Augmented LLM architecture that translates natural language into MongoDB queries
+- Intelligently classifies queries to determine when to access personal student data
+- Maintains a semantic similarity cache for efficient responses to common questions
+- Features a fallback system for general knowledge questions not requiring personal data
+
 
 ### PDF-to-Quiz Generator
 - Automatically generates quizzes from PDF documents or text prompts
@@ -266,6 +270,15 @@ EduConnect is a comprehensive college management system built with the MERN stac
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c6e0cf77-ebb8-400e-9ea9-b3f30046fce6" width="800" alt="Description">
 </div>
+
+
+The application follows a modular architecture:
+
+- Backend API service (Express.js)
+- Database-Augmented LLM chatbot service (Python/Flask)
+- Quiz generator service (Python/FastAPI)
+- Frontend web and mobile application (React Native)
+
 
 <!--
 <br/>
