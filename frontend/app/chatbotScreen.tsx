@@ -133,7 +133,7 @@ const ChatbotScreen = () => {
     
     const fetchBotResponse = async (email:string, query: string): Promise<string> => {
         try {
-            const response = await fetch(`${DEPLOYED_CHATBOT_URL}/ask`, {
+            const response = await fetch(`${LOCAL_CHATBOT_URL}/ask`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
