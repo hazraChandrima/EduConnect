@@ -29,7 +29,7 @@ We have developed a **secure, multi-role** web/mobile application tailored for c
 
 ### 🔒 Authentication and Security
 - Using **multi-factor authentication (2FA)** during login
-- **Role-Based Access Control** for each user type
+- **Role-Based Access Control (RBAC)** for each user type
 
 
 ### 📚 Student-Centric Learning Management
@@ -135,9 +135,9 @@ EduConnect is a comprehensive college management system built with the MERN stac
    
    Create two configuration files in the root of your frontend project (cuz Expo with Typescript doesn't support .env fr some reason) :
 
-   **a. app-config.js**
+   **a. app-config.ts**
    ```typescript
-   // app-config.js
+   // app-config.ts
    // This file contains API URLs for different services
 
    const IP_ADDRESS = "YOUR_LOCAL_IP_ADDRESS"
@@ -281,7 +281,7 @@ This repository follows a monorepo architecture — all four core modules of Edu
 - Quiz Generator Service (/PDF-text_to_quiz)
 - Frontend Web & Mobile App (/frontend)
 
-📌 The Architecture diagram above visually highlights how these modules interact.
+The Architecture diagram above visually highlights how these modules interact.
 
 ---
 
@@ -314,8 +314,7 @@ This repository follows a monorepo architecture — all four core modules of Edu
 
 ## 🤝 Contributors
 
-- [Isha Jayal](https://github.com/ishXD)
 - [Ananya Goyal](https://github.com/ananyagoyal0624)
-- [Rishika Aggarwal](https://github.com/rishika-on-git)
 - [Chandrima Hazra](https://github.com/hazraChandrima)
-
+- [Isha Jayal](https://github.com/ishXD)
+- [Rishika Aggarwal](https://github.com/rishika-on-git)
