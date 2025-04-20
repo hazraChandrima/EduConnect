@@ -212,31 +212,41 @@ EduConnect is a comprehensive college management system built with the MERN stac
    OPENAI_API_KEY=your_openai_api_key
    ```
 
-3. If you want to run both the functionalities simultaneously (on a single port):
+3. How to Run the API
 
-   - Run the Text-to-Quiz API:
-   ```bash
-   uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-   ```
-   The PDF/Text-to-Quiz app will be available at http://127.0.0.1:8000/
+You have two options for running the application:
 
+### Option 1: Run Everything on a Single Port (Recommended)
 
-   **OR** If you want to run both the functionalities separately:
+```bash
+uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+```
 
-   Move to src/api directory and then,
+This runs both services under a single server:
+- PDF to Quiz: http://127.0.0.1:8000/pdf_to_quizz
+- Text to Quiz: http://127.0.0.1:8000/text_to_quizz
 
-   - Run the PDF-to-Quiz API:
-   ```bash
-   uvicorn api_pdf:app --host 127.0.0.1 --port 8000 --reload
-   ```
-   The PDF-to-Quiz app will be available at http://127.0.0.1:8000/pdf_to_quizz
+### Option 2: Run Services Separately
 
-   - Run the Text-to-Quiz API:
-   ```bash
-   uvicorn api_text:app --host 127.0.0.1 --port 8001 --reload
-   ```
-   The Text-to-Quiz app will be available at http://127.0.0.1:8001/text_to_quizz
+Navigate to the src/api directory first:
 
+```bash
+cd src/api
+```
+
+Then run each service on its own port:
+
+**PDF to Quiz API (Port 8000)**
+```bash
+uvicorn api_pdf:app --host 127.0.0.1 --port 8000 --reload
+```
+Access at: http://127.0.0.1:8000/pdf_to_quizz
+
+**Text to Quiz API (Port 8001)**
+```bash
+uvicorn api_text:app --host 127.0.0.1 --port 8001 --reload
+```
+Access at: http://127.0.0.1:8001/text_to_quizz
 
 ---
 
