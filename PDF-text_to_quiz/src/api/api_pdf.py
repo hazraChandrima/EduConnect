@@ -2,11 +2,11 @@ from fastapi import FastAPI, UploadFile, File, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import shutil
 import os
-import asyncio
 import tempfile
-from pdf_to_quizz import pdf_to_quizz
+from src.parsers.pdf_to_quiz import pdf_to_quizz
 
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,6 +15,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 @app.post("/pdf_to_quizz/")
 async def generate_quiz_from_pdf(

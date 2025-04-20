@@ -1,12 +1,12 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import asyncio
-from quizz_generator import generate_quizz
-from ui_utils import transform
+from src.generators.quiz_generator import generate_quizz
+from src.utils.ui_utils import transform
 from fastapi.middleware.cors import CORSMiddleware
 
-
 app = FastAPI()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,6 +15,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 class QuizRequest(BaseModel):
     content: str
@@ -37,6 +39,8 @@ async def txt_to_quizz(content: str, num_questions: int):
         return transformed_quizz
 
     return []
+
+
 
 @app.post("/text_to_quizz/")
 async def generate_text_quizz(request: QuizRequest):

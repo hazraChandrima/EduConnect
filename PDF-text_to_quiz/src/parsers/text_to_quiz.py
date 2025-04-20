@@ -1,6 +1,7 @@
 import asyncio
-from quizz_generator import generate_quizz
-from ui_utils import transform
+from src.generators.quiz_generator import generate_quizz
+from src.utils.ui_utils import transform
+
 
 async def txt_to_quizz(content, num_questions):
     quizz = await generate_quizz(content, num_questions)
@@ -19,4 +20,3 @@ async def txt_to_quizz(content, num_questions):
         return transformed_quizz
 
     return ''
-

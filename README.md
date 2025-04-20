@@ -212,7 +212,18 @@ EduConnect is a comprehensive college management system built with the MERN stac
    OPENAI_API_KEY=your_openai_api_key
    ```
 
-3. If you want to run both the functionalities separately:
+3. If you want to run both the functionalities simultaneously (on a single port):
+
+   - Run the Text-to-Quiz API:
+   ```bash
+   uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+   ```
+   The PDF/Text-to-Quiz app will be available at http://127.0.0.1:8000/
+
+
+   **OR** If you want to run both the functionalities separately:
+
+   Move to src/api directory and then,
 
    - Run the PDF-to-Quiz API:
    ```bash
@@ -225,15 +236,6 @@ EduConnect is a comprehensive college management system built with the MERN stac
    uvicorn api_text:app --host 127.0.0.1 --port 8001 --reload
    ```
    The Text-to-Quiz app will be available at http://127.0.0.1:8001/text_to_quizz
-
-
-   **OR** If you want to run both the functionalities simultaneously (on a single port):
-
-   - Run the Text-to-Quiz API:
-   ```bash
-   uvicorn main:app --host 127.0.0.1 --port 8000 --reload
-   ```
-   The PDF/Text-to-Quiz app will be available at http://127.0.0.1:8000/
 
 
 ---

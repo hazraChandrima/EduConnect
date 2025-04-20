@@ -8,10 +8,9 @@ from langchain.output_parsers.regex import RegexParser
 
 from langchain.prompts import PromptTemplate
 
+
+
 def generate_regex_and_output_keys(num_questions):
-    """
-    Generates a regex pattern and output keys for parsing N questions.
-    """
     # Regex pattern for a single question
     single_question_pattern = (
         r"Question\s?\d?:\s+\n?(.*?)\nCHOICE_A(.*?)\nCHOICE_B(.*?)\nCHOICE_C(.*?)\nCHOICE_D(.*?)(?:\n)+Answer:\s?(.*)"

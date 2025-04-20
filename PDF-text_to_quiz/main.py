@@ -4,10 +4,9 @@ from pydantic import BaseModel
 import shutil
 import os
 import tempfile
-import asyncio
-from pdf_to_quizz import pdf_to_quizz
-from quizz_generator import generate_quizz
-from ui_utils import transform
+from src.parsers.pdf_to_quiz import pdf_to_quizz
+from src.generators.quiz_generator import generate_quizz
+from src.utils.ui_utils import transform
 
 app = FastAPI() # using a single fastapi instance to manage both the apis simultaneously
 
@@ -85,7 +84,9 @@ async def txt_to_quizz(content: str, num_questions: int):
 
     return []
 
+
+
+
 @app.post("/text_to_quizz/")
 async def generate_text_quizz(request: QuizRequest):
     return await txt_to_quizz(request.content, request.num_questions)
-

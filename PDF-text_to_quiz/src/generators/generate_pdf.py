@@ -13,11 +13,14 @@ class PDF(FPDF):
         page_number = f"Page {self.page_no()}"
         self.cell(0, 10, page_number, align="C")
 
+
+
+
 def generate_questions(data, pdf: PDF, print_response:  bool = False):
     pdf.add_page()
 
     question_number = 1
-    # Add questions  to the PDF
+    # Add questions to the PDF
     for question_data in data:
         question = question_data["question"]
         options = [
@@ -41,11 +44,12 @@ def generate_questions(data, pdf: PDF, print_response:  bool = False):
         
     pdf.add_page()
 
-def generate_pdf(filename , json_data):
 
+
+
+def generate_pdf(filename , json_data):
     pdf = PDF()
     pdf.add_page()
-
     pdf.set_font("Arial", size=10)
 
     generate_questions(json_data, pdf, print_response=False)
@@ -53,11 +57,12 @@ def generate_pdf(filename , json_data):
 
     pdf.output(filename)
 
-def generate_pdf_quiz(file_name, json_data):
 
+
+
+def generate_pdf_quiz(file_name, json_data):
     # remove extension .pdf from file name
     if file_name.endswith(".json"):
         file_name = file_name[:-5]
 
-    # Generate PDF
     generate_pdf(f"{file_name}.pdf", json_data)

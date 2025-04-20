@@ -1,6 +1,6 @@
 import asyncio
-from qa_llm import QaLlm
-from qcm_chain import QCMGenerateChain
+from src.llm.qa_llm import QaLlm
+from src.llm.qcm_chain import QCMGenerateChain
 
 
 async def llm_call(qa_chain: QCMGenerateChain, text: list):
@@ -10,10 +10,10 @@ async def llm_call(qa_chain: QCMGenerateChain, text: list):
 
     return batch_examples
 
+
+
 async def generate_quizz(content: str, num_questions: int = 5):
-    """
-    Generates a quiz from the given content.
-    """
+    # Generates a quiz from the given content.
     print("Debug: Calling QaLlm()...")  
     qa_llm = QaLlm()  
 

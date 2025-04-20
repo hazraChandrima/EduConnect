@@ -1,9 +1,11 @@
 import asyncio
 import os
 from langchain_community.document_loaders import PyPDFLoader
-from quizz_generator import generate_quizz
-from ui_utils import transform
+from src.generators.quiz_generator import generate_quizz
+from src.utils.ui_utils import transform
 import traceback
+
+
 
 async def pdf_to_quizz(pdf_file_name, num_questions: int = 5):
     try:
@@ -22,14 +24,14 @@ async def pdf_to_quizz(pdf_file_name, num_questions: int = 5):
             
         print(f"Extracted {len(pages)} pages from PDF")
 
-        sem = asyncio.Semaphore(10)  # Limit parallel tasks
+        sem = asyncio.Semaphore(10)  
 
         async def process_page(page, page_num):
             async with sem:
                 try:
                     print(f"Processing page {page_num+1}")
                     result = await generate_quizz(page.page_content, num_questions)
-                    return result if result else []  # Ensure it's not None
+                    return result if result else [] 
                 except Exception as e:
                     print(f"Error processing page {page_num+1}: {str(e)}")
                     return []
@@ -41,10 +43,8 @@ async def pdf_to_quizz(pdf_file_name, num_questions: int = 5):
         for i, question_set in enumerate(questions):
             if question_set: 
                 try:
-                    # Logging what we're transforming
                     print(f"Transforming question set from page {i+1}, containing {len(question_set)} items")
                     
-                    # Adjust this based on how your transform function actually works
                     if isinstance(question_set, list) and len(question_set) > 0:
                         transformed_questions = transform(question_set[0], num_questions)
                         print(f"Transformed to {len(transformed_questions)} questions")
@@ -62,6 +62,8 @@ async def pdf_to_quizz(pdf_file_name, num_questions: int = 5):
             print(f"Limited to {num_questions} questions as requested")
             
         return all_questions
+
+
 
     except Exception as e:
         print(f"Error processing PDF: {str(e)}")
